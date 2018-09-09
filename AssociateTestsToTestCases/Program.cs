@@ -9,14 +9,14 @@ using Minimatch;
 
 namespace AssociateTestsToTestCases
 {
-    internal class Program
+    internal static class Program
     {
         private static void Main(string[] args)
         {
             Parser.Default.ParseArguments<Options>(args)
             .WithParsed(o =>
             {
-                var testAssemblyPaths = LocateTestAssemblies(o.Directory, o.MinimatchPatterns.Split(';'));
+                var testAssemblyPaths = ListTestAssemblyPaths(o.Directory, o.MinimatchPatterns.Split(';'));
                 var testMethods = ListTestMethods(testAssemblyPaths);
 
                 //Todo: retrieve, match and associate test cases from VSTS with test methods.
@@ -39,7 +39,7 @@ namespace AssociateTestsToTestCases
             return testMethods.ToArray();
         }
 
-        private static string[] LocateTestAssemblies(string directory, string[] minimatchPatterns)
+        private static string[] ListTestAssemblyPaths(string directory, string[] minimatchPatterns)
         {
             var files = ListAllAccessibleFilesInDirectory(directory);
             var matchingFilesToBeIncluded = new List<string>();
