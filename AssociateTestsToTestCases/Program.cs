@@ -33,7 +33,7 @@ namespace AssociateTestsToTestCases
             foreach (var testAssemblyPath in testAssemblyPaths)
             {
                 var testAssembly = Assembly.LoadFrom(testAssemblyPath);
-                testMethods.AddRange(testAssembly.GetTypes().SelectMany(type => type.GetMethods().Where(method => method.GetCustomAttribute<TestMethodAttribute>() != null)));
+                testMethods.AddRange(testAssembly.GetTypes().Where(type => type.GetCustomAttribute<TestClassAttribute>() != null).SelectMany(type => type.GetMethods().Where(method => method.GetCustomAttribute<TestMethodAttribute>() != null)));
             }
 
             return testMethods.ToArray();
