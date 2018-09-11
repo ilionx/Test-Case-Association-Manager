@@ -35,7 +35,7 @@ namespace AssociateTestsToTestCases
             return CreateListVstsTestCases(testcases);
         }
 
-        public async Task AssociateWorkItemWithTestMethodAsync(int workItemId, string methodName, string assemblyName, string automatedTestId)
+        public void AssociateWorkItemWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId)
         {
             var patchDocument = new JsonPatchDocument
             {
