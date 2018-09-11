@@ -47,12 +47,12 @@ namespace AssociateTestsToTestCases
             Console.WriteLine("[SUCCESS] VSTS Test Cases have been obtained.");
 
             Console.WriteLine("Trying to Associate Work Items with Test Methods...");
-            TryAssociateWorkItemsWithTestMethods(testMethods, testCases, vstsAccessor);
+            AssociateWorkItemsWithTestMethods(testMethods, testCases, vstsAccessor);
 
             Console.WriteLine("[FINISH] Workitems and Test Methods have been associated.");
         }
 
-        private static void TryAssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<VstsTestCase> testCases, VstsAccessor vstsAccessor)
+        private static void AssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<VstsTestCase> testCases, VstsAccessor vstsAccessor)
         {
             foreach (var testCase in testCases)
             {
