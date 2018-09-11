@@ -32,7 +32,7 @@ namespace AssociateTestsToTestCases
             if (testMethods.IsNullOrEmpty())
             {
                 Console.WriteLine("[ERROR] Could not retrieve the DLL Test Methods. Program has been terminated.");
-                Environment.Exit(-1); // todo: will this even throw an error?
+                Environment.Exit(-1); // Todo: will this even throw an error?
             }
             Console.WriteLine("[SUCCESS] DLL Test Methods have been obtained.");
 
@@ -42,7 +42,7 @@ namespace AssociateTestsToTestCases
             if (testCases.IsNullOrEmpty())
             {
                 Console.WriteLine("[ERROR] Could not retrieve the VSTS Test Cases. Program has been terminated.");
-                Environment.Exit(-1); // todo: will this even throw an error?
+                Environment.Exit(-1); // Todo: will this even throw an error?
             }
             Console.WriteLine("[SUCCESS] VSTS Test Cases have been obtained.");
 
@@ -73,7 +73,7 @@ namespace AssociateTestsToTestCases
                 // Todo:  the following if condition is for testing purpose only
                 if (testCase.Title == "WorkflowAccess_StoreProvisionContractWorkflow_NewProvisionContractWorkflow")
                 {
-                    vstsAccessor.AssociateWorkItemWithTestMethodAsync((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString()).Wait();
+                    vstsAccessor.AssociateWorkItemWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString());
                 }
             }
         }
