@@ -61,7 +61,7 @@ namespace AssociateTestsToTestCases
                 {
                     Operation = Operation.Add,
                     Path = "/fields/Microsoft.VSTS.TCM.AutomatedTestType",
-                    Value = "Unit Test"
+                    Value = "" // todo: what's the purpose of this attribute?
                 },
                 new JsonPatchOperation()
                 {
