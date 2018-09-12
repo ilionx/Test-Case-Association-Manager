@@ -33,7 +33,7 @@ namespace AssociateTestsToTestCases
             _workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
         }
 
-        public List<VstsTestCase> GetVstsTestCases()
+        public List<TestCase> GetVstsTestCases()
         {
             var workItemQuery = _workItemTrackingHttpClient.QueryByWiqlAsync(new Wiql()
             {
@@ -41,10 +41,10 @@ namespace AssociateTestsToTestCases
                     "SELECT * From WorkItems Where [System.WorkItemType] = 'Test Case'"
             }).Result;
 
-            var testcasesId = workItemQuery.WorkItems?.Select(x => x.Id).ToArray();
-            var testcases = _workItemTrackingHttpClient.GetWorkItemsAsync(testcasesId).Result;
+            var testCasesId = workItemQuery.WorkItems?.Select(x => x.Id).ToArray();
+            var testCases = _workItemTrackingHttpClient.GetWorkItemsAsync(testCasesId).Result;
 
-            return CreateVstsTestCaseList(testcases);
+            return CreateTestCaseList(testCases);
         }
 
         public bool AssociateTestCaseWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, string testType = "")
@@ -73,7 +73,7 @@ namespace AssociateTestsToTestCases
                 {
                     Operation = Operation.Add,
                     Path = AutomatedTestTypePatchName,
-                    Value = testType // Todo: what's the purpose of this attribute?
+                    Value = testType
                 },
                 new JsonPatchOperation()
                 {
@@ -91,9 +91,9 @@ namespace AssociateTestsToTestCases
                    result.Fields[AutomatedTestName].ToString() == methodName;
         }
 
-        private List<VstsTestCase> CreateVstsTestCaseList(List<WorkItem> workItems)
+        private List<TestCase> CreateTestCaseList(List<WorkItem> workItems)
         {
-            var vstsTestCases = new List<VstsTestCase>();
+            var testCases = new List<TestCase>();
 
             foreach (var workItem in workItems)
             {
@@ -104,14 +104,14 @@ namespace AssociateTestsToTestCases
                     continue;
                 }
 
-                vstsTestCases.Add(new VstsTestCase()
+                testCases.Add(new TestCase()
                 {
                     Id = workItem.Id,
                     Title = workItemTitle
                 });
             }
 
-            return vstsTestCases;
+            return testCases;
         }
     }
 }

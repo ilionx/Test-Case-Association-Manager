@@ -1,6 +1,6 @@
 ﻿namespace AssociateTestsToTestCases
 {
-    public class VstsTestCase
+    public class TestCase
     {
         public int? Id { get; set; }
         public string Title { get; set; }

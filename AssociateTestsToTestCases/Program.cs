@@ -14,7 +14,7 @@ namespace AssociateTestsToTestCases
     {
         private static void Main(string[] args)
         {
-            TestCaseAccess vstsAccessor = null;
+            TestCaseAccess testCaseAccess = null;
             string[] testAssemblyPaths = null;
 
             Parser.Default.ParseArguments<Options>(args)
@@ -23,7 +23,7 @@ namespace AssociateTestsToTestCases
                 var minimatchPatterns = o.MinimatchPatterns.Split(';');
                 testAssemblyPaths = ListTestAssemblyPaths(o.Directory, minimatchPatterns);
 
-                vstsAccessor = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken);
+                testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken);
             });
 
             Console.WriteLine("Trying to retrieve the DLL Test Methods...");
@@ -37,7 +37,7 @@ namespace AssociateTestsToTestCases
             Console.WriteLine("[SUCCESS] DLL Test Methods have been obtained.\n");
 
             Console.WriteLine("Trying to retrieve the VSTS Test Cases...");
-            var testCases = vstsAccessor.GetVstsTestCases();
+            var testCases = testCaseAccess.GetVstsTestCases();
 
             if (testCases.IsNullOrEmpty())
             {
@@ -47,12 +47,12 @@ namespace AssociateTestsToTestCases
             Console.WriteLine("[SUCCESS] VSTS Test Cases have been obtained.\n");
 
             Console.WriteLine("Trying to Associate Work Items with Test Methods...");
-            AssociateWorkItemsWithTestMethods(testMethods, testCases, vstsAccessor);
+            AssociateWorkItemsWithTestMethods(testMethods, testCases, testCaseAccess);
 
             Console.WriteLine("[FINISH] Workitems and Test Methods have been associated.");
         }
 
-        private static void AssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<VstsTestCase> testCases, TestCaseAccess vstsAccessor)
+        private static void AssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<TestCase> testCases, TestCaseAccess vstsAccessor)
         {
             foreach (var testCase in testCases)
             {
