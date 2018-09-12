@@ -15,17 +15,13 @@ namespace AssociateTestsToTestCases
     {
         private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
 
-        private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
-        private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
-        private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
-        private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
+        private const string FieldProperty = "fields";
         private const string AutomatedName = "Automated";
-
-        private const string AutomationStatusPatchName = "/fields/Microsoft.VSTS.TCM.AutomationStatus";
-        private const string AutomatedTestIdPatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestId";
-        private const string AutomationTestStoragePatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestStorage";
-        private const string AutomationTestNamePatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestName";
-        private const string AutomatedTestTypePatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestType";
+        private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
+        private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
+        private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
+        private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
+        private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
 
         public TestCaseAccess(string collectionUri, string personalAccessToken)
         {
@@ -54,31 +50,31 @@ namespace AssociateTestsToTestCases
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = AutomationTestNamePatchName,
+                    Path = $"/{FieldProperty}/{AutomatedTestName}",
                     Value = methodName
                 },
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = AutomationTestStoragePatchName,
+                    Path =  $"/{FieldProperty}/{AutomatedTestStorageName}",
                     Value = assemblyName
                 },
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = AutomatedTestIdPatchName,
+                    Path = $"/{FieldProperty}/{AutomatedTestIdName}",
                     Value = automatedTestId
                 },
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = AutomatedTestTypePatchName,
+                    Path = $"/{FieldProperty}/{AutomatedTestTypePatchName}",
                     Value = testType
                 },
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = AutomationStatusPatchName,
+                    Path = $"/{FieldProperty}/{AutomationStatusName}",
                     Value = AutomatedName
                 }
             };
