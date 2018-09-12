@@ -75,7 +75,7 @@ namespace AssociateTestsToTestCases
                 }
             };
 
-            var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, validateOnly: true).Result; // Todo: set validateOnly to false in production!
+            var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, true).Result;
 
             return result.Fields[_automationStatusKey].ToString() == "Automated" &&
                    result.Fields[_automationTestIdKey].ToString() == automatedTestId &&
