@@ -14,10 +14,11 @@ namespace AssociateTestsToTestCases
     public class VstsAccessor
     {
         private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
-        private const string _automationStatusKey = "Microsoft.VSTS.TCM.AutomationStatus";
-        private const string _automationTestIdKey = "Microsoft.VSTS.TCM.AutomatedTestId";
-        private const string _automatedTestStorageKey = "Microsoft.VSTS.TCM.AutomatedTestStorage";
-        private const string _automatedTestNameKey = "Microsoft.VSTS.TCM.AutomatedTestName";
+        private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
+        private const string AutomationTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
+        private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
+        private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
+        private const string AutomatedName = "Automated";
 
         public VstsAccessor(string collectionUri, string personalAccessToken)
         {
@@ -71,16 +72,16 @@ namespace AssociateTestsToTestCases
                 {
                     Operation = Operation.Add,
                     Path = "/fields/Microsoft.VSTS.TCM.AutomationStatus",
-                    Value = "Automated"
+                    Value = AutomatedName
                 }
             };
 
             var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, true).Result;
 
-            return result.Fields[_automationStatusKey].ToString() == "Automated" &&
-                   result.Fields[_automationTestIdKey].ToString() == automatedTestId &&
-                   result.Fields[_automatedTestStorageKey].ToString() == assemblyName &&
-                   result.Fields[_automatedTestNameKey].ToString() == methodName;
+            return result.Fields[AutomationStatusName].ToString() == AutomatedName &&
+                   result.Fields[AutomationTestIdName].ToString() == automatedTestId &&
+                   result.Fields[AutomatedTestStorageName].ToString() == assemblyName &&
+                   result.Fields[AutomatedTestName].ToString() == methodName;
         }
 
         private List<VstsTestCase> CreateVstsTestCaseList(List<WorkItem> workItems)
@@ -91,7 +92,7 @@ namespace AssociateTestsToTestCases
             {
                 var workItemTitle = workItem.Fields?.FirstOrDefault(x => x.Key == "System.Title").Value.ToString();
 
-                if (workItem.Fields[_automationStatusKey].ToString() == "Automated")
+                if (workItem.Fields[AutomationStatusName].ToString() == AutomatedName)
                 {
                     continue;
                 }
