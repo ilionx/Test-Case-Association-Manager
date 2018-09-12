@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 
 namespace AssociateTestsToTestCases
 {
-    public class VstsAccessor
+    public class TestCaseAccess
     {
         private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
 
@@ -27,7 +27,7 @@ namespace AssociateTestsToTestCases
         private const string AutomationTestNamePatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestName";
         private const string AutomatedTestTypePatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestType";
 
-        public VstsAccessor(string collectionUri, string personalAccessToken)
+        public TestCaseAccess(string collectionUri, string personalAccessToken)
         {
             var connection = new VssConnection(new Uri(collectionUri), new VssBasicCredential(string.Empty, personalAccessToken));
             _workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();

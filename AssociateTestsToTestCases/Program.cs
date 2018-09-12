@@ -14,7 +14,7 @@ namespace AssociateTestsToTestCases
     {
         private static void Main(string[] args)
         {
-            VstsAccessor vstsAccessor = null;
+            TestCaseAccess vstsAccessor = null;
             string[] testAssemblyPaths = null;
 
             Parser.Default.ParseArguments<Options>(args)
@@ -23,7 +23,7 @@ namespace AssociateTestsToTestCases
                 var minimatchPatterns = o.MinimatchPatterns.Split(';');
                 testAssemblyPaths = ListTestAssemblyPaths(o.Directory, minimatchPatterns);
 
-                vstsAccessor = new VstsAccessor(o.CollectionUri, o.PersonalAccessToken);
+                vstsAccessor = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken);
             });
 
             Console.WriteLine("Trying to retrieve the DLL Test Methods...");
@@ -52,7 +52,7 @@ namespace AssociateTestsToTestCases
             Console.WriteLine("[FINISH] Workitems and Test Methods have been associated.");
         }
 
-        private static void AssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<VstsTestCase> testCases, VstsAccessor vstsAccessor)
+        private static void AssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<VstsTestCase> testCases, TestCaseAccess vstsAccessor)
         {
             foreach (var testCase in testCases)
             {
