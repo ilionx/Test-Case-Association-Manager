@@ -47,7 +47,7 @@ namespace AssociateTestsToTestCases
             return CreateVstsTestCaseList(testcases);
         }
 
-        public bool AssociateWorkItemWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, string testType = "")
+        public bool AssociateTestCaseWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, string testType = "")
         {
             var patchDocument = new JsonPatchDocument
             {

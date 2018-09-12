@@ -70,7 +70,7 @@ namespace AssociateTestsToTestCases
                     continue;
                 }
 
-                var operationSuccess = vstsAccessor.AssociateWorkItemWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString());
+                var operationSuccess = vstsAccessor.AssociateTestCaseWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString());
 
                 Console.WriteLine(operationSuccess
                     ? $"[SUCCESS] Test case '{testCase.Title}' [Id: {testCase.Id}] has been associated with the corresponding automated test."
