@@ -14,11 +14,18 @@ namespace AssociateTestsToTestCases
     public class VstsAccessor
     {
         private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
+
         private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
-        private const string AutomationTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
+        private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
         private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
         private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
         private const string AutomatedName = "Automated";
+
+        private const string AutomationStatusPatchName = "/fields/Microsoft.VSTS.TCM.AutomationStatus";
+        private const string AutomatedTestIdPatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestId";
+        private const string AutomationTestStoragePatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestStorage";
+        private const string AutomationTestNamePatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestName";
+        private const string AutomatedTestTypePatchName = "/fields/Microsoft.VSTS.TCM.AutomatedTestType";
 
         public VstsAccessor(string collectionUri, string personalAccessToken)
         {
@@ -40,38 +47,38 @@ namespace AssociateTestsToTestCases
             return CreateVstsTestCaseList(testcases);
         }
 
-        public bool AssociateWorkItemWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId)
+        public bool AssociateWorkItemWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, string testType = "")
         {
             var patchDocument = new JsonPatchDocument
             {
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = "/fields/Microsoft.VSTS.TCM.AutomatedTestName",
+                    Path = AutomationTestNamePatchName,
                     Value = methodName
                 },
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = "/fields/Microsoft.VSTS.TCM.AutomatedTestStorage",
+                    Path = AutomationTestStoragePatchName,
                     Value = assemblyName
                 },
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = "/fields/Microsoft.VSTS.TCM.AutomatedTestId",
+                    Path = AutomatedTestIdPatchName,
                     Value = automatedTestId
                 },
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = "/fields/Microsoft.VSTS.TCM.AutomatedTestType",
-                    Value = "" // Todo: what's the purpose of this attribute?
+                    Path = AutomatedTestTypePatchName,
+                    Value = testType // Todo: what's the purpose of this attribute?
                 },
                 new JsonPatchOperation()
                 {
                     Operation = Operation.Add,
-                    Path = "/fields/Microsoft.VSTS.TCM.AutomationStatus",
+                    Path = AutomationStatusPatchName,
                     Value = AutomatedName
                 }
             };
@@ -79,7 +86,7 @@ namespace AssociateTestsToTestCases
             var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, true).Result;
 
             return result.Fields[AutomationStatusName].ToString() == AutomatedName &&
-                   result.Fields[AutomationTestIdName].ToString() == automatedTestId &&
+                   result.Fields[AutomatedTestIdName].ToString() == automatedTestId &&
                    result.Fields[AutomatedTestStorageName].ToString() == assemblyName &&
                    result.Fields[AutomatedTestName].ToString() == methodName;
         }
