@@ -32,7 +32,7 @@ namespace AssociateTestsToTestCases
             var testcasesId = workItemQuery.WorkItems?.Select(x => x.Id).ToArray();
             var testcases = _workItemTrackingHttpClient.GetWorkItemsAsync(testcasesId).Result;
 
-            return CreateListVstsTestCases(testcases);
+            return CreateVstsTestCaseList(testcases);
         }
 
         public bool AssociateWorkItemWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId)
@@ -79,7 +79,7 @@ namespace AssociateTestsToTestCases
                    result.Fields["Microsoft.VSTS.TCM.AutomatedTestName"].ToString() == methodName;
         }
 
-        private List<VstsTestCase> CreateListVstsTestCases(List<WorkItem> workItems)
+        private List<VstsTestCase> CreateVstsTestCaseList(List<WorkItem> workItems)
         {
             var vstsTestCases = new List<VstsTestCase>();
 
