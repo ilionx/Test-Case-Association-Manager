@@ -79,7 +79,7 @@ namespace AssociateTestsToTestCases
                 }
             };
 
-            var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, true).Result;
+            var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, false).Result;
 
             return result.Fields[AutomationStatusName].ToString() == AutomatedName &&
                    result.Fields[AutomatedTestIdName].ToString() == automatedTestId &&
