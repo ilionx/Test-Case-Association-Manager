@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.TeamFoundation.Common;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.Common;
@@ -35,7 +35,7 @@ namespace AssociateTestsToTestCases
             return CreateListVstsTestCases(testcases);
         }
 
-        public void AssociateWorkItemWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId)
+        public bool AssociateWorkItemWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId)
         {
             var patchDocument = new JsonPatchDocument
             {
@@ -71,7 +71,12 @@ namespace AssociateTestsToTestCases
                 }
             };
 
-            _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, false).Wait();
+            var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, true).Result;
+
+            return result.Fields["Microsoft.VSTS.TCM.AutomationStatus"].ToString() == "Automated" &&
+                   !result.Fields["Microsoft.VSTS.TCM.AutomatedTestId"].ToString().IsNullOrEmpty() &&
+                   result.Fields["Microsoft.VSTS.TCM.AutomatedTestStorage"].ToString() == assemblyName &&
+                   result.Fields["Microsoft.VSTS.TCM.AutomatedTestName"].ToString() == methodName;
         }
 
         private List<VstsTestCase> CreateListVstsTestCases(List<WorkItem> workItems)
@@ -81,6 +86,11 @@ namespace AssociateTestsToTestCases
             foreach (var workItem in workItems)
             {
                 var workItemTitle = workItem.Fields?.FirstOrDefault(x => x.Key == "System.Title").Value.ToString();
+
+                if (workItem.Fields["Microsoft.VSTS.TCM.AutomationStatus"].ToString() == "Automated")
+                {
+                    continue;
+                }
 
                 vstsTestCases.Add(new VstsTestCase()
                 {

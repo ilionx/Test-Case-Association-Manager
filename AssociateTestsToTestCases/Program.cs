@@ -31,20 +31,20 @@ namespace AssociateTestsToTestCases
 
             if (testMethods.IsNullOrEmpty())
             {
-                Console.WriteLine("[ERROR] Could not retrieve the DLL Test Methods. Program has been terminated.");
+                Console.WriteLine("[ERROR] Could not retrieve the DLL Test Methods. Program has been terminated.\n");
                 Environment.Exit(-1); // Todo: will this even throw an error?
             }
-            Console.WriteLine("[SUCCESS] DLL Test Methods have been obtained.");
+            Console.WriteLine("[SUCCESS] DLL Test Methods have been obtained.\n");
 
             Console.WriteLine("Trying to retrieve the VSTS Test Cases...");
             var testCases = vstsAccessor.GetVstsTestCases();
 
             if (testCases.IsNullOrEmpty())
             {
-                Console.WriteLine("[ERROR] Could not retrieve the VSTS Test Cases. Program has been terminated.");
+                Console.WriteLine("[ERROR] Could not retrieve the VSTS Test Cases. Program has been terminated.\n");
                 Environment.Exit(-1); // Todo: will this even throw an error?
             }
-            Console.WriteLine("[SUCCESS] VSTS Test Cases have been obtained.");
+            Console.WriteLine("[SUCCESS] VSTS Test Cases have been obtained.\n");
 
             Console.WriteLine("Trying to Associate Work Items with Test Methods...");
             AssociateWorkItemsWithTestMethods(testMethods, testCases, vstsAccessor);
@@ -60,7 +60,7 @@ namespace AssociateTestsToTestCases
 
                 if (testMethod == null)
                 {
-                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has no corresponding automated test."); // Todo: a lot of warnings will occur as the list of test cases is unfiltered. 
+                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has no corresponding automated test."); // Todo: a lot of false positives will occur as the list of test cases is unfiltered. 
                     continue;
                 }
 
@@ -70,11 +70,11 @@ namespace AssociateTestsToTestCases
                     continue;
                 }
 
-                // Todo:  the following if condition is for testing purpose only
-                if (testCase.Title == "WorkflowAccess_StoreProvisionContractWorkflow_NewProvisionContractWorkflow")
-                {
-                    vstsAccessor.AssociateWorkItemWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString());
-                }
+                var operationSuccess = vstsAccessor.AssociateWorkItemWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString());
+
+                Console.WriteLine(operationSuccess
+                    ? $"[SUCCESS] Test case '{testCase.Title}' [Id: {testCase.Id}] has been associated with the corresponding automated test."
+                    : $"[ERROR] Test case '{testCase.Title}' [Id: {testCase.Id}] could not be associated with the corresponding automated test.");
             }
         }
 
