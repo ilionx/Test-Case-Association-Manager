@@ -17,11 +17,13 @@ namespace AssociateTestsToTestCases
 
         private const string FieldProperty = "fields";
         private const string AutomatedName = "Automated";
+        private const string SystemTitle = "System.Title";
         private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
         private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
         private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
         private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
         private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
+        private const string Query = "SELECT * From WorkItems Where [System.WorkItemType] = 'Test Case'";
 
         public TestCaseAccess(string collectionUri, string personalAccessToken)
         {
@@ -33,8 +35,7 @@ namespace AssociateTestsToTestCases
         {
             var workItemQuery = _workItemTrackingHttpClient.QueryByWiqlAsync(new Wiql()
             {
-                Query =
-                    "SELECT * From WorkItems Where [System.WorkItemType] = 'Test Case'"
+                Query = Query
             }).Result;
 
             var testCasesId = workItemQuery.WorkItems?.Select(x => x.Id).ToArray();
@@ -43,7 +44,7 @@ namespace AssociateTestsToTestCases
             return CreateTestCaseList(testCases);
         }
 
-        public bool AssociateTestCaseWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, string testType = "")
+        public bool AssociateTestCaseWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, bool validationOnly, string testType)
         {
             var patchDocument = new JsonPatchDocument
             {
@@ -93,7 +94,7 @@ namespace AssociateTestsToTestCases
 
             foreach (var workItem in workItems)
             {
-                var workItemTitle = workItem.Fields?.FirstOrDefault(x => x.Key == "System.Title").Value.ToString();
+                var workItemTitle = workItem.Fields?.FirstOrDefault(x => x.Key == SystemTitle).Value.ToString();
 
                 if (workItem.Fields[AutomationStatusName].ToString() == AutomatedName)
                 {

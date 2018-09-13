@@ -16,6 +16,8 @@ namespace AssociateTestsToTestCases
         {
             TestCaseAccess testCaseAccess = null;
             string[] testAssemblyPaths = null;
+            var validationOnly = false;
+            var testType = "";
 
             Parser.Default.ParseArguments<Options>(args)
             .WithParsed(o =>
@@ -24,6 +26,8 @@ namespace AssociateTestsToTestCases
                 testAssemblyPaths = ListTestAssemblyPaths(o.Directory, minimatchPatterns);
 
                 testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken);
+                validationOnly = o.ValidationOnly;
+                testType = o.TestType;
             });
 
             Console.WriteLine("Trying to retrieve the DLL Test Methods...");
@@ -32,7 +36,7 @@ namespace AssociateTestsToTestCases
             if (testMethods.IsNullOrEmpty())
             {
                 Console.WriteLine("[ERROR] Could not retrieve the DLL Test Methods. Program has been terminated.\n");
-                Environment.Exit(-1); // Todo: will this even throw an error?
+                Environment.Exit(-1);
             }
             Console.WriteLine("[SUCCESS] DLL Test Methods have been obtained.\n");
 
@@ -42,17 +46,17 @@ namespace AssociateTestsToTestCases
             if (testCases.IsNullOrEmpty())
             {
                 Console.WriteLine("[ERROR] Could not retrieve the VSTS Test Cases. Program has been terminated.\n");
-                Environment.Exit(-1); // Todo: will this even throw an error?
+                Environment.Exit(-1);
             }
             Console.WriteLine("[SUCCESS] VSTS Test Cases have been obtained.\n");
 
             Console.WriteLine("Trying to Associate Work Items with Test Methods...");
-            AssociateWorkItemsWithTestMethods(testMethods, testCases, testCaseAccess);
+            AssociateWorkItemsWithTestMethods(testMethods, testCases, testCaseAccess, validationOnly, testType);
 
             Console.WriteLine("[FINISH] Workitems and Test Methods have been associated.");
         }
 
-        private static void AssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<TestCase> testCases, TestCaseAccess vstsAccessor)
+        private static void AssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<TestCase> testCases, TestCaseAccess vstsAccessor, bool validationOnly, string testType)
         {
             foreach (var testCase in testCases)
             {
@@ -60,7 +64,7 @@ namespace AssociateTestsToTestCases
 
                 if (testMethod == null)
                 {
-                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has no corresponding automated test."); // Todo: a lot of false positives will occur as the list of test cases is unfiltered. 
+                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has no corresponding automated test.");
                     continue;
                 }
 
@@ -70,7 +74,7 @@ namespace AssociateTestsToTestCases
                     continue;
                 }
 
-                var operationSuccess = vstsAccessor.AssociateTestCaseWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString());
+                var operationSuccess = vstsAccessor.AssociateTestCaseWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString(), validationOnly, testType);
 
                 Console.WriteLine(operationSuccess
                     ? $"[SUCCESS] Test case '{testCase.Title}' [Id: {testCase.Id}] has been associated with the corresponding automated test."
@@ -141,11 +145,17 @@ namespace AssociateTestsToTestCases
             [Option('m', "minimatch patterns", Required = true, HelpText = "Supports multiple minimatch patterns, separated by a semicolon.")]
             public string MinimatchPatterns { get; set; }
 
-            [Option('t', "personal access token", Required = true, HelpText = "The personal access token used for accessing the Visual Studio Team Services project")]
+            [Option('p', "personal access token", Required = true, HelpText = "The personal access token used for accessing the Visual Studio Team Services project")]
             public string PersonalAccessToken { get; set; }
+
+            [Option('t', "test type", Required = false, Default = "", HelpText = "The automation test type")]
+            public string TestType { get; set; }
 
             [Option('u', "collection uri", Required = true, HelpText = "The collection uri used for accessing the project work items")]
             public string CollectionUri { get; set; }
+
+            [Option('v', "validation only", Required = false, HelpText = "The collection uri used for accessing the project work items")]
+            public bool ValidationOnly { get; set; }
         }
     }
 }
