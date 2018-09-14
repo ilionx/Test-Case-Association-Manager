@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TeamFoundation.Common;
+using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.Common;
@@ -14,7 +15,9 @@ namespace AssociateTestsToTestCases
     public class TestCaseAccess
     {
         private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
+        private readonly TestManagementHttpClient _testManagementHttpClient;
 
+        //private const string ProjectName = "GGR";
         private const string FieldProperty = "fields";
         private const string AutomatedName = "Automated";
         private const string SystemTitle = "System.Title";
@@ -23,19 +26,21 @@ namespace AssociateTestsToTestCases
         private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
         private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
         private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
-        private const string Query = "SELECT * From WorkItems Where [System.WorkItemType] = 'Test Case'";
+        private const string GetVstsTestCasesQuery = "SELECT * From WorkItems Where [System.WorkItemType] = 'Test Case'";
+        //private const string GetVstsTestRunsQuery = "SELECT * From TestResult";
 
         public TestCaseAccess(string collectionUri, string personalAccessToken)
         {
             var connection = new VssConnection(new Uri(collectionUri), new VssBasicCredential(string.Empty, personalAccessToken));
             _workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
+            _testManagementHttpClient = connection.GetClient<TestManagementHttpClient>();
         }
 
         public List<TestCase> GetVstsTestCases()
         {
             var workItemQuery = _workItemTrackingHttpClient.QueryByWiqlAsync(new Wiql()
             {
-                Query = Query
+                Query = GetVstsTestCasesQuery
             }).Result;
 
             var testCasesId = workItemQuery.WorkItems?.Select(x => x.Id).ToArray();
@@ -94,21 +99,32 @@ namespace AssociateTestsToTestCases
 
             foreach (var workItem in workItems)
             {
-                var workItemTitle = workItem.Fields?.FirstOrDefault(x => x.Key == SystemTitle).Value.ToString();
-
-                if (workItem.Fields[AutomationStatusName].ToString() == AutomatedName)
-                {
-                    continue;
-                }
-
                 testCases.Add(new TestCase()
                 {
                     Id = workItem.Id,
-                    Title = workItemTitle
+                    Title = workItem.Fields[SystemTitle].ToString(),
+                    AutomationStatus = workItem.Fields[AutomationStatusName].ToString()
                 });
             }
 
             return testCases;
         }
+
+        //public bool ResetStatusTestCases()
+        //{
+        //    //var workItemQuery = new QueryModel(GetVstsTestRunsQuery);
+
+        //    //var testRuns = _testManagementHttpClient.GetTestRunsByQueryAsync(workItemQuery, ProjectName).Result;
+
+        //    //foreach (var testRun in testRuns)
+        //    //{
+        //    //    testRun.State = TestRunState.NotStarted.ToString();
+
+        //    //    _testManagementHttpClient.
+        //    //    _testManagementHttpClient.UpdateTestRunAsync(testRun, ProjectName, testRun.Id);
+        //    //}
+
+        //    return true;
+        //}
     }
 }

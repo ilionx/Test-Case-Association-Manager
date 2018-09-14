@@ -12,6 +12,8 @@ namespace AssociateTestsToTestCases
 {
     internal static class Program
     {
+        private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
+
         private static void Main(string[] args)
         {
             TestCaseAccess testCaseAccess = null;
@@ -19,16 +21,17 @@ namespace AssociateTestsToTestCases
             var validationOnly = false;
             var testType = "";
 
-            Parser.Default.ParseArguments<Options>(args)
-            .WithParsed(o =>
-            {
-                var minimatchPatterns = o.MinimatchPatterns.Split(';');
-                testAssemblyPaths = ListTestAssemblyPaths(o.Directory, minimatchPatterns);
 
-                testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken);
-                validationOnly = o.ValidationOnly;
-                testType = o.TestType;
-            });
+            Parser.Default.ParseArguments<Options>(args)
+                .WithParsed(o =>
+                {
+                    var minimatchPatterns = o.MinimatchPatterns.Split(';');
+                    testAssemblyPaths = ListTestAssemblyPaths(o.Directory, minimatchPatterns);
+
+                    testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken);
+                    validationOnly = o.ValidationOnly;
+                    testType = o.TestType;
+                });
 
             Console.WriteLine("Trying to retrieve the DLL Test Methods...");
             var testMethods = ListTestMethods(testAssemblyPaths);
@@ -50,6 +53,16 @@ namespace AssociateTestsToTestCases
             }
             Console.WriteLine("[SUCCESS] VSTS Test Cases have been obtained.\n");
 
+            //Console.WriteLine("Trying to reset the status of each test case");
+            //var resetStatusTestCasesSuccess = testCaseAccess.ResetStatusTestCases();
+
+            //if (!resetStatusTestCasesSuccess)
+            //{
+            //    Console.Write("[ERROR] Could not reset the status of each VSTS Test Case. Program has been terminated.\n");
+            //    Environment.Exit(-1);
+            //}
+            //Console.WriteLine("[SUCCESS] VSTS Test Cases have been reset.\n");
+
             Console.WriteLine("Trying to Associate Work Items with Test Methods...");
             AssociateWorkItemsWithTestMethods(testMethods, testCases, testCaseAccess, validationOnly, testType);
 
@@ -62,15 +75,21 @@ namespace AssociateTestsToTestCases
             {
                 var testMethod = testMethods.SingleOrDefault(x => x.Name == testCase.Title);
 
-                if (testMethod == null)
-                {
-                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has no corresponding automated test.");
-                    continue;
-                }
-
                 if (testCase.Id == null)
                 {
                     Console.WriteLine($"[WARNING] Test case '{testCase.Title}' does not contain an Id, and therefore it will be skipped.");
+                    continue;
+                }
+
+                if (testCase.AutomationStatus == AutomationStatusName && testMethod == null)
+                {
+                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has been associated in the past, but the corresponding automated test is not available anymore.");
+                    continue;
+                }
+
+                if (testMethod == null)
+                {
+                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has no corresponding automated test.");
                     continue;
                 }
 
