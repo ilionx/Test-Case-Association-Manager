@@ -53,20 +53,20 @@ namespace AssociateTestsToTestCases
             }
             Console.WriteLine("[SUCCESS] VSTS Test Cases have been obtained.\n");
 
-            //Console.WriteLine("Trying to reset the status of each test case");
-            //var resetStatusTestCasesSuccess = testCaseAccess.ResetStatusTestCases();
+            Console.WriteLine("Trying to reset the status of each test case");
+            var resetStatusTestCasesSuccess = testCaseAccess.ResetStatusTestCases();
 
-            //if (!resetStatusTestCasesSuccess)
-            //{
-            //    Console.Write("[ERROR] Could not reset the status of each VSTS Test Case. Program has been terminated.\n");
-            //    Environment.Exit(-1);
-            //}
-            //Console.WriteLine("[SUCCESS] VSTS Test Cases have been reset.\n");
+            if (!resetStatusTestCasesSuccess)
+            {
+                Console.Write("[ERROR] Could not reset the status of each VSTS Test Case. Program has been terminated.\n");
+                Environment.Exit(-1);
+            }
+            Console.WriteLine("[SUCCESS] VSTS Test Cases have been reset.\n");
 
             Console.WriteLine("Trying to Associate Work Items with Test Methods...");
             AssociateWorkItemsWithTestMethods(testMethods, testCases, testCaseAccess, validationOnly, testType);
 
-            Console.WriteLine("[FINISH] Workitems and Test Methods have been associated.");
+            Console.WriteLine("[FINISH] Work Items and Test Methods have been associated.");
         }
 
         private static void AssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<TestCase> testCases, TestCaseAccess vstsAccessor, bool validationOnly, string testType)
@@ -90,6 +90,11 @@ namespace AssociateTestsToTestCases
                 if (testMethod == null)
                 {
                     Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has no corresponding automated test.");
+                    continue;
+                }
+
+                if (testCase.AutomationStatus == AutomationStatusName)
+                {
                     continue;
                 }
 

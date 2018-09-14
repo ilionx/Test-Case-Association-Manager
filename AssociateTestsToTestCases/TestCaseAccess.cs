@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Common;
+using Microsoft.TeamFoundation.Framework.Client;
+using Microsoft.TeamFoundation.TestManagement.Client;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.Common;
+using Microsoft.VisualStudio.Services.Location;
 using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
@@ -17,7 +21,7 @@ namespace AssociateTestsToTestCases
         private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
         private readonly TestManagementHttpClient _testManagementHttpClient;
 
-        //private const string ProjectName = "GGR";
+        private const string ProjectName = "GGR";
         private const string FieldProperty = "fields";
         private const string AutomatedName = "Automated";
         private const string SystemTitle = "System.Title";
@@ -27,7 +31,6 @@ namespace AssociateTestsToTestCases
         private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
         private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
         private const string GetVstsTestCasesQuery = "SELECT * From WorkItems Where [System.WorkItemType] = 'Test Case'";
-        //private const string GetVstsTestRunsQuery = "SELECT * From TestResult";
 
         public TestCaseAccess(string collectionUri, string personalAccessToken)
         {
@@ -85,7 +88,7 @@ namespace AssociateTestsToTestCases
                 }
             };
 
-            var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, false).Result;
+            var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, validationOnly).Result;
 
             return result.Fields[AutomationStatusName].ToString() == AutomatedName &&
                    result.Fields[AutomatedTestIdName].ToString() == automatedTestId &&
@@ -110,21 +113,22 @@ namespace AssociateTestsToTestCases
             return testCases;
         }
 
-        //public bool ResetStatusTestCases()
-        //{
-        //    //var workItemQuery = new QueryModel(GetVstsTestRunsQuery);
+        public bool ResetStatusTestCases()
+        {
+            var testPlans = _testManagementHttpClient.GetPlansAsync(ProjectName).Result;
+            var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(ProjectName, testPlans[0].Id).Result;
+            var testPoints = _testManagementHttpClient.GetPointsAsync(ProjectName, testPlans[0].Id, testSuites[0].Id).Result;
 
-        //    //var testRuns = _testManagementHttpClient.GetTestRunsByQueryAsync(workItemQuery, ProjectName).Result;
+            //foreach (var testPoint in testPoints)
+            //{
+            //    testPoint.State = TestPointState.InProgress.ToString(); // InProgress = for testing purpose.
+            //}
 
-        //    //foreach (var testRun in testRuns)
-        //    //{
-        //    //    testRun.State = TestRunState.NotStarted.ToString();
+            var pointUpdateModel = new PointUpdateModel(resetToActive: true); // if this doesn't work, then set Outcome to In progress?
 
-        //    //    _testManagementHttpClient.
-        //    //    _testManagementHttpClient.UpdateTestRunAsync(testRun, ProjectName, testRun.Id);
-        //    //}
+            var updatedTestPoints = _testManagementHttpClient.UpdateTestPointsAsync(pointUpdateModel, ProjectName, testPlans[0].Id, testSuites[0].Id, "1").Result; // todo: for testing-purpose: set's outcome test point 1 linked to test case 53
 
-        //    return true;
-        //}
+            return true;
+        }
     }
 }
