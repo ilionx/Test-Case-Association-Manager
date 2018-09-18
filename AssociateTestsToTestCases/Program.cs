@@ -14,17 +14,17 @@ namespace AssociateTestsToTestCases
     {
         private const string AutomationName = "Automated";
 
-        private static int _errorAssociationCount = 0;
-        private static int _totalAssociationCount = 0;
-        private static int _successfulAssociationCount = 0;
-        private static int _warningMissingIdAssociationCount = 0;
-        private static int _warningNoCorrespondingAutomatedTestAssociationCount = 0;
-        private static int _warningAutomatedTestNotAvailableAnymoreAssociationCount = 0;
-
-        private static string _testType = "";
         private static bool _validationOnly;
+        private static string _testType = "";
         private static string[] _testAssemblyPaths;
         private static TestCaseAccess _testCaseAccess;
+
+        private static int _errorAssociationCount;
+        private static int _totalAssociationCount;
+        private static int _successfulAssociationCount;
+        private static int _warningMissingIdAssociationCount;
+        private static int _warningNoCorrespondingAutomatedTestAssociationCount;
+        private static int _warningAutomatedTestNotAvailableAnymoreAssociationCount;
 
         private static void Main(string[] args)
         {
@@ -73,7 +73,7 @@ namespace AssociateTestsToTestCases
             AssociateWorkItemsWithTestMethods(testMethods, testCases, _testCaseAccess, _validationOnly, _testType);
 
             Console.WriteLine("[FINISH]  Work Items and Test Methods have been associated.");
-            Console.WriteLine($"[SUMMARY] Success: {_successfulAssociationCount} | Errors: {_errorAssociationCount} | Warnings: [Missing Id: {_warningMissingIdAssociationCount} - Automated Test N\\A anymore: {_warningAutomatedTestNotAvailableAnymoreAssociationCount} - Automated Test not found: {_warningNoCorrespondingAutomatedTestAssociationCount}] \n");
+            Console.WriteLine($"[SUMMARY] Success: {_successfulAssociationCount} | Errors: {_errorAssociationCount} | Warnings: [Missing Id: {_warningMissingIdAssociationCount} - Automated Test N\\A anymore: {_warningAutomatedTestNotAvailableAnymoreAssociationCount} - Automated Test not found: {_warningNoCorrespondingAutomatedTestAssociationCount}]");
             Console.WriteLine($"[SUMMARY] Total VSTS Test Cases: {testCases.Count} | Total Automated Test Cases: {_totalAssociationCount}");
         }
 
