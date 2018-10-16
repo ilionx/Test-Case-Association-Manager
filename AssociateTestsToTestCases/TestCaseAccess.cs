@@ -25,13 +25,13 @@ namespace AssociateTestsToTestCases
         private const string FieldProperty = "fields";
         private const string AutomatedName = "Automated";
         private const string SystemTitle = "System.Title";
+        private const string SystemTestPlanName = "System Test Plan";
         private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
         private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
         private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
         private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
         private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
-        private const string GetVstsTestCasesQuery = "SELECT * From WorkItems Where [System.WorkItemType] = 'Test Case'";
-
+        
         public TestCaseAccess(string collectionUri, string personalAccessToken)
         {
             var connection = new VssConnection(new Uri(collectionUri), new VssBasicCredential(string.Empty, personalAccessToken));
@@ -41,15 +41,32 @@ namespace AssociateTestsToTestCases
 
         public List<TestCase> GetVstsTestCases()
         {
-            var workItemQuery = _workItemTrackingHttpClient.QueryByWiqlAsync(new Wiql()
-            {
-                Query = GetVstsTestCasesQuery
-            }).Result;
+            var testCasesId = GetTestCasesId();
 
-            var testCasesId = workItemQuery.WorkItems?.Select(x => x.Id).ToArray();
-            var testCases = _workItemTrackingHttpClient.GetWorkItemsAsync(testCasesId).Result;
+            var chunkedTestCases = ChunkTestCases(testCasesId);
+
+            var testCases = chunkedTestCases.SelectMany(chunkedTestgroupCases => _workItemTrackingHttpClient.GetWorkItemsAsync(chunkedTestgroupCases).Result).ToList();
 
             return CreateTestCaseList(testCases);
+        }
+
+        private int[] GetTestCasesId()
+        {
+            var testPlan = _testManagementHttpClient.GetPlansAsync(ProjectName).Result
+                .Single(x => x.Name.Equals(SystemTestPlanName));
+
+            var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(ProjectName, testPlan.Id).Result;
+
+            return _testManagementHttpClient.GetPointsAsync(ProjectName, testPlan.Id, testSuites[0].Id).Result
+                .Select(x => int.Parse(x.TestCase.Id)).ToArray();
+        }
+
+        private static int[][] ChunkTestCases(int[] testCasesId)
+        {
+            var i = 0;
+            var chunkSize = 200;
+            var chunkedTestCases = testCasesId.GroupBy(s => i++ / chunkSize).Select(g => g.ToArray()).ToArray();
+            return chunkedTestCases;
         }
 
         public bool AssociateTestCaseWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, bool validationOnly, string testType)
