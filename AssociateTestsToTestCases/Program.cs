@@ -15,6 +15,7 @@ namespace AssociateTestsToTestCases
         private const string AutomationName = "Automated";
 
         private static bool _validationOnly;
+        private static bool _verboseLogging;
         private static string _testType = "";
         private static string[] _testAssemblyPaths;
         private static TestCaseAccess _testCaseAccess;
@@ -37,6 +38,7 @@ namespace AssociateTestsToTestCases
                         _testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken);
                         _validationOnly = o.ValidationOnly;
                         _testType = o.TestType;
+                        _verboseLogging = o.VerboseLogging;
                     });
 
             Console.WriteLine("Trying to retrieve the DLL Test Methods...");
@@ -119,7 +121,11 @@ namespace AssociateTestsToTestCases
                     return;
                 }
 
-                Console.WriteLine($"[SUCCESS] Test case '{testCase.Title}' [Id: {testCase.Id}] has been associated with the corresponding automated test.");
+                if (_verboseLogging)
+                {
+                    Console.WriteLine($"[SUCCESS] Test case '{testCase.Title}' [Id: {testCase.Id}] has been associated with the corresponding automated test.");
+                }
+
                 _totalAssociationCount += 1;
                 _successfulAssociationCount += 1;
             }
@@ -199,6 +205,9 @@ namespace AssociateTestsToTestCases
 
             [Option('v', "validation only", Required = false, HelpText = "The collection uri used for accessing the project work items")]
             public bool ValidationOnly { get; set; }
+
+            [Option('l', "verbose logging", Required = false, HelpText = "Verbose logging also records the successful matching.")]
+            public bool VerboseLogging { get; set; }
         }
     }
 }
