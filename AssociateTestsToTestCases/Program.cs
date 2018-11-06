@@ -188,25 +188,25 @@ namespace AssociateTestsToTestCases
 
         private class Options
         {
-            [Option('d', "directory", Required = true, HelpText = "The root directory to search")]
+            [Option('d', "directory", Required = true, HelpText = "The root directory to search in.")]
             public string Directory { get; set; }
 
-            [Option('m', "minimatch patterns", Required = true, HelpText = "Supports multiple minimatch patterns, separated by a semicolon.")]
+            [Option('m', "minimatchpatterns", Required = true, HelpText = "Supports multiple minimatch patterns, separated by a semicolon.")]
             public string MinimatchPatterns { get; set; }
 
-            [Option('p', "personal access token", Required = true, HelpText = "The personal access token used for accessing the Visual Studio Team Services project")]
+            [Option('p', "personalaccesstoken", Required = true, HelpText = "The personal access token used for accessing the Visual Studio Team Services project")]
             public string PersonalAccessToken { get; set; }
 
-            [Option('t', "test type", Required = false, Default = "", HelpText = "The automation test type")]
+            [Option('t', "testtype", Required = false, Default = "", HelpText = "The automation test type")]
             public string TestType { get; set; }
 
-            [Option('u', "collection uri", Required = true, HelpText = "The collection uri used for accessing the project work items")]
+            [Option('u', "collectionuri", Required = true, HelpText = "The collection uri used for accessing the project work items")]
             public string CollectionUri { get; set; }
 
-            [Option('v', "validation only", Required = false, HelpText = "The collection uri used for accessing the project work items")]
+            [Option('v', "validationonly", Required = false, HelpText = "Indicate if you only want to validate the changes without saving the work item.")]
             public bool ValidationOnly { get; set; }
 
-            [Option('l', "verbose logging", Required = false, HelpText = "Verbose logging also records the successful matching.")]
+            [Option('l', "verboselogging", Required = false, HelpText = "Verbose logging also records the successful matching.")]
             public bool VerboseLogging { get; set; }
         }
     }
