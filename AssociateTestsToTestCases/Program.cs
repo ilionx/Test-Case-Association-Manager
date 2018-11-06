@@ -206,7 +206,7 @@ namespace AssociateTestsToTestCases
             [Option('v', "validationonly", Required = false, HelpText = "Indicate if you only want to validate the changes without saving the work item.")]
             public bool ValidationOnly { get; set; }
 
-            [Option('l', "verboselogging", Required = false, HelpText = "Verbose logging also records the successful matching.")]
+            [Option('l', "verboselogging", Required = false, HelpText = "Verbose logging also outputs the successful matchings.")]
             public bool VerboseLogging { get; set; }
         }
     }
