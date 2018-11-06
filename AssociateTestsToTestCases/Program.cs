@@ -194,7 +194,7 @@ namespace AssociateTestsToTestCases
             [Option('m', "minimatchpatterns", Required = true, HelpText = "Minimatch patterns to search for within the directory, separated by a semicolon.")]
             public string MinimatchPatterns { get; set; }
 
-            [Option('p', "personalaccesstoken", Required = true, HelpText = "The personal access token used for accessing the Visual Studio Team Services project.")]
+            [Option('p', "personalaccesstoken", Required = true, HelpText = "The personal access token used for accessing the Azure DevOps project.")]
             public string PersonalAccessToken { get; set; }
 
             [Option('t', "testtype", Required = false, Default = "", HelpText = "The automation test type.")]
