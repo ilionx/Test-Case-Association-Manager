@@ -32,8 +32,9 @@ namespace AssociateTestsToTestCases
             Parser.Default.ParseArguments<Options>(args)
                     .WithParsed(o =>
                     {
-                        var minimatchPatterns = o.MinimatchPatterns.Split(';');
-                        _testAssemblyPaths = ListTestAssemblyPaths(o.Directory, minimatchPatterns);
+                        var minimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
+                        var directory = o.Directory.ToLowerInvariant();
+                        _testAssemblyPaths = ListTestAssemblyPaths(directory, minimatchPatterns);
 
                         _testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken);
                         _validationOnly = o.ValidationOnly;
@@ -146,7 +147,7 @@ namespace AssociateTestsToTestCases
 
         private static string[] ListTestAssemblyPaths(string directory, string[] minimatchPatterns)
         {
-            var files = ListAllAccessibleFilesInDirectory(directory);
+            var files = ListAllAccessibleFilesInDirectory(directory).Select(s => s.ToLowerInvariant()).ToArray();
             var matchingFilesToBeIncluded = new List<string>();
 
             foreach (var minimatchPattern in minimatchPatterns.Where(minimatchPattern => !minimatchPattern.StartsWith("!")))
