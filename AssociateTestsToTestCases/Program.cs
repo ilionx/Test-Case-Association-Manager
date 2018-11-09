@@ -16,7 +16,6 @@ namespace AssociateTestsToTestCases
         private const string AutomationName = "Automated";
 
         private static Messages _messages;
-        private static MessageType _messageType;
         private static TestCaseAccess _testCaseAccess;
 
         private static bool _validationOnly;
@@ -27,9 +26,8 @@ namespace AssociateTestsToTestCases
         private static void Main(string[] args)
         {
             _messages = new Messages();
-            _messageType = new MessageType();
 
-            WriteToConsole(_messageType.Stage, _messages.Stage.Arguments.Status);
+            WriteToConsole(_messages.Types.Stage, _messages.Stage.Arguments.Status);
             Parser.Default.ParseArguments<Options>(args)
                     .WithParsed(o =>
                     {
@@ -42,27 +40,27 @@ namespace AssociateTestsToTestCases
                         _testType = o.TestType;
                         _verboseLogging = o.VerboseLogging;
                     });
-            WriteToConsole(_messageType.Success, _messages.Stage.Arguments.Success);
+            WriteToConsole(_messages.Types.Success, _messages.Stage.Arguments.Success);
 
-            WriteToConsole(_messageType.Stage, _messages.Stage.DllTestMethods.Status);
+            WriteToConsole(_messages.Types.Stage, _messages.Stage.DllTestMethods.Status);
             var testMethods = ListTestMethods(_testAssemblyPaths);
 
             if (testMethods.IsNullOrEmpty())
             {
-                WriteToConsole(_messageType.Error, _messages.Stage.DllTestMethods.Failure);
+                WriteToConsole(_messages.Types.Error, _messages.Stage.DllTestMethods.Failure);
                 Environment.Exit(-1);
             }
-            WriteToConsole(_messageType.Success, _messages.Stage.DllTestMethods.Success);
+            WriteToConsole(_messages.Types.Success, _messages.Stage.DllTestMethods.Success);
 
-            WriteToConsole(_messageType.Stage, _messages.Stage.TestCases.Status);
+            WriteToConsole(_messages.Types.Stage, _messages.Stage.TestCases.Status);
             var testCases = _testCaseAccess.GetVstsTestCases();
 
             if (testCases.IsNullOrEmpty())
             {
-                WriteToConsole(_messageType.Error, _messages.Stage.TestCases.Failure);
+                WriteToConsole(_messages.Types.Error, _messages.Stage.TestCases.Failure);
                 Environment.Exit(-1);
             }
-            WriteToConsole(_messageType.Success, _messages.Stage.TestCases.Success);
+            WriteToConsole(_messages.Types.Success, _messages.Stage.TestCases.Success);
 
             //Console.WriteLine("Trying to reset the status of each test case");
             //var resetStatusTestCasesSuccess = testCaseAccess.ResetStatusTestCases();
@@ -74,13 +72,13 @@ namespace AssociateTestsToTestCases
             //}
             //Console.WriteLine("[SUCCESS] VSTS Test Cases have been reset.\n");
 
-            WriteToConsole(_messageType.Stage, _messages.Stage.Association.Status);
+            WriteToConsole(_messages.Types.Stage, _messages.Stage.Association.Status);
             AssociateTestCasesWithTestMethods(testMethods, testCases, _testCaseAccess, _validationOnly, _testType);
-            WriteToConsole(_messageType.Success, _messages.Stage.Association.Success);
+            WriteToConsole(_messages.Types.Success, _messages.Stage.Association.Success);
 
-            WriteToConsole(_messageType.Stage, _messages.Stage.Summary.Status);
-            WriteToConsole(_messageType.Summary, string.Format(_messages.Stage.Summary.Detailed, Counter.Counter.Success, Counter.Counter.Error, Counter.Counter.WarningMissingId + Counter.Counter.WarningTestMethodNotAvailable + Counter.Counter.WarningNoCorrespondingTestMethod, Counter.Counter.WarningMissingId, Counter.Counter.WarningTestMethodNotAvailable, Counter.Counter.WarningNoCorrespondingTestMethod));
-            WriteToConsole(_messageType.Summary, string.Format(_messages.Stage.Summary.Overview, testCases.Count, Counter.Counter.Total));
+            WriteToConsole(_messages.Types.Stage, _messages.Stage.Summary.Status);
+            WriteToConsole(_messages.Types.Summary, string.Format(_messages.Stage.Summary.Detailed, Counter.Counter.Success, Counter.Counter.Error, Counter.Counter.WarningMissingId + Counter.Counter.WarningTestMethodNotAvailable + Counter.Counter.WarningNoCorrespondingTestMethod, Counter.Counter.WarningMissingId, Counter.Counter.WarningTestMethodNotAvailable, Counter.Counter.WarningNoCorrespondingTestMethod));
+            WriteToConsole(_messages.Types.Summary, string.Format(_messages.Stage.Summary.Overview, testCases.Count, Counter.Counter.Total));
         }
 
         private static void AssociateTestCasesWithTestMethods(MethodInfo[] testMethods, List<TestCase> testCases, TestCaseAccess vstsAccessor, bool validationOnly, string testType)
@@ -91,21 +89,21 @@ namespace AssociateTestsToTestCases
 
                 if (testCase.Id == null)
                 {
-                    WriteToConsole(_messageType.Warning, string.Format(_messages.Association.Failure.TestcaseWithNoIdSkipped, testCase.Title));
+                    WriteToConsole(_messages.Types.Warning, string.Format(_messages.Association.TestCaseSkipped, testCase.Title), _messages.Reasons.MissingTestCaseId);
                     Counter.Counter.WarningMissingId += 1;
                     continue;
                 }
 
                 if (testCase.AutomationStatus == AutomationName && testMethod == null)
                 {
-                    WriteToConsole(_messageType.Warning, string.Format(_messages.Association.Failure.TestcaseCorrespondingTestMethodNotAvailable, testCase.Title, testCase.Id));
+                    WriteToConsole(_messages.Types.Warning, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.AssociatedTestMethodNotAvailable);
                     Counter.Counter.WarningTestMethodNotAvailable += 1;
                     continue;
                 }
 
                 if (testMethod == null)
                 {
-                    WriteToConsole(_messageType.Warning, string.Format(_messages.Association.Failure.TestcaseNoCorrespondingTestMethod, testCase.Title, testCase.Id));
+                    WriteToConsole(_messages.Types.Warning, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.MissingTestMethod);
                     Counter.Counter.WarningNoCorrespondingTestMethod += 1;
                     continue;
                 }
@@ -120,14 +118,14 @@ namespace AssociateTestsToTestCases
 
                 if (!operationSuccess)
                 {
-                    WriteToConsole(_messageType.Failure, string.Format(_messages.Association.Failure.TestcaseCouldNotBeAssociated, testCase.Title, testCase.Id));
+                    WriteToConsole(_messages.Types.Failure, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.Association);
                     Counter.Counter.Error += 1;
                     return;
                 }
 
                 if (_verboseLogging)
                 {
-                    WriteToConsole(_messageType.Success, string.Format(_messages.Association.Success, testCase.Title, testCase.Id));
+                    WriteToConsole(_messages.Types.Success, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.Association);
                 }
 
                 Counter.Counter.Total += 1;
@@ -190,10 +188,13 @@ namespace AssociateTestsToTestCases
             return files.ToArray();
         }
 
-        private static void WriteToConsole(string messageType, string message)
+        private static void WriteToConsole(string messageType, string message, string reason = "")
         {
-            var space = new string(' ', _messageType.LongestTypeCount - messageType.Count());
-            var outputMessage = $"[{messageType}]{space} {message}";
+            var reasonOutputFormat = reason.Length.Equals((0)) ? string.Empty : $"[{reason}]";
+
+            var spaceMessageType = new string(' ', _messages.Types.LongestTypeCount - messageType.Count());
+            var spaceReason = reason.Length.Equals(0) ? string.Empty : new string(' ', _messages.Reasons.LongestReasonCount - reason.Count()+1);
+            var outputMessage = $"[{messageType}]{spaceMessageType} {reasonOutputFormat}{spaceReason}{message}";
             Console.WriteLine(outputMessage);
         }
 
