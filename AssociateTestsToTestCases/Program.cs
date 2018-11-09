@@ -16,7 +16,6 @@ namespace AssociateTestsToTestCases
     internal static class Program
     {
         private static Messages _messages;
-        private static Associator _associator;
         private static FileAccess _fileAccessor;
         private static TestCaseAccess _testCaseAccess;
 
@@ -30,12 +29,7 @@ namespace AssociateTestsToTestCases
 
         private static void Main(string[] args)
         {
-            _messages = new Messages();
-            _fileAccessor = new FileAccess();
-
-            ParseArguments(args);
-
-            _associator = new Associator(_messages, _verboseLogging);
+            Init(args);
 
             GetTestmethods();
 
@@ -46,6 +40,14 @@ namespace AssociateTestsToTestCases
             Associate();
 
             OutputSummary();
+        }
+
+        private static void Init(string[] args)
+        {
+            _messages = new Messages();
+            _fileAccessor = new FileAccess();
+
+            ParseArguments(args);
         }
 
         private static void ParseArguments(string[] args)
@@ -108,7 +110,7 @@ namespace AssociateTestsToTestCases
         private static void Associate()
         {
             Writer.WriteToConsole(_messages, _messages.Types.Stage, _messages.Stage.Association.Status);
-            _associator.Associate(_testMethods, _testCases, _testCaseAccess, _validationOnly, _testType);
+            new Associator(_messages, _verboseLogging).Associate(_testMethods, _testCases, _testCaseAccess, _validationOnly, _testType);
             Writer.WriteToConsole(_messages, _messages.Types.Success, _messages.Stage.Association.Success);
         }
 
