@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using AssociateTestsToTestCases.Message;
 using CommandLine;
 using Microsoft.TeamFoundation.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,21 +15,21 @@ namespace AssociateTestsToTestCases
     {
         private const string AutomationName = "Automated";
 
-        private static bool _validationOnly;
-        private static bool _verboseLogging;
-        private static string _testType = "";
-        private static string[] _testAssemblyPaths;
+        private static Messages _messages;
+        private static MessageType _messageType;
         private static TestCaseAccess _testCaseAccess;
 
-        private static int _errorAssociationCount;
-        private static int _totalAssociationCount;
-        private static int _successfulAssociationCount;
-        private static int _warningMissingIdAssociationCount;
-        private static int _warningNoCorrespondingAutomatedTestAssociationCount;
-        private static int _warningAutomatedTestNotAvailableAnymoreAssociationCount;
+        private static bool _validationOnly;
+        private static bool _verboseLogging;
+        private static string[] _testAssemblyPaths;
+        private static string _testType = string.Empty;
 
         private static void Main(string[] args)
         {
+            _messages = new Messages();
+            _messageType = new MessageType();
+
+            WriteToConsole(_messageType.Stage, _messages.Stage.Arguments.Status);
             Parser.Default.ParseArguments<Options>(args)
                     .WithParsed(o =>
                     {
@@ -36,31 +37,32 @@ namespace AssociateTestsToTestCases
                         var directory = o.Directory.ToLowerInvariant();
                         _testAssemblyPaths = ListTestAssemblyPaths(directory, minimatchPatterns);
 
-                        _testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken);
+                        _testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken, o.ProjectName, o.TestPlanName);
                         _validationOnly = o.ValidationOnly;
                         _testType = o.TestType;
                         _verboseLogging = o.VerboseLogging;
                     });
+            WriteToConsole(_messageType.Success, _messages.Stage.Arguments.Success);
 
-            Console.WriteLine("Trying to retrieve the DLL Test Methods...");
+            WriteToConsole(_messageType.Stage, _messages.Stage.DllTestMethods.Status);
             var testMethods = ListTestMethods(_testAssemblyPaths);
 
             if (testMethods.IsNullOrEmpty())
             {
-                Console.WriteLine("[ERROR] Could not retrieve the DLL Test Methods. Program has been terminated.\n");
+                WriteToConsole(_messageType.Error, _messages.Stage.DllTestMethods.Failure);
                 Environment.Exit(-1);
             }
-            Console.WriteLine("[SUCCESS] DLL Test Methods have been obtained.\n");
+            WriteToConsole(_messageType.Success, _messages.Stage.DllTestMethods.Success);
 
-            Console.WriteLine("Trying to retrieve the VSTS Test Cases...");
+            WriteToConsole(_messageType.Stage, _messages.Stage.TestCases.Status);
             var testCases = _testCaseAccess.GetVstsTestCases();
 
             if (testCases.IsNullOrEmpty())
             {
-                Console.WriteLine("[ERROR] Could not retrieve the VSTS Test Cases. Program has been terminated.\n");
+                WriteToConsole(_messageType.Error, _messages.Stage.TestCases.Failure);
                 Environment.Exit(-1);
             }
-            Console.WriteLine("[SUCCESS] VSTS Test Cases have been obtained.\n");
+            WriteToConsole(_messageType.Success, _messages.Stage.TestCases.Success);
 
             //Console.WriteLine("Trying to reset the status of each test case");
             //var resetStatusTestCasesSuccess = testCaseAccess.ResetStatusTestCases();
@@ -72,15 +74,16 @@ namespace AssociateTestsToTestCases
             //}
             //Console.WriteLine("[SUCCESS] VSTS Test Cases have been reset.\n");
 
-            Console.WriteLine("Trying to Associate Work Items with Test Methods...");
-            AssociateWorkItemsWithTestMethods(testMethods, testCases, _testCaseAccess, _validationOnly, _testType);
+            WriteToConsole(_messageType.Stage, _messages.Stage.Association.Status);
+            AssociateTestCasesWithTestMethods(testMethods, testCases, _testCaseAccess, _validationOnly, _testType);
+            WriteToConsole(_messageType.Success, _messages.Stage.Association.Success);
 
-            Console.WriteLine("[FINISH]  Work Items and Test Methods have been associated.");
-            Console.WriteLine($"[SUMMARY] Success: {_successfulAssociationCount} | Errors: {_errorAssociationCount} | Warnings: [Missing Id: {_warningMissingIdAssociationCount} - Automated Test N\\A anymore: {_warningAutomatedTestNotAvailableAnymoreAssociationCount} - Automated Test not found: {_warningNoCorrespondingAutomatedTestAssociationCount}]");
-            Console.WriteLine($"[SUMMARY] Total VSTS Test Cases: {testCases.Count} | Total Automated Test Cases: {_totalAssociationCount}");
+            WriteToConsole(_messageType.Stage, _messages.Stage.Summary.Status);
+            WriteToConsole(_messageType.Summary, string.Format(_messages.Stage.Summary.Detailed, Counter.Counter.Success, Counter.Counter.Error, Counter.Counter.WarningMissingId + Counter.Counter.WarningTestMethodNotAvailable + Counter.Counter.WarningNoCorrespondingTestMethod, Counter.Counter.WarningMissingId, Counter.Counter.WarningTestMethodNotAvailable, Counter.Counter.WarningNoCorrespondingTestMethod));
+            WriteToConsole(_messageType.Summary, string.Format(_messages.Stage.Summary.Overview, testCases.Count, Counter.Counter.Total));
         }
 
-        private static void AssociateWorkItemsWithTestMethods(MethodInfo[] testMethods, List<TestCase> testCases, TestCaseAccess vstsAccessor, bool validationOnly, string testType)
+        private static void AssociateTestCasesWithTestMethods(MethodInfo[] testMethods, List<TestCase> testCases, TestCaseAccess vstsAccessor, bool validationOnly, string testType)
         {
             foreach (var testCase in testCases)
             {
@@ -88,28 +91,28 @@ namespace AssociateTestsToTestCases
 
                 if (testCase.Id == null)
                 {
-                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' does not contain an Id, and therefore it will be skipped.");
-                    _warningMissingIdAssociationCount += 1;
+                    WriteToConsole(_messageType.Warning, string.Format(_messages.Association.Failure.TestcaseWithNoIdSkipped, testCase.Title));
+                    Counter.Counter.WarningMissingId += 1;
                     continue;
                 }
 
                 if (testCase.AutomationStatus == AutomationName && testMethod == null)
                 {
-                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has been associated in the past, but the corresponding automated test is not available anymore.");
-                    _warningAutomatedTestNotAvailableAnymoreAssociationCount += 1;
+                    WriteToConsole(_messageType.Warning, string.Format(_messages.Association.Failure.TestcaseCorrespondingTestMethodNotAvailable, testCase.Title, testCase.Id));
+                    Counter.Counter.WarningTestMethodNotAvailable += 1;
                     continue;
                 }
 
                 if (testMethod == null)
                 {
-                    Console.WriteLine($"[WARNING] Test case '{testCase.Title}' [Id: {testCase.Id}] has no corresponding automated test.");
-                    _warningNoCorrespondingAutomatedTestAssociationCount += 1;
+                    WriteToConsole(_messageType.Warning, string.Format(_messages.Association.Failure.TestcaseNoCorrespondingTestMethod, testCase.Title, testCase.Id));
+                    Counter.Counter.WarningNoCorrespondingTestMethod += 1;
                     continue;
                 }
 
                 if (testCase.AutomationStatus == AutomationName)
                 {
-                    _totalAssociationCount += 1;
+                    Counter.Counter.Total += 1;
                     continue;
                 }
 
@@ -117,18 +120,18 @@ namespace AssociateTestsToTestCases
 
                 if (!operationSuccess)
                 {
-                    Console.WriteLine($"[ERROR] Test case '{testCase.Title}' [Id: {testCase.Id}] could not be associated with the corresponding automated test.");
-                    _errorAssociationCount += 1;
+                    WriteToConsole(_messageType.Failure, string.Format(_messages.Association.Failure.TestcaseCouldNotBeAssociated, testCase.Title, testCase.Id));
+                    Counter.Counter.Error += 1;
                     return;
                 }
 
                 if (_verboseLogging)
                 {
-                    Console.WriteLine($"[SUCCESS] Test case '{testCase.Title}' [Id: {testCase.Id}] has been associated with the corresponding automated test.");
+                    WriteToConsole(_messageType.Success, string.Format(_messages.Association.Success, testCase.Title, testCase.Id));
                 }
 
-                _totalAssociationCount += 1;
-                _successfulAssociationCount += 1;
+                Counter.Counter.Total += 1;
+                Counter.Counter.Success += 1;
             }
         }
 
@@ -187,6 +190,13 @@ namespace AssociateTestsToTestCases
             return files.ToArray();
         }
 
+        private static void WriteToConsole(string messageType, string message)
+        {
+            var space = new string(' ', _messageType.LongestTypeCount - messageType.Count());
+            var outputMessage = $"[{messageType}]{space} {message}";
+            Console.WriteLine(outputMessage);
+        }
+
         private class Options
         {
             [Option('d', "directory", Required = true, HelpText = "The root directory to search in.")]
@@ -198,13 +208,19 @@ namespace AssociateTestsToTestCases
             [Option('p', "personalaccesstoken", Required = true, HelpText = "The personal access token used for accessing the Azure DevOps project.")]
             public string PersonalAccessToken { get; set; }
 
+            [Option('u', "collectionuri", Required = true, HelpText = "The Azure DevOps collection Uri used for accessing the project test cases.")]
+            public string CollectionUri { get; set; }
+
+            [Option('n', "projectname", Required = true, HelpText = "The project name containing the test plan.")]
+            public string ProjectName { get; set; }
+
+            [Option('e', "testplanname", Required = true, HelpText = "The name of the test plan containing the test cases.")]
+            public string TestPlanName { get; set; }
+
             [Option('t', "testtype", Required = false, Default = "", HelpText = "The automation test type.")]
             public string TestType { get; set; }
 
-            [Option('u', "collectionuri", Required = true, HelpText = "The Azure DevOps collection Uri used for accessing the project work items.")]
-            public string CollectionUri { get; set; }
-
-            [Option('v', "validationonly", Required = false, HelpText = "Indicates if you only want to validate the changes without saving the work item.")]
+            [Option('v', "validationonly", Required = false, HelpText = "Indicates if you only want to validate the changes without saving the test cases.")]
             public bool ValidationOnly { get; set; }
 
             [Option('l', "verboselogging", Required = false, HelpText = "When Verbose logging is turned on it also outputs the successful matchings next to the warnings.")]

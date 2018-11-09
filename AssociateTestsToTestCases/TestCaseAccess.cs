@@ -21,22 +21,25 @@ namespace AssociateTestsToTestCases
         private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
         private readonly TestManagementHttpClient _testManagementHttpClient;
 
-        private const string ProjectName = "GGR";
+        private readonly string _projectName;
         private const string FieldProperty = "fields";
         private const string AutomatedName = "Automated";
         private const string SystemTitle = "System.Title";
-        private const string SystemTestPlanName = "System Test Plan";
+        private readonly string _testPlanName;
         private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
         private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
         private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
         private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
         private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
         
-        public TestCaseAccess(string collectionUri, string personalAccessToken)
+        public TestCaseAccess(string collectionUri, string personalAccessToken, string projectName, string testName)
         {
             var connection = new VssConnection(new Uri(collectionUri), new VssBasicCredential(string.Empty, personalAccessToken));
             _workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
             _testManagementHttpClient = connection.GetClient<TestManagementHttpClient>();
+
+            _projectName = projectName;
+            _testPlanName = testName;
         }
 
         public List<TestCase> GetVstsTestCases()
@@ -52,12 +55,12 @@ namespace AssociateTestsToTestCases
 
         private int[] GetTestCasesId()
         {
-            var testPlan = _testManagementHttpClient.GetPlansAsync(ProjectName).Result
-                .Single(x => x.Name.Equals(SystemTestPlanName));
+            var testPlan = _testManagementHttpClient.GetPlansAsync(_projectName).Result
+                .Single(x => x.Name.Equals(_testPlanName));
 
-            var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(ProjectName, testPlan.Id).Result;
+            var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(_projectName, testPlan.Id).Result;
 
-            return _testManagementHttpClient.GetPointsAsync(ProjectName, testPlan.Id, testSuites[0].Id).Result
+            return _testManagementHttpClient.GetPointsAsync(_projectName, testPlan.Id, testSuites[0].Id).Result
                 .Select(x => int.Parse(x.TestCase.Id)).ToArray();
         }
 
