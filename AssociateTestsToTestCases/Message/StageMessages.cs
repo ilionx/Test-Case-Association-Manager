@@ -33,11 +33,13 @@
     {
         public readonly string Status = "Trying to Associate Test Cases with Test Methods...";
         public readonly string Success = "Test Cases and Test Methods have been associated ({0}).\n";
+        public readonly string Failure = "Could not associate every Test Method with its corresponding Test Case ({0}). Program has been terminated.\n";
     }
 
     public class SummaryMessage
     {
         public readonly string Status = "Summary:";
+        public readonly string TestCases = "The following Test Methods do not have a corresponding Test Case:";
         public readonly string Overview = "Total Azure DevOps Test Cases: {0} | Total Test Methods: {1} | Total Associations: {2}";
         public readonly string Detailed = "Success: {0} | Errors: {1} | Warnings: {2} [Missing Id: {3} - Test Method N\\A anymore: {4} - Test Method not found: {5}]";
     }

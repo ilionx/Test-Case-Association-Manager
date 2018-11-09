@@ -16,15 +16,20 @@ namespace AssociateTestsToTestCases.Access.Association
         private readonly Messages _messages;
         private readonly bool _verboseLogging;
 
+        private List<TestMethod> _testMethodsNotMapped;
+
         public Associator(Messages messages, bool verboseLogging)
         {
             _messages = messages;
             _verboseLogging = verboseLogging;
         }
 
-        public void Associate(MethodInfo[] testMethods, List<TestCase.TestCase> testCases, TestCaseAccess vstsAccessor, bool validationOnly, string testType)
+        public List<TestMethod> Associate(MethodInfo[] testMethods, List<TestCase.TestCase> testCases,
+            TestCaseAccess vstsAccessor, bool validationOnly, string testType)
         {
-            foreach (var testCase in testCases)
+            _testMethodsNotMapped = testMethods.Select(x => new TestMethod(x.Name, x.DeclaringType.FullName)).ToList();
+
+        foreach (var testCase in testCases)
             {
                 var testMethod = testMethods.SingleOrDefault(x => x.Name == testCase.Title);
 
@@ -51,6 +56,7 @@ namespace AssociateTestsToTestCases.Access.Association
 
                 if (testCase.AutomationStatus == AutomationName)
                 {
+                    _testMethodsNotMapped.Remove(_testMethodsNotMapped.SingleOrDefault(x => x.Name.Equals(testCase.Title)));
                     Counter.Total += 1;
                     continue;
                 }
@@ -61,7 +67,6 @@ namespace AssociateTestsToTestCases.Access.Association
                 {
                     Writer.WriteToConsole(_messages, _messages.Types.Failure, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.Association);
                     Counter.Error += 1;
-                    return;
                 }
 
                 if (_verboseLogging)
@@ -69,9 +74,13 @@ namespace AssociateTestsToTestCases.Access.Association
                     Writer.WriteToConsole(_messages, _messages.Types.Success, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.Association);
                 }
 
+                _testMethodsNotMapped.Remove(_testMethodsNotMapped.Single(x => x.Name == testCase.Title));
+
                 Counter.Total += 1;
                 Counter.Success += 1;
             }
+
+            return _testMethodsNotMapped;
         }
     }
 }

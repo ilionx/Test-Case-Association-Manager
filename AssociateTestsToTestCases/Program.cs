@@ -109,7 +109,18 @@ namespace AssociateTestsToTestCases
         private static void Associate()
         {
             Writer.WriteToConsole(_messages, _messages.Types.Stage, _messages.Stage.Association.Status);
-            new Associator(_messages, _verboseLogging).Associate(_testMethods, _testCases, _testCaseAccess, _validationOnly, _testType);
+            var testMethodsNotMapped = new Associator(_messages, _verboseLogging).Associate(_testMethods, _testCases, _testCaseAccess, _validationOnly, _testType);
+
+            if (testMethodsNotMapped.Count != 0)
+            {
+                Writer.WriteToConsole(_messages, _messages.Types.Error, string.Format(_messages.Stage.Association.Failure, testMethodsNotMapped.Count));
+
+                OutputSummary();
+
+                Writer.WriteToConsole(_messages, _messages.Types.Summary, _messages.Stage.Summary.TestCases);
+                testMethodsNotMapped.ForEach(testMethod => Writer.WriteToConsole(_messages, _messages.Types.Info, $"{testMethod.FullName}.{testMethod.Name}"));
+                Environment.Exit(-1);
+            }
             Writer.WriteToConsole(_messages, _messages.Types.Success, string.Format(_messages.Stage.Association.Success, Counter.Success));
         }
 
