@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using Minimatch;
 using System.Linq;
 using System.Reflection;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Minimatch;
 
 namespace AssociateTestsToTestCases.Access.File
 {

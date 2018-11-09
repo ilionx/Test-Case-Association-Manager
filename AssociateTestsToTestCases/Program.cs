@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
+using CommandLine;
 using System.Linq;
 using System.Reflection;
-using AssociateTestsToTestCases.Access.Association;
-using AssociateTestsToTestCases.Access.Output;
-using AssociateTestsToTestCases.Access.TestCase;
+using System.Collections.Generic;
+using Microsoft.TeamFoundation.Common;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Utility;
-using CommandLine;
-using Microsoft.TeamFoundation.Common;
-using FileAccess = AssociateTestsToTestCases.Access.File.FileAccess;
+using AssociateTestsToTestCases.Access.File;
+using AssociateTestsToTestCases.Access.Output;
+using AssociateTestsToTestCases.Access.TestCase;
+using AssociateTestsToTestCases.Access.Association;
 
 namespace AssociateTestsToTestCases
 {
