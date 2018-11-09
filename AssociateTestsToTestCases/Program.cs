@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
+using AssociateTestsToTestCases.Access.Association;
+using AssociateTestsToTestCases.Access.Output;
+using AssociateTestsToTestCases.Access.TestCase;
 using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Utility;
 using CommandLine;
 using Microsoft.TeamFoundation.Common;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Minimatch;
+using FileAccess = AssociateTestsToTestCases.Access.File.FileAccess;
 
 namespace AssociateTestsToTestCases
 {
     internal static class Program
     {
-        private const string AutomationName = "Automated";
-
         private static Messages _messages;
+        private static Associator _associator;
+        private static FileAccess _fileAccessor;
         private static TestCaseAccess _testCaseAccess;
 
         private static bool _validationOnly;
@@ -23,179 +25,98 @@ namespace AssociateTestsToTestCases
         private static string[] _testAssemblyPaths;
         private static string _testType = string.Empty;
 
+        private static List<TestCase> _testCases;
+        private static MethodInfo[] _testMethods;
+
         private static void Main(string[] args)
         {
             _messages = new Messages();
+            _fileAccessor = new FileAccess();
 
-            WriteToConsole(_messages.Types.Stage, _messages.Stage.Arguments.Status);
-            Parser.Default.ParseArguments<Options>(args)
-                    .WithParsed(o =>
-                    {
-                        var minimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
-                        var directory = o.Directory.ToLowerInvariant();
-                        _testAssemblyPaths = ListTestAssemblyPaths(directory, minimatchPatterns);
+            ParseArguments(args);
 
-                        _testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken, o.ProjectName, o.TestPlanName);
-                        _validationOnly = o.ValidationOnly;
-                        _testType = o.TestType;
-                        _verboseLogging = o.VerboseLogging;
-                    });
-            WriteToConsole(_messages.Types.Success, _messages.Stage.Arguments.Success);
+            _associator = new Associator(_messages, _verboseLogging);
 
-            WriteToConsole(_messages.Types.Stage, _messages.Stage.DllTestMethods.Status);
-            var testMethods = ListTestMethods(_testAssemblyPaths);
+            GetTestmethods();
 
-            if (testMethods.IsNullOrEmpty())
+            GetVstsTestCases();
+
+            //ResetStatusTestCases(); TODO
+
+            Associate();
+
+            OutputSummary();
+        }
+
+        private static void ParseArguments(string[] args)
+        {
+            Writer.WriteToConsole(_messages, _messages.Types.Stage, _messages.Stage.Arguments.Status);
+            Parser.Default.ParseArguments<Program.Options>(args)
+                .WithParsed(o =>
+                {
+                    var minimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
+                    var directory = o.Directory.ToLowerInvariant();
+                    _testAssemblyPaths = _fileAccessor.ListTestAssemblyPaths(directory, minimatchPatterns);
+
+                    _testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken, o.ProjectName, o.TestPlanName);
+                    _validationOnly = o.ValidationOnly;
+                    _testType = o.TestType;
+                    _verboseLogging = o.VerboseLogging;
+                });
+            Writer.WriteToConsole(_messages, _messages.Types.Success, _messages.Stage.Arguments.Success);
+        }
+
+        private static void GetTestmethods()
+        {
+            Writer.WriteToConsole(_messages, _messages.Types.Stage, _messages.Stage.DllTestMethods.Status);
+            _testMethods = _fileAccessor.ListTestMethods(_testAssemblyPaths);
+
+            if (_testMethods.IsNullOrEmpty())
             {
-                WriteToConsole(_messages.Types.Error, _messages.Stage.DllTestMethods.Failure);
+                Writer.WriteToConsole(_messages, _messages.Types.Error, _messages.Stage.DllTestMethods.Failure);
                 Environment.Exit(-1);
             }
-            WriteToConsole(_messages.Types.Success, _messages.Stage.DllTestMethods.Success);
+            Writer.WriteToConsole(_messages, _messages.Types.Success, _messages.Stage.DllTestMethods.Success);
+        }
 
-            WriteToConsole(_messages.Types.Stage, _messages.Stage.TestCases.Status);
-            var testCases = _testCaseAccess.GetVstsTestCases();
+        private static void GetVstsTestCases()
+        {
+            Writer.WriteToConsole(_messages, _messages.Types.Stage, _messages.Stage.TestCases.Status);
+            _testCases = _testCaseAccess.GetVstsTestCases();
 
-            if (testCases.IsNullOrEmpty())
+            if (_testCases.IsNullOrEmpty())
             {
-                WriteToConsole(_messages.Types.Error, _messages.Stage.TestCases.Failure);
+                Writer.WriteToConsole(_messages, _messages.Types.Error, _messages.Stage.TestCases.Failure);
                 Environment.Exit(-1);
             }
-            WriteToConsole(_messages.Types.Success, _messages.Stage.TestCases.Success);
-
-            //Console.WriteLine("Trying to reset the status of each test case");
-            //var resetStatusTestCasesSuccess = testCaseAccess.ResetStatusTestCases();
-
-            //if (!resetStatusTestCasesSuccess)
-            //{
-            //    Console.Write("[ERROR] Could not reset the status of each VSTS Test Case. Program has been terminated.\n");
-            //    Environment.Exit(-1);
-            //}
-            //Console.WriteLine("[SUCCESS] VSTS Test Cases have been reset.\n");
-
-            WriteToConsole(_messages.Types.Stage, _messages.Stage.Association.Status);
-            AssociateTestCasesWithTestMethods(testMethods, testCases, _testCaseAccess, _validationOnly, _testType);
-            WriteToConsole(_messages.Types.Success, _messages.Stage.Association.Success);
-
-            WriteToConsole(_messages.Types.Stage, _messages.Stage.Summary.Status);
-            WriteToConsole(_messages.Types.Summary, string.Format(_messages.Stage.Summary.Detailed, Counter.Counter.Success, Counter.Counter.Error, Counter.Counter.WarningMissingId + Counter.Counter.WarningTestMethodNotAvailable + Counter.Counter.WarningNoCorrespondingTestMethod, Counter.Counter.WarningMissingId, Counter.Counter.WarningTestMethodNotAvailable, Counter.Counter.WarningNoCorrespondingTestMethod));
-            WriteToConsole(_messages.Types.Summary, string.Format(_messages.Stage.Summary.Overview, testCases.Count, Counter.Counter.Total));
+            Writer.WriteToConsole(_messages, _messages.Types.Success, _messages.Stage.TestCases.Success);
         }
 
-        private static void AssociateTestCasesWithTestMethods(MethodInfo[] testMethods, List<TestCase> testCases, TestCaseAccess vstsAccessor, bool validationOnly, string testType)
+        //private static void ResetStatusTestCases()
+        //{
+        //    //Console.WriteLine("Trying to reset the status of each test case");
+        //    //var resetStatusTestCasesSuccess = testCaseAccess.ResetStatusTestCases();
+
+        //    //if (!resetStatusTestCasesSuccess)
+        //    //{
+        //    //    Console.Write("[ERROR] Could not reset the status of each VSTS Test Case. Program has been terminated.\n");
+        //    //    Environment.Exit(-1);
+        //    //}
+        //    //Console.WriteLine("[SUCCESS] VSTS Test Cases have been reset.\n");
+        //}
+
+        private static void Associate()
         {
-            foreach (var testCase in testCases)
-            {
-                var testMethod = testMethods.SingleOrDefault(x => x.Name == testCase.Title);
-
-                if (testCase.Id == null)
-                {
-                    WriteToConsole(_messages.Types.Warning, string.Format(_messages.Association.TestCaseSkipped, testCase.Title), _messages.Reasons.MissingTestCaseId);
-                    Counter.Counter.WarningMissingId += 1;
-                    continue;
-                }
-
-                if (testCase.AutomationStatus == AutomationName && testMethod == null)
-                {
-                    WriteToConsole(_messages.Types.Warning, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.AssociatedTestMethodNotAvailable);
-                    Counter.Counter.WarningTestMethodNotAvailable += 1;
-                    continue;
-                }
-
-                if (testMethod == null)
-                {
-                    WriteToConsole(_messages.Types.Warning, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.MissingTestMethod);
-                    Counter.Counter.WarningNoCorrespondingTestMethod += 1;
-                    continue;
-                }
-
-                if (testCase.AutomationStatus == AutomationName)
-                {
-                    Counter.Counter.Total += 1;
-                    continue;
-                }
-
-                var operationSuccess = vstsAccessor.AssociateTestCaseWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString(), validationOnly, testType);
-
-                if (!operationSuccess)
-                {
-                    WriteToConsole(_messages.Types.Failure, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.Association);
-                    Counter.Counter.Error += 1;
-                    return;
-                }
-
-                if (_verboseLogging)
-                {
-                    WriteToConsole(_messages.Types.Success, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.Association);
-                }
-
-                Counter.Counter.Total += 1;
-                Counter.Counter.Success += 1;
-            }
+            Writer.WriteToConsole(_messages, _messages.Types.Stage, _messages.Stage.Association.Status);
+            _associator.Associate(_testMethods, _testCases, _testCaseAccess, _validationOnly, _testType);
+            Writer.WriteToConsole(_messages, _messages.Types.Success, _messages.Stage.Association.Success);
         }
 
-        private static MethodInfo[] ListTestMethods(string[] testAssemblyPaths)
+        private static void OutputSummary()
         {
-            var testMethods = new List<MethodInfo>();
-
-            foreach (var testAssemblyPath in testAssemblyPaths)
-            {
-                var testAssembly = Assembly.LoadFrom(testAssemblyPath);
-                testMethods.AddRange(testAssembly.GetTypes().Where(type => type.GetCustomAttribute<TestClassAttribute>() != null).SelectMany(type => type.GetMethods().Where(method => method.GetCustomAttribute<TestMethodAttribute>() != null)));
-            }
-
-            return testMethods.ToArray();
-        }
-
-        private static string[] ListTestAssemblyPaths(string directory, string[] minimatchPatterns)
-        {
-            var files = ListAllAccessibleFilesInDirectory(directory).Select(s => s.ToLowerInvariant()).ToArray();
-            var matchingFilesToBeIncluded = new List<string>();
-
-            foreach (var minimatchPattern in minimatchPatterns.Where(minimatchPattern => !minimatchPattern.StartsWith("!")))
-            {
-                var mm = new Minimatcher(minimatchPattern, new Minimatch.Options() { AllowWindowsPaths = true });
-                matchingFilesToBeIncluded.AddRange(mm.Filter(files));
-            }
-
-            var matchingFilesToBeExcluded = new List<string>();
-            foreach (var minimatchPattern in minimatchPatterns.Where(minimatchPattern => minimatchPattern.StartsWith("!")))
-            {
-                var actualMinimatchPattern = minimatchPattern.TrimStart('!');
-                var mm = new Minimatcher(actualMinimatchPattern, new Minimatch.Options() { AllowWindowsPaths = true });
-                matchingFilesToBeExcluded.AddRange(mm.Filter(files));
-            }
-
-            matchingFilesToBeIncluded.RemoveAll(x => matchingFilesToBeExcluded.Contains(x));
-
-            return matchingFilesToBeIncluded.ToArray();
-        }
-
-        private static string[] ListAllAccessibleFilesInDirectory(string directory)
-        {
-            var files = new List<string>(Directory.GetFiles(directory, "*.*", SearchOption.TopDirectoryOnly));
-            foreach (var subDir in Directory.GetDirectories(directory))
-            {
-                try
-                {
-                    files.AddRange(ListAllAccessibleFilesInDirectory(subDir));
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    //Ignored by design, see https://stackoverflow.com/a/19137152. Comment is here to suppress analyzer warnings.
-                }
-            }
-
-            return files.ToArray();
-        }
-
-        private static void WriteToConsole(string messageType, string message, string reason = "")
-        {
-            var reasonOutputFormat = reason.Length.Equals((0)) ? string.Empty : $"[{reason}]";
-
-            var spaceMessageType = new string(' ', _messages.Types.LongestTypeCount - messageType.Count());
-            var spaceReason = reason.Length.Equals(0) ? string.Empty : new string(' ', _messages.Reasons.LongestReasonCount - reason.Count()+1);
-            var outputMessage = $"[{messageType}]{spaceMessageType} {reasonOutputFormat}{spaceReason}{message}";
-            Console.WriteLine(outputMessage);
+            Writer.WriteToConsole(_messages, _messages.Types.Stage, _messages.Stage.Summary.Status);
+            Writer.WriteToConsole(_messages, _messages.Types.Summary, string.Format(_messages.Stage.Summary.Detailed, Counter.Success, Counter.Error, Counter.WarningMissingId + Counter.WarningTestMethodNotAvailable + Counter.WarningNoCorrespondingTestMethod, Counter.WarningMissingId, Counter.WarningTestMethodNotAvailable, Counter.WarningNoCorrespondingTestMethod));
+            Writer.WriteToConsole(_messages, _messages.Types.Summary, string.Format(_messages.Stage.Summary.Overview, _testCases.Count, Counter.Total));
         }
 
         private class Options

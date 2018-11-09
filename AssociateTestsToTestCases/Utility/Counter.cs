@@ -1,4 +1,4 @@
-﻿namespace AssociateTestsToTestCases.Counter
+﻿namespace AssociateTestsToTestCases.Utility
 {
     public static class Counter
     {

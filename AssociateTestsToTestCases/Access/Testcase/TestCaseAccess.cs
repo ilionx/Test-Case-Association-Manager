@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.TeamFoundation.Client;
-using Microsoft.TeamFoundation.Common;
-using Microsoft.TeamFoundation.Framework.Client;
-using Microsoft.TeamFoundation.TestManagement.Client;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.Common;
-using Microsoft.VisualStudio.Services.Location;
 using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 
-namespace AssociateTestsToTestCases
+namespace AssociateTestsToTestCases.Access.TestCase
 {
     public class TestCaseAccess
     {
@@ -133,32 +128,32 @@ namespace AssociateTestsToTestCases
             return testCases;
         }
 
-        public bool ResetStatusTestCases()
-        {
-            //var testPlans = _testManagementHttpClient.GetPlansAsync(ProjectName).Result;
-            //var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(ProjectName, testPlans[0].Id).Result;
+        //public bool ResetStatusTestCases()
+        //{
+        //    //var testPlans = _testManagementHttpClient.GetPlansAsync(ProjectName).Result;
+        //    //var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(ProjectName, testPlans[0].Id).Result;
 
-            //// option 1
-            //var pointUpdateModel = new PointUpdateModel(resetToActive: true); // if this doesn't work, then set Outcome to In progress?
+        //    //// option 1
+        //    //var pointUpdateModel = new PointUpdateModel(resetToActive: true); // if this doesn't work, then set Outcome to In progress?
 
-            //// option 2
+        //    //// option 2
 
-            ////var testPoints = _testManagementHttpClient.GetPointsAsync(ProjectName, testPlans[0].Id, testSuites[0].Id).Result;
+        //    ////var testPoints = _testManagementHttpClient.GetPointsAsync(ProjectName, testPlans[0].Id, testSuites[0].Id).Result;
 
-            ////foreach (var testPoint in testPoints)
-            ////{
-            ////    testPoint.State = TestPointState.InProgress.ToString(); // InProgress = for testing purpose.
-            ////}
+        //    ////foreach (var testPoint in testPoints)
+        //    ////{
+        //    ////    testPoint.State = TestPointState.InProgress.ToString(); // InProgress = for testing purpose.
+        //    ////}
 
 
-            //// sets status to active for 1 testpoint
-            //var updatedTestPoints = _testManagementHttpClient.UpdateTestPointsAsync(pointUpdateModel, ProjectName, testPlans[0].Id, testSuites[0].Id, "1").Result; // todo: for testing-purpose: set's outcome test point 1 linked to test case 53
+        //    //// sets status to active for 1 testpoint
+        //    //var updatedTestPoints = _testManagementHttpClient.UpdateTestPointsAsync(pointUpdateModel, ProjectName, testPlans[0].Id, testSuites[0].Id, "1").Result; // ToDo: for testing-purpose: set's outcome test point 1 linked to test case 53
 
-            //if (updatedTestPoints)
-            //{
+        //    //if (updatedTestPoints)
+        //    //{
                 
-            //}
-            return true;
-        }
+        //    //}
+        //    return true;
+        //}
     }
 }
