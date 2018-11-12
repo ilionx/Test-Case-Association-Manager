@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Message.Type;
 
 namespace AssociateTestsToTestCases.Access.Output
 {
@@ -20,7 +21,29 @@ namespace AssociateTestsToTestCases.Access.Output
             var reasonOutputFormat = reason.Length.Equals(0) ? string.Empty : string.Format(Format, reason);
             var spaceReason = reason.Length.Equals(0) ? string.Empty : new string(' ', messages.Reasons.LongestReasonCount - reason.Count() + 1);
 
+            Console.ForegroundColor = GetConsoleColor(messages.Types, messageType);
             Console.WriteLine(OutputMessage, indention, messageTypeFormat, spaceMessageType, reasonOutputFormat, spaceReason, message);
+        }
+
+        private static ConsoleColor GetConsoleColor(TypeMessage types, string messageType)
+        {
+            var consoleColor = ConsoleColor.DarkCyan;
+
+            if (messageType.Equals(types.Success))
+            {
+                consoleColor = ConsoleColor.DarkGreen;
+            } else if (messageType.Equals(types.Warning))
+            {
+                consoleColor = ConsoleColor.DarkYellow;
+            } else if (messageType.Equals(types.Error) || messageType.Equals(types.Failure))
+            {
+                consoleColor = ConsoleColor.DarkRed;
+            }  else if (messageType.Equals(types.Stage))
+            {
+                consoleColor = ConsoleColor.Gray;
+            }
+
+            return consoleColor;
         }
     }
 }
