@@ -17,10 +17,12 @@ namespace AssociateTestsToTestCases.Access.TestCase
         private readonly TestManagementHttpClient _testManagementHttpClient;
 
         private readonly string _projectName;
+        private readonly string _testPlanName;
+
+        private const int ChunkSize = 200;
         private const string FieldProperty = "fields";
         private const string AutomatedName = "Automated";
         private const string SystemTitle = "System.Title";
-        private readonly string _testPlanName;
         private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
         private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
         private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
@@ -62,8 +64,7 @@ namespace AssociateTestsToTestCases.Access.TestCase
         private static int[][] ChunkTestCases(int[] testCasesId)
         {
             var i = 0;
-            var chunkSize = 200;
-            var chunkedTestCases = testCasesId.GroupBy(s => i++ / chunkSize).Select(g => g.ToArray()).ToArray();
+            var chunkedTestCases = testCasesId.GroupBy(s => i++ / ChunkSize).Select(g => g.ToArray()).ToArray();
             return chunkedTestCases;
         }
 

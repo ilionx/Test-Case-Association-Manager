@@ -4,7 +4,7 @@ using AssociateTestsToTestCases.Message;
 
 namespace AssociateTestsToTestCases.Access.Output
 {
-    public static class Writer
+    public static class CommandLineAccess
     {
         public static void WriteToConsole(Messages messages, string messageType, string message, string reason = "")
         {
