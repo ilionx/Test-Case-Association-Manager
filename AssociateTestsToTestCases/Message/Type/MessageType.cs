@@ -1,12 +1,12 @@
 ﻿using System.Linq;
 
-namespace AssociateTestsToTestCases.Message
+namespace AssociateTestsToTestCases.Message.Type
 {
     public class MessageType
     {
+        public readonly string Info = "INFO";
         public readonly string Stage = "STAGE";
         public readonly string Error = "ERROR";
-        public readonly string Info = "INFO";
         public readonly string Failure = "FAILURE";
         public readonly string Success = "SUCCESS";
         public readonly string Summary = "SUMMARY";

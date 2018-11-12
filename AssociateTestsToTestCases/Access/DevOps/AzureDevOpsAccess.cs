@@ -7,16 +7,16 @@ using AssociateTestsToTestCases.Utility;
 using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.TestCase;
 
-namespace AssociateTestsToTestCases.Access.AzureDevOps
+namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class AzureDevOpsAccess
     {
-        private const string AutomationName = "Automated";
-
         private readonly Messages _messages;
         private readonly bool _verboseLogging;
 
         private List<TestMethod> _testMethodsNotMapped;
+
+        private const string AutomationName = "Automated";
 
         public AzureDevOpsAccess(Messages messages, bool verboseLogging)
         {
@@ -25,7 +25,7 @@ namespace AssociateTestsToTestCases.Access.AzureDevOps
         }
 
         public List<TestMethod> Associate(MethodInfo[] testMethods, List<TestCase.TestCase> testCases,
-            TestCaseAccess vstsAccessor, bool validationOnly, string testType)
+            TestCaseAccess azureDevopsAccessor, bool validationOnly, string testType)
         {
             _testMethodsNotMapped = testMethods.Select(x => new TestMethod(x.Name, x.DeclaringType.FullName)).ToList();
 
@@ -35,21 +35,21 @@ namespace AssociateTestsToTestCases.Access.AzureDevOps
 
                 if (testCase.Id == null)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, _messages.Types.Warning, string.Format(_messages.Association.TestCaseSkipped, testCase.Title), _messages.Reasons.MissingTestCaseId);
+                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Association.TestCaseSkipped, testCase.Title), _messages.Types.Warning, _messages.Reasons.MissingTestCaseId);
                     Counter.WarningMissingId += 1;
                     continue;
                 }
 
                 if (testCase.AutomationStatus == AutomationName && testMethod == null)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, _messages.Types.Warning, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.AssociatedTestMethodNotAvailable);
+                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable);
                     Counter.WarningTestMethodNotAvailable += 1;
                     continue;
                 }
 
                 if (testMethod == null)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, _messages.Types.Warning, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.MissingTestMethod);
+                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Warning, _messages.Reasons.MissingTestMethod);
                     Counter.WarningNoCorrespondingTestMethod += 1;
                     continue;
                 }
@@ -61,17 +61,17 @@ namespace AssociateTestsToTestCases.Access.AzureDevOps
                     continue;
                 }
 
-                var operationSuccess = vstsAccessor.AssociateTestCaseWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString(), validationOnly, testType);
+                var operationSuccess = azureDevopsAccessor.AssociateTestCaseWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString(), validationOnly, testType);
 
                 if (!operationSuccess)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, _messages.Types.Failure, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.Association);
+                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Failure, _messages.Reasons.Association);
                     Counter.Error += 1;
                 }
 
                 if (_verboseLogging)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, _messages.Types.Success, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Reasons.Association);
+                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Association.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Success, _messages.Reasons.Association);
                 }
 
                 _testMethodsNotMapped.Remove(_testMethodsNotMapped.Single(x => x.Name == testCase.Title));
@@ -79,6 +79,8 @@ namespace AssociateTestsToTestCases.Access.AzureDevOps
                 Counter.Total += 1;
                 Counter.Success += 1;
             }
+
+            Counter.Error += _testMethodsNotMapped.Count;
 
             return _testMethodsNotMapped;
         }

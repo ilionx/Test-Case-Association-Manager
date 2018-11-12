@@ -1,4 +1,4 @@
-﻿namespace AssociateTestsToTestCases.Access.AzureDevOps
+﻿namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class TestMethod
     {

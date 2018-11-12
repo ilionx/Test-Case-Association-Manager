@@ -39,7 +39,7 @@ namespace AssociateTestsToTestCases.Access.TestCase
             _testPlanName = testName;
         }
 
-        public List<TestCase> GetVstsTestCases()
+        public List<TestCase> GetTestCases()
         {
             var testCasesId = GetTestCasesId();
 
