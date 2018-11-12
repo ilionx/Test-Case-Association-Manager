@@ -2,7 +2,7 @@
 
 namespace AssociateTestsToTestCases.Message.Reason
 {
-    public class MessageReason
+    public class ReasonMessage
     {
         public readonly string Association = "Association";
         public readonly string MissingTestMethod = "Missing Test Method";
@@ -11,7 +11,7 @@ namespace AssociateTestsToTestCases.Message.Reason
 
         public int LongestReasonCount { get; }
 
-        public MessageReason()
+        public ReasonMessage()
         {
             var fields = GetType().GetFields().Select(s => s.GetValue(this).ToString()).ToArray();
             LongestReasonCount = fields.OrderByDescending(s => s.Length).First().Count();

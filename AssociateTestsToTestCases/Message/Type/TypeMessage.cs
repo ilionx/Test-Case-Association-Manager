@@ -2,7 +2,7 @@
 
 namespace AssociateTestsToTestCases.Message.Type
 {
-    public class MessageType
+    public class TypeMessage
     {
         public readonly string Info = "INFO";
         public readonly string Stage = "STAGE";
@@ -14,7 +14,7 @@ namespace AssociateTestsToTestCases.Message.Type
 
         public int LongestTypeCount { get; }
 
-        public MessageType()
+        public TypeMessage()
         {
             var fields = GetType().GetFields().Select(s => s.GetValue(this).ToString()).ToArray();
             LongestTypeCount = fields.OrderByDescending(s => s.Length).First().Count();

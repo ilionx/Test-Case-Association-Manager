@@ -52,7 +52,7 @@ namespace AssociateTestsToTestCases
 
         private static void ParseArguments(string[] args)
         {
-            CommandLineAccess.WriteToConsole(_messages, _messages.Stage.Arguments.Status, _messages.Types.Stage);
+            CommandLineAccess.WriteToConsole(_messages, _messages.Stages.Argument.Status, _messages.Types.Stage);
             Parser.Default.ParseArguments<Program.Options>(args)
                 .WithParsed(o =>
                 {
@@ -65,32 +65,32 @@ namespace AssociateTestsToTestCases
                     _testType = o.TestType;
                     _verboseLogging = o.VerboseLogging;
                 });
-            CommandLineAccess.WriteToConsole(_messages, _messages.Stage.Arguments.Success, _messages.Types.Success);
+            CommandLineAccess.WriteToConsole(_messages, _messages.Stages.Argument.Success, _messages.Types.Success);
         }
 
         private static void GetTestMethods()
         {
-            CommandLineAccess.WriteToConsole(_messages, _messages.Stage.DllTestMethods.Status, _messages.Types.Stage);
+            CommandLineAccess.WriteToConsole(_messages, _messages.Stages.TestMethod.Status, _messages.Types.Stage);
             _testMethods = _fileAccessor.ListTestMethods(_testAssemblyPaths);
             if (_testMethods.IsNullOrEmpty())
             {
-                CommandLineAccess.WriteToConsole(_messages, _messages.Stage.DllTestMethods.Failure, _messages.Types.Error);
+                CommandLineAccess.WriteToConsole(_messages, _messages.Stages.TestMethod.Failure, _messages.Types.Error);
                 Environment.Exit(-1);
             }
-            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stage.DllTestMethods.Success, _testMethods.Length), _messages.Types.Success);
+            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stages.TestMethod.Success, _testMethods.Length), _messages.Types.Success);
         }
 
         private static void GetTestCases()
         {
-            CommandLineAccess.WriteToConsole(_messages, _messages.Stage.TestCases.Status, _messages.Types.Stage);
+            CommandLineAccess.WriteToConsole(_messages, _messages.Stages.TestCase.Status, _messages.Types.Stage);
             _testCases = _testCaseAccess.GetTestCases();
 
             if (_testCases.IsNullOrEmpty())
             {
-                CommandLineAccess.WriteToConsole(_messages, _messages.Stage.TestCases.Failure, _messages.Types.Error);
+                CommandLineAccess.WriteToConsole(_messages, _messages.Stages.TestCase.Failure, _messages.Types.Error);
                 Environment.Exit(-1);
             }
-            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stage.TestCases.Success, _testCases.Count), _messages.Types.Success);
+            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stages.TestCase.Success, _testCases.Count), _messages.Types.Success);
         }
 
         //private static void ResetStatusTestCases()
@@ -108,12 +108,12 @@ namespace AssociateTestsToTestCases
 
         private static void Associate()
         {
-            CommandLineAccess.WriteToConsole(_messages, _messages.Stage.Association.Status, _messages.Types.Stage);
+            CommandLineAccess.WriteToConsole(_messages, _messages.Stages.Association.Status, _messages.Types.Stage);
             var testMethodsNotMapped = new AzureDevOpsAccess(_messages, _verboseLogging).Associate(_testMethods, _testCases, _testCaseAccess, _validationOnly, _testType);
 
             if (testMethodsNotMapped.Count != 0)
             {
-                CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stage.Association.Failure, testMethodsNotMapped.Count), _messages.Types.Error);
+                CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stages.Association.Failure, testMethodsNotMapped.Count), _messages.Types.Error);
                 testMethodsNotMapped.ForEach(testMethod => CommandLineAccess.WriteToConsole(_messages, $"{testMethod.FullName}.{testMethod.Name}", _messages.Types.Info));
                 CommandLineAccess.WriteToConsole(_messages, string.Empty);
 
@@ -121,14 +121,14 @@ namespace AssociateTestsToTestCases
 
                 Environment.Exit(-1);
             }
-            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stage.Association.Success, Counter.Success), _messages.Types.Success);
+            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stages.Association.Success, Counter.Success), _messages.Types.Success);
         }
 
         private static void OutputSummary()
         {
-            CommandLineAccess.WriteToConsole(_messages, _messages.Stage.Summary.Status, _messages.Types.Stage);
-            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stage.Summary.Detailed, Counter.Success, Counter.Error, Counter.WarningMissingId + Counter.WarningTestMethodNotAvailable + Counter.WarningNoCorrespondingTestMethod, Counter.WarningMissingId, Counter.WarningTestMethodNotAvailable, Counter.WarningNoCorrespondingTestMethod), _messages.Types.Summary);
-            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stage.Summary.Overview, _testCases.Count, _testMethods.Length, Counter.Total), _messages.Types.Summary);
+            CommandLineAccess.WriteToConsole(_messages, _messages.Stages.Summary.Status, _messages.Types.Stage);
+            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stages.Summary.Detailed, Counter.Success, Counter.Error, Counter.WarningMissingId + Counter.WarningTestMethodNotAvailable + Counter.WarningNoCorrespondingTestMethod, Counter.WarningMissingId, Counter.WarningTestMethodNotAvailable, Counter.WarningNoCorrespondingTestMethod), _messages.Types.Summary);
+            CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Stages.Summary.Overview, _testCases.Count, _testMethods.Length, Counter.Total), _messages.Types.Summary);
         }
 
         private class Options
