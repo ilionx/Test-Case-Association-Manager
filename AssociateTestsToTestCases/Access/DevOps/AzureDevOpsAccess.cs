@@ -2,26 +2,28 @@
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Utility;
-using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.TestCase;
 
 namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class AzureDevOpsAccess
     {
-        private readonly Messages _messages;
-        private readonly bool _verboseLogging;
-
         private const string AutomationName = "Automated";
 
         private List<TestMethod> _testMethodsNotMapped;
 
-        public AzureDevOpsAccess(Messages messages, bool verboseLogging)
+        private readonly Messages _messages;
+        private readonly bool _verboseLogging;
+        private readonly WriteToConsoleEventLogger _writeToConsoleEventLogger;
+
+        public AzureDevOpsAccess(WriteToConsoleEventLogger writeToConsoleEventLogger, Messages messages, bool verboseLogging)
         {
             _messages = messages;
             _verboseLogging = verboseLogging;
+            _writeToConsoleEventLogger = writeToConsoleEventLogger;
         }
 
         public List<TestMethod> Associate(MethodInfo[] testMethods, List<TestCase.TestCase> testCases,
@@ -35,21 +37,21 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
                 if (testCase.Id == null)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Associations.TestCaseSkipped, testCase.Title), _messages.Types.Warning, _messages.Reasons.MissingTestCaseId);
+                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseSkipped, testCase.Title), _messages.Types.Warning, _messages.Reasons.MissingTestCaseId);
                     Counter.WarningMissingId += 1;
                     continue;
                 }
 
                 if (testCase.AutomationStatus == AutomationName && testMethod == null)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable);
+                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable);
                     Counter.WarningTestMethodNotAvailable += 1;
                     continue;
                 }
 
                 if (testMethod == null)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Warning, _messages.Reasons.MissingTestMethod);
+                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Warning, _messages.Reasons.MissingTestMethod);
                     Counter.WarningNoCorrespondingTestMethod += 1;
                     continue;
                 }
@@ -65,13 +67,13 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
                 if (!operationSuccess)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Failure, _messages.Reasons.Association);
+                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Failure, _messages.Reasons.Association);
                     Counter.Error += 1;
                 }
 
                 if (_verboseLogging)
                 {
-                    CommandLineAccess.WriteToConsole(_messages, string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Success, _messages.Reasons.Association);
+                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Success, _messages.Reasons.Association);
                 }
 
                 _testMethodsNotMapped.Remove(_testMethodsNotMapped.Single(x => x.Name == testCase.Title));

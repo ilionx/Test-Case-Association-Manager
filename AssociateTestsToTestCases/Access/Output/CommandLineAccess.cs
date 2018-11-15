@@ -1,28 +1,31 @@
 ﻿using System;
 using System.Linq;
+using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Message.Type;
 
 namespace AssociateTestsToTestCases.Access.Output
 {
-    public static class CommandLineAccess
+    public class CommandLineAccess
     {
-        private const string Indention = "  * ";
-        private const string Format = "[{0}]";
-        private const string OutputMessage = "{0}{1}{2} {3}{4}{5}";
+        private readonly Messages _messages;
 
-        public static void WriteToConsole(Messages messages, string message, string messageType = "", string reason = "")
+        public CommandLineAccess(Messages messages)
         {
-            var indention = message.Equals(string.Empty) | (reason.Length.Equals(0) & new[] { messages.Types.Stage, messages.Types.Success, messages.Types.Error }.Contains(messageType)) ? string.Empty : Indention;
+            _messages = messages;
+        }
 
-            var messageTypeFormat = messageType.Length.Equals(0) ? string.Empty : string.Format(Format, messageType);
-            var spaceMessageType = new string(' ', messages.Types.LongestTypeCount - messageType.Count());
+        public void WriteToConsole(string message, string messageType = "", string reason = "")
+        {
+            var indention = message.Equals(string.Empty) | (reason.Length.Equals(0) & new[] { _messages.Types.Stage, _messages.Types.Success, _messages.Types.Error }.Contains(messageType)) ? string.Empty : _messages.Indention;
+            var messageTypeFormat = messageType.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, messageType);
+            var spaceMessageType = new string(' ', _messages.Types.LongestTypeCount - messageType.Count());
 
-            var reasonOutputFormat = reason.Length.Equals(0) ? string.Empty : string.Format(Format, reason);
-            var spaceReason = reason.Length.Equals(0) ? string.Empty : new string(' ', messages.Reasons.LongestReasonCount - reason.Count() + 1);
+            var reasonOutputFormat = reason.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, reason);
+            var spaceReason = reason.Length.Equals(0) ? string.Empty : new string(' ', _messages.Reasons.LongestReasonCount - reason.Count() + 1);
 
-            Console.ForegroundColor = GetConsoleColor(messages.Types, messageType);
-            Console.WriteLine(OutputMessage, indention, messageTypeFormat, spaceMessageType, reasonOutputFormat, spaceReason, message);
+            Console.ForegroundColor = GetConsoleColor(_messages.Types, messageType);
+            Console.WriteLine(_messages.Output, indention, messageTypeFormat, spaceMessageType, reasonOutputFormat, spaceReason, message);
         }
 
         private static ConsoleColor GetConsoleColor(TypeMessage types, string messageType)
@@ -38,12 +41,17 @@ namespace AssociateTestsToTestCases.Access.Output
             } else if (messageType.Equals(types.Error) || messageType.Equals(types.Failure))
             {
                 consoleColor = ConsoleColor.DarkRed;
-            }  else if (messageType.Equals(types.Stage))
+            }  else if (messageType.Equals(types.Stage) || messageType.Equals(string.Empty))
             {
                 consoleColor = ConsoleColor.Gray;
             }
 
             return consoleColor;
+        }
+
+        public void OnWriteToConsole(object sender, WriteToConsoleEventArgs eventArgs)
+        {
+            WriteToConsole(eventArgs.Message, eventArgs.MessageType, eventArgs.Reason);
         }
     }
 }

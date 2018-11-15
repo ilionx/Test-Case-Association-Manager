@@ -2,6 +2,8 @@
 {
     public class StageMessages
     {
+        public readonly string Format = "[{0}]";
+
         public readonly SummaryMessage Summary = new SummaryMessage();
         public readonly ArgumentMessage Argument = new ArgumentMessage();
         public readonly TestCaseMessage TestCase = new TestCaseMessage();
