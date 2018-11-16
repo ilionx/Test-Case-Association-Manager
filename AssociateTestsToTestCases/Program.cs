@@ -51,7 +51,7 @@ namespace AssociateTestsToTestCases
             _messages = new Messages();
             _fileAccessor = new FileAccess();
             _writeToConsoleEventLogger = new WriteToConsoleEventLogger();
-            _commandLineAccess = new CommandLineAccess(new Messages());
+            _commandLineAccess = new CommandLineAccess(new Messages(), new AzureDevOpsColors());
 
             SubscribeMethods();
 

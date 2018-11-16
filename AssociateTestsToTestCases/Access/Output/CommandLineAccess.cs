@@ -8,15 +8,24 @@ namespace AssociateTestsToTestCases.Access.Output
 {
     public class CommandLineAccess
     {
-        private readonly Messages _messages;
+        private const string ErrorColorOutput = "##vso[task.logissue type=error;]";
+        private const string WarningColorOutput = "##vso[task.logissue type=warning;]";
 
-        public CommandLineAccess(Messages messages)
+        private readonly bool _isLocal;
+        private readonly Messages _messages;
+        private readonly AzureDevOpsColors _azureDevOpsColors;
+
+        public CommandLineAccess(Messages messages, AzureDevOpsColors azureDevOpsColors)
         {
             _messages = messages;
+            _azureDevOpsColors = azureDevOpsColors;
+            _isLocal = Environment.GetEnvironmentVariable("SYSTEM_TeamProject") == null;
         }
 
         public void WriteToConsole(string message, string messageType = "", string reason = "")
         {
+            Console.ForegroundColor = GetConsoleColor(_messages.Types, messageType);
+
             var indention = message.Equals(string.Empty) | (reason.Length.Equals(0) & new[] { _messages.Types.Stage, _messages.Types.Success, _messages.Types.Error }.Contains(messageType)) ? string.Empty : _messages.Indention;
             var messageTypeFormat = messageType.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, messageType);
             var spaceMessageType = new string(' ', _messages.Types.LongestTypeCount - messageType.Count());
@@ -24,11 +33,16 @@ namespace AssociateTestsToTestCases.Access.Output
             var reasonOutputFormat = reason.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, reason);
             var spaceReason = reason.Length.Equals(0) ? string.Empty : new string(' ', _messages.Reasons.LongestReasonCount - reason.Count() + 1);
 
-            Console.ForegroundColor = GetConsoleColor(_messages.Types, messageType);
-            Console.WriteLine(_messages.Output, indention, messageTypeFormat, spaceMessageType, reasonOutputFormat, spaceReason, message);
+            var messageOutput = string.Format(_messages.Output, indention, messageTypeFormat, spaceMessageType, reasonOutputFormat, spaceReason, message);
+            if(!_isLocal)
+            {
+                messageOutput = messageOutput.Insert(0, GetAzureDevOpsConsoleColor(_messages.Types, messageType));
+            }
+
+            Console.WriteLine(messageOutput);
         }
 
-        private static ConsoleColor GetConsoleColor(TypeMessage types, string messageType)
+        private ConsoleColor GetConsoleColor(TypeMessage types, string messageType)
         {
             var consoleColor = ConsoleColor.DarkCyan;
 
@@ -47,6 +61,41 @@ namespace AssociateTestsToTestCases.Access.Output
             }
 
             return consoleColor;
+        }
+
+        private string GetAzureDevOpsConsoleColor(TypeMessage types, string messageType)
+        {
+            var spaceMessageType = string.Empty;
+            var colorOutput = _azureDevOpsColors.DefaultColor;
+            var azureDevOpsColors = _azureDevOpsColors.LongestTypeCount + 1;
+
+            if (messageType.Equals(types.Success))
+            {
+                colorOutput = _azureDevOpsColors.SuccessColor;
+            } else if (messageType.Equals(types.Warning))
+            {
+                colorOutput = WarningColorOutput;
+                spaceMessageType = new string(' ', azureDevOpsColors - _azureDevOpsColors.WarningColor.Length);
+            } else if (messageType.Equals(types.Error))
+            {
+                colorOutput = ErrorColorOutput;
+                spaceMessageType = new string(' ', azureDevOpsColors - _azureDevOpsColors.FailureColor.Length);
+            } else if (messageType.Equals(types.Failure))
+            {
+                colorOutput = _azureDevOpsColors.FailureColor;
+            } else if (messageType.Equals(types.Stage) || messageType.Equals(string.Empty))
+            {
+                colorOutput = string.Empty;
+            }
+
+            if (colorOutput.Length <= _azureDevOpsColors.LongestTypeCount)
+            {
+                spaceMessageType = new string(' ', azureDevOpsColors - colorOutput.Length);
+            }
+
+            colorOutput += spaceMessageType;
+
+            return colorOutput;
         }
 
         public void OnWriteToConsole(object sender, WriteToConsoleEventArgs eventArgs)
