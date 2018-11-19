@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
@@ -13,8 +12,6 @@ namespace AssociateTestsToTestCases.Access.DevOps
     {
         private const string AutomationName = "Automated";
 
-        private List<TestMethod> _testMethodsNotMapped;
-
         private readonly Messages _messages;
         private readonly bool _verboseLogging;
         private readonly WriteToConsoleEventLogger _writeToConsoleEventLogger;
@@ -26,65 +23,68 @@ namespace AssociateTestsToTestCases.Access.DevOps
             _writeToConsoleEventLogger = writeToConsoleEventLogger;
         }
 
-        public List<TestMethod> Associate(MethodInfo[] testMethods, List<TestCase.TestCase> testCases,
-            TestCaseAccess azureDevOpsAccessor, bool validationOnly, string testType)
+        public List<TestCase.TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase.TestCase> testCases, List<TestMethod> testMethods)
         {
-            _testMethodsNotMapped = testMethods.Select(x => new TestMethod(x.Name, x.DeclaringType.FullName)).ToList();
+            var testCasesWithNotAvailableTestMethods = testCases.Where(x => x.AutomationStatus == AutomationName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToList();
 
-        foreach (var testCase in testCases)
+            Counter.Warning += testCasesWithNotAvailableTestMethods.Count;
+            Counter.TestMethodNotAvailable += testCasesWithNotAvailableTestMethods.Count;
+
+            return testCasesWithNotAvailableTestMethods;
+        }
+
+        public int Associate(List<TestMethod> testMethods, List<TestCase.TestCase> testCases, TestCaseAccess azureDevOpsAccessor, bool validationOnly, string testType)
+        {
+            foreach (var testMethod in testMethods)
             {
-                var testMethod = testMethods.SingleOrDefault(x => x.Name == testCase.Title);
+                var testCase = testCases.SingleOrDefault(x => x.Title.Equals(testMethod.Name));
 
-                if (testCase.Id == null)
+                if (testCase == null)
                 {
-                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseSkipped, testCase.Title), _messages.Types.Warning, _messages.Reasons.MissingTestCaseId);
-                    Counter.WarningMissingId += 1;
+                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestMethodInfo, testMethod.Name, $"{testMethod.FullClassName}.{testMethod.Name}"), _messages.Types.Error, _messages.Reasons.MissingTestCase);
+
+                    Counter.TestCaseNotFound += 1;
                     continue;
                 }
 
-                if (testCase.AutomationStatus == AutomationName && testMethod == null)
+                if (testCase.AutomationStatus.Equals(AutomationName) && testCase.Title.Equals(testMethod.Name) & testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
                 {
-                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable);
-                    Counter.WarningTestMethodNotAvailable += 1;
-                    continue;
-                }
-
-                if (testMethod == null)
-                {
-                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Warning, _messages.Reasons.MissingTestMethod);
-                    Counter.WarningNoCorrespondingTestMethod += 1;
-                    continue;
-                }
-
-                if (testCase.AutomationStatus == AutomationName)
-                {
-                    _testMethodsNotMapped.Remove(_testMethodsNotMapped.SingleOrDefault(x => x.Name.Equals(testCase.Title)));
                     Counter.Total += 1;
                     continue;
                 }
 
-                var operationSuccess = azureDevOpsAccessor.AssociateTestCaseWithTestMethod((int)testCase.Id, $"{testMethod.DeclaringType.FullName}.{testMethod.Name}", testMethod.Module.Name, Guid.NewGuid().ToString(), validationOnly, testType);
+                if (testCase.AutomationStatus.Equals(AutomationName) && testCase.Title.Equals(testMethod.Name) & !testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
+                {
+                    if (_verboseLogging)
+                    {
+                        _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Info, _messages.Reasons.FixedAssociationTestCase);
+                    }
+
+                    Counter.FixedReference += 1;
+                }
+
+                var operationSuccess = azureDevOpsAccessor.AssociateTestCaseWithTestMethod(testCase.Id, $"{testMethod.FullClassName}.{testMethod.Name}", testMethod.AssemblyName, Guid.NewGuid().ToString(), validationOnly, testType);
 
                 if (!operationSuccess)
                 {
                     _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Failure, _messages.Reasons.Association);
-                    Counter.Error += 1;
+
+                    Counter.OperationFailed += 1;
+                    continue;
                 }
 
                 if (_verboseLogging)
                 {
-                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Success, _messages.Reasons.Association);
+                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestMethodMapped, testMethod.Name, testCase.Id), _messages.Types.Success, _messages.Reasons.Association);
                 }
 
-                _testMethodsNotMapped.Remove(_testMethodsNotMapped.Single(x => x.Name == testCase.Title));
-
-                Counter.Total += 1;
                 Counter.Success += 1;
             }
 
-            Counter.Error += _testMethodsNotMapped.Count;
+            Counter.Total += Counter.Success;
+            Counter.Error += Counter.TestCaseNotFound + Counter.OperationFailed;
 
-            return _testMethodsNotMapped;
+            return Counter.Error;
         }
     }
 }

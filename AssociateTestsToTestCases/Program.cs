@@ -20,8 +20,9 @@ namespace AssociateTestsToTestCases
         private static MethodInfo[] _testMethods;
 
         private static Messages _messages;
-        private static FileAccess _fileAccessor;
+        private static FileAccess _fileAccess;
         private static TestCaseAccess _testCaseAccess;
+        private static AzureDevOpsAccess _azureDevOpsAccess;
 
         private static bool _validationOnly;
         private static bool _verboseLogging;
@@ -49,13 +50,14 @@ namespace AssociateTestsToTestCases
         private static void Init(string[] args)
         {
             _messages = new Messages();
-            _fileAccessor = new FileAccess();
+            _fileAccess = new FileAccess();
             _writeToConsoleEventLogger = new WriteToConsoleEventLogger();
             _commandLineAccess = new CommandLineAccess(new Messages(), new AzureDevOpsColors());
 
             SubscribeMethods();
 
             ParseArguments(args);
+            _azureDevOpsAccess = new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging);
         }
 
         private static void SubscribeMethods()
@@ -71,7 +73,7 @@ namespace AssociateTestsToTestCases
                 {
                     var minimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
                     var directory = o.Directory.ToLowerInvariant();
-                    _testAssemblyPaths = _fileAccessor.ListTestAssemblyPaths(directory, minimatchPatterns);
+                    _testAssemblyPaths = _fileAccess.ListTestAssemblyPaths(directory, minimatchPatterns);
 
                     _testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken, o.ProjectName, o.TestPlanName);
                     _validationOnly = o.ValidationOnly;
@@ -84,10 +86,18 @@ namespace AssociateTestsToTestCases
         private static void GetTestMethods()
         {
             _writeToConsoleEventLogger.Write(_messages.Stages.TestMethod.Status, _messages.Types.Stage);
-            _testMethods = _fileAccessor.ListTestMethods(_testAssemblyPaths);
+            _testMethods = _fileAccess.ListTestMethods(_testAssemblyPaths);
             if (_testMethods.IsNullOrEmpty())
             {
                 _writeToConsoleEventLogger.Write(_messages.Stages.TestMethod.Failure, _messages.Types.Error);
+                Environment.Exit(-1);
+            }
+
+            var duplicateTestMethods = _fileAccess.ListDuplicateTestMethods(_testMethods);
+            if (duplicateTestMethods.Count != 0)
+            {
+                _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.TestMethod.Duplicate, duplicateTestMethods.Count), _messages.Types.Error);
+                duplicateTestMethods.ForEach(x => _writeToConsoleEventLogger.Write(string.Format(_messages.TestMethods.Duplicate, x.Name, _messages.TestMethods.GetDuplicateTestMethodNamesString(x.TestMethods)), _messages.Types.Info));
                 Environment.Exit(-1);
             }
 
@@ -102,6 +112,14 @@ namespace AssociateTestsToTestCases
             if (_testCases.IsNullOrEmpty())
             {
                 _writeToConsoleEventLogger.Write(_messages.Stages.TestCase.Failure, _messages.Types.Error);
+                Environment.Exit(-1);
+            }
+
+            var duplicateTestCases = _testCaseAccess.ListDuplicateTestCases(_testCases);
+            if (duplicateTestCases.Count != 0)
+            {
+                _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.TestCase.Duplicate, duplicateTestCases.Count), _messages.Types.Error);
+                duplicateTestCases.ForEach(x => _writeToConsoleEventLogger.Write(string.Format(_messages.TestCases.Duplicate, x.Name, _messages.TestCases.GetDuplicateTestCaseNamesString(x.TestCases)), _messages.Types.Info));
                 Environment.Exit(-1);
             }
 
@@ -124,13 +142,19 @@ namespace AssociateTestsToTestCases
         private static void Associate()
         {
             _writeToConsoleEventLogger.Write(_messages.Stages.Association.Status, _messages.Types.Stage);
-            var testMethodsNotMapped = new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging).Associate(_testMethods, _testCases, _testCaseAccess, _validationOnly, _testType);
 
-            if (testMethodsNotMapped.Count != 0)
+            var testMethods = _testMethods.Select(x => new TestMethod(x.Name, x.Module.Name, x.DeclaringType.FullName)).ToList();
+
+            var testMethodsNotAvailable = _azureDevOpsAccess.ListTestCasesWithNotAvailableTestMethods(_testCases, testMethods);
+            if (testMethodsNotAvailable.Count != 0)
             {
-                _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Association.Failure, testMethodsNotMapped.Count), _messages.Types.Error);
-                testMethodsNotMapped.ForEach(testMethod => _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestMethodNotMapped, testMethod.Name, testMethod.FullName), _messages.Types.Info));
-                _writeToConsoleEventLogger.Write(string.Empty);
+               testMethodsNotAvailable.ForEach(x => _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseWithNotAvailableTestMethod, x.Title, x.Id, x.AutomatedTestName), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable));
+            }
+
+            var testMethodsAssociationErrorCount = _azureDevOpsAccess.Associate(testMethods, _testCases, _testCaseAccess, _validationOnly, _testType);
+            if (testMethodsAssociationErrorCount != 0)
+            {
+                _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Association.Failure, testMethodsAssociationErrorCount), _messages.Types.Error);
 
                 OutputSummary();
 
@@ -143,7 +167,7 @@ namespace AssociateTestsToTestCases
         private static void OutputSummary()
         {
             _writeToConsoleEventLogger.Write(_messages.Stages.Summary.Status, _messages.Types.Stage);
-            _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Summary.Detailed, Counter.Success, Counter.Error, Counter.WarningMissingId + Counter.WarningTestMethodNotAvailable + Counter.WarningNoCorrespondingTestMethod, Counter.WarningMissingId, Counter.WarningTestMethodNotAvailable, Counter.WarningNoCorrespondingTestMethod), _messages.Types.Summary);
+            _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Summary.Detailed, Counter.Success, Counter.FixedReference, Counter.Error, Counter.OperationFailed, Counter.TestCaseNotFound, Counter.Warning, Counter.TestMethodNotAvailable), _messages.Types.Summary);
             _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Summary.Overview, _testCases.Count, _testMethods.Length, Counter.Total), _messages.Types.Summary);
         }
 

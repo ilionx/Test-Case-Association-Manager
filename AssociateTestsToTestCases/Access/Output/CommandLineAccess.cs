@@ -8,6 +8,9 @@ namespace AssociateTestsToTestCases.Access.Output
 {
     public class CommandLineAccess
     {
+        private const char SpaceChar = ' ';
+        private const string SystemTeamProjectName = "SYSTEM_TeamProject";
+
         private const string ErrorColorOutput = "##vso[task.logissue type=error;]";
         private const string WarningColorOutput = "##vso[task.logissue type=warning;]";
 
@@ -19,7 +22,7 @@ namespace AssociateTestsToTestCases.Access.Output
         {
             _messages = messages;
             _azureDevOpsColors = azureDevOpsColors;
-            _isLocal = Environment.GetEnvironmentVariable("SYSTEM_TeamProject") == null;
+            _isLocal = Environment.GetEnvironmentVariable(SystemTeamProjectName) == null;
         }
 
         public void WriteToConsole(string message, string messageType = "", string reason = "")
@@ -28,10 +31,10 @@ namespace AssociateTestsToTestCases.Access.Output
 
             var indention = message.Equals(string.Empty) | (reason.Length.Equals(0) & new[] { _messages.Types.Stage, _messages.Types.Success, _messages.Types.Error }.Contains(messageType)) ? string.Empty : _messages.Indention;
             var messageTypeFormat = messageType.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, messageType);
-            var spaceMessageType = new string(' ', _messages.Types.LongestTypeCount - messageType.Count());
+            var spaceMessageType = new string(SpaceChar, _messages.Types.LongestTypeCount - messageType.Count());
 
             var reasonOutputFormat = reason.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, reason);
-            var spaceReason = reason.Length.Equals(0) ? string.Empty : new string(' ', _messages.Reasons.LongestReasonCount - reason.Count() + 1);
+            var spaceReason = reason.Length.Equals(0) ? string.Empty : new string(SpaceChar, _messages.Reasons.LongestReasonCount - reason.Count() + 1);
 
             var messageOutput = string.Format(_messages.Output, indention, messageTypeFormat, spaceMessageType, reasonOutputFormat, spaceReason, message);
             if(!_isLocal)
@@ -75,11 +78,11 @@ namespace AssociateTestsToTestCases.Access.Output
             } else if (messageType.Equals(types.Warning))
             {
                 colorOutput = WarningColorOutput;
-                spaceMessageType = new string(' ', azureDevOpsColors - _azureDevOpsColors.WarningColor.Length);
+                spaceMessageType = new string(SpaceChar, azureDevOpsColors - _azureDevOpsColors.WarningColor.Length);
             } else if (messageType.Equals(types.Error))
             {
                 colorOutput = ErrorColorOutput;
-                spaceMessageType = new string(' ', azureDevOpsColors - _azureDevOpsColors.FailureColor.Length);
+                spaceMessageType = new string(SpaceChar, azureDevOpsColors - _azureDevOpsColors.FailureColor.Length);
             } else if (messageType.Equals(types.Failure))
             {
                 colorOutput = _azureDevOpsColors.FailureColor;
@@ -90,7 +93,7 @@ namespace AssociateTestsToTestCases.Access.Output
 
             if (colorOutput.Length <= _azureDevOpsColors.LongestTypeCount)
             {
-                spaceMessageType = new string(' ', azureDevOpsColors - colorOutput.Length);
+                spaceMessageType = new string(SpaceChar, azureDevOpsColors - colorOutput.Length);
             }
 
             colorOutput += spaceMessageType;

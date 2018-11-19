@@ -47,6 +47,19 @@ namespace AssociateTestsToTestCases.Access.File
             return matchingFilesToBeIncluded.ToArray();
         }
 
+        public List<DuplicateTestMethod> ListDuplicateTestMethods(MethodInfo[] testMethods)
+        {
+            var duplicateTestMethods = new List<DuplicateTestMethod>();
+            var duplicates = testMethods.Select(x => x.Name).GroupBy(x => x).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+
+            foreach (var duplicate in duplicates)
+            {
+                duplicateTestMethods.Add(new DuplicateTestMethod(duplicate, testMethods.Where(y => y.Name.Equals(duplicate)).ToArray()));
+            }
+
+            return duplicateTestMethods;
+        }
+
         private static string[] ListAllAccessibleFilesInDirectory(string directory)
         {
             var files = new List<string>(Directory.GetFiles(directory, "*.*", SearchOption.TopDirectoryOnly));

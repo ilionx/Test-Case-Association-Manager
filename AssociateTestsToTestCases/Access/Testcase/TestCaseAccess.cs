@@ -112,6 +112,20 @@ namespace AssociateTestsToTestCases.Access.TestCase
                    result.Fields[AutomatedTestName].ToString() == methodName;
         }
 
+        public List<DuplicateTestCase> ListDuplicateTestCases(List<TestCase> testCases)
+        {
+            var duplicateTestCases = new List<DuplicateTestCase>();
+
+            var duplicates = testCases.Select(x => x.Title).GroupBy(x => x).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+
+            foreach (var duplicate in duplicates)
+            {
+                duplicateTestCases.Add(new DuplicateTestCase(duplicate, testCases.Where(y => y.Title.Equals(duplicate)).ToArray()));
+            }
+
+            return duplicateTestCases;
+        }
+
         private List<TestCase> CreateTestCaseList(List<WorkItem> workItems)
         {
             var testCases = new List<TestCase>();
@@ -120,9 +134,10 @@ namespace AssociateTestsToTestCases.Access.TestCase
             {
                 testCases.Add(new TestCase()
                 {
-                    Id = workItem.Id,
+                    Id = (int)workItem.Id,
                     Title = workItem.Fields[SystemTitle].ToString(),
-                    AutomationStatus = workItem.Fields[AutomationStatusName].ToString()
+                    AutomationStatus = workItem.Fields[AutomationStatusName].ToString(),
+                    AutomatedTestName = workItem.Fields.ContainsKey(AutomatedTestName) ? workItem.Fields[AutomatedTestName].ToString() : null
                 });
             }
 

@@ -5,9 +5,9 @@ namespace AssociateTestsToTestCases.Message.Reason
     public class ReasonMessage
     {
         public readonly string Association = "Association";
-        public readonly string MissingTestMethod = "Missing Test Method";
-        public readonly string MissingTestCaseId = "Missing Test Case Id";
-        public readonly string AssociatedTestMethodNotAvailable = "Associated Test Method is N\\A";
+        public readonly string MissingTestCase = "Missing Test Case";
+        public readonly string FixedAssociationTestCase = "Fixed Association";
+        public readonly string AssociatedTestMethodNotAvailable = "N\\A Associated Test Method";
 
         public int LongestReasonCount { get; }
 

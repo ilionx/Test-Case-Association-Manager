@@ -1,14 +1,18 @@
-﻿namespace AssociateTestsToTestCases.Access.DevOps
+﻿using System.Reflection;
+
+namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class TestMethod
     {
         public readonly string Name;
-        public readonly string FullName;
+        public readonly string AssemblyName;
+        public readonly string FullClassName;
 
-        public TestMethod(string name, string fullName)
+        public TestMethod(string name, string assemblyName, string fullClassName)
         {
             Name = name;
-            FullName = fullName;
+            AssemblyName = assemblyName;
+            FullClassName = fullClassName;
         }
     }
 }

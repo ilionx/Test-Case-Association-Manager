@@ -12,6 +12,8 @@ namespace AssociateTestsToTestCases.Message
         public readonly TypeMessage Types;
         public readonly StageMessages Stages;
         public readonly ReasonMessage Reasons;
+        public readonly TestCase.TestCaseMessage TestCases;
+        public readonly TestMethod.TestMethodMessage TestMethods;
         public readonly Association.AssociationMessage Associations;
 
         public Messages()
@@ -19,6 +21,8 @@ namespace AssociateTestsToTestCases.Message
             Types = new TypeMessage();
             Stages = new StageMessages();
             Reasons = new ReasonMessage();
+            TestCases = new TestCase.TestCaseMessage();
+            TestMethods = new TestMethod.TestMethodMessage();
             Associations = new Association.AssociationMessage();
         }
     }
