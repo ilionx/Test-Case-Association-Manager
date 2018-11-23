@@ -1,0 +1,103 @@
+{
+    "id": "20cc0294-c570-42ea-87b6-6970414d8d97",
+    "name": "AssociateTestMethodsWithTestCases",
+    "friendlyName": "Associate test methods with test cases",
+    "description": "Makes it possible to associate test methods (code) with test cases (Azure DevOps).",
+    "helpMarkDown": "Associates test methods with test cases.",
+    "category": "Deploy",
+    "visibility": [
+        "Release",
+        "Build"
+	],
+    "author": "QNH",
+    "version": {
+        "Major": 1,
+        "Minor": 3,
+        "Patch": 0
+    },
+    "instanceNameFormat": "Test Case - Test Method Association tool",
+    "inputs": [
+        {
+            "name": "SourceFolder",
+            "type": "string",
+            "label": "Source folder",
+            "defaultValue": "$(System.DefaultWorkingDirectory)",
+            "required": true,
+            "helpMarkDown": "The source folder used to execute the tool on."
+		},
+		{
+            "name": "MinimatchPatterns",
+            "type": "string",
+            "label": "Minimatch patterns",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "Minimatch patterns to search for within the source folder, separated by a semicolon."
+		},
+		{
+            "name": "CollectionUri",
+            "type": "string",
+            "label": "Collection Uri",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "The Azure DevOps collection Uri used for accessing the project work items."
+		},
+		{
+            "name": "PersonalAccesstoken",
+            "type": "string",
+            "label": "Personal Access token",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "The personal access token used for accessing the Azure DevOps project."
+		},
+		{
+            "name": "ProjectName",
+            "type": "string",
+            "label": "Project name",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "The project name containing the test plan."
+		},
+		{
+            "name": "TestPlanName",
+            "type": "string",
+            "label": "Test plan name",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "The name of the test plan containing the test cases."
+		},
+		{
+            "name": "TestType",
+            "type": "string",
+            "label": "Test Type",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "The automation test type."
+		},
+		{
+            "name": "ValidateOnly",
+            "type": "boolean",
+            "label": "Validate only",
+            "defaultValue": true,
+            "required": false,
+            "helpMarkDown": "Indicate if you only want to validate the changes without saving the work item."
+		},
+		{
+            "name": "VerboseLogging",
+            "type": "boolean",
+            "label": "Verbose logging",
+            "defaultValue": true,
+            "required": false,
+            "helpMarkDown": "When turned on it also outputs the successful matchings next to the warnings."
+		}
+	],
+	"outputVariables": [],
+    "execution": {
+        "PowerShell3": {
+            "target": "powershell.ps1",
+            "platforms": [
+                "windows"
+            ],
+            "workingDirectory": "$(currentDirectory)"
+        }
+    }
+}
