@@ -6,8 +6,10 @@ ECHO.
 ECHO [Stage] Dependency checks...
 ECHO | set /p=* Node - 
 WHERE node >nul 2>&1 && ECHO Installed || GOTO NodeNotInstalled
+ECHO | set /p=* Dotnet - 
+WHERE dotnet >nul 2>&1 && ECHO Installed || GOTO DotnetNotInstalled
 ECHO | set /p=* Tfx-cli - 
-WHERE tfx >nul 2>&1 && ECHO Installed || GOTO TFXNotInstalled
+WHERE tfx >nul 2>&1 && ECHO Installed || GOTO TfxNotInstalled
 ECHO | set /p=* Robocopy - 
 WHERE robocopy >nul 2>&1 && ECHO Installed || GOTO RobocopyNotInstalled
 ECHO | set /p=* Powershell - 
@@ -19,7 +21,7 @@ GOTO Installed
 ECHO  Not installed (URL: "https://nodejs.org/en/download/")
 GOTO End
 
-:TFXNotInstalled
+:TfxNotInstalled
 ECHO  Not installed (command: "npm install -g tfx-cli")
 GOTO End
 
@@ -31,18 +33,21 @@ GOTO End
 ECHO  Not installed (URL: https://www.microsoft.com/en-us/download/details.aspx?id=17657)
 GOTO End
 
+:DotnetNotInstalled
+ECHO  Not installed (URL: https://www.microsoft.com/net/download)
+GOTO End
 
 
 :Installed
 :CopyWorkFiles
 ECHO.
 ECHO [Stage] Copying Work files to Temporary folder...
-ROBOCOPY "%cd%" "%cd%\temp" /is /e /xd "%cd%\output" /xd "%cd%\temp" /xd "%cd%\associatetooltask\tool" /xf "CreateMarketplaceExtension.bat" /xf "PatchVersionNumber.ps1" /xf "PublishExtension.ps1" /NJH /NJS
+ROBOCOPY "%cd%" "%cd%\temp" /is /e /xd "%cd%\output" /xd "%cd%\temp" /xd "%cd%\associatetooltask\tool" /xf "CreateMarketplaceExtension.bat" /xf "PatchVersionNumber.ps1" /xf "PublishExtension.ps1" /xf "BuildTool.ps1" /NJH /NJS
 
 :RebuildSolution
-REM - ToDo Rebuild AssociateTestsToTestCases solution
 ECHO.
 ECHO [Stage] Rebuilding Solution...
+dotnet build ".\..\AssociateTestsToTestCases\AssociateTestsToTestCases.csproj" -c Release
 
 :CopyToolFiles
 ECHO.
@@ -63,6 +68,7 @@ CHDIR /d "%cd%\.."
 
 :PublishPrompt
 ECHO.
+ECHO [Stage] Publishing Package...
 SET /p publish=Do you want to publish the package? (y/n) 
 ECHO %publish%
 
@@ -72,7 +78,6 @@ ECHO Wrong input. Please try again.
 GOTO PublishPrompt
 
 :publishYes
-ECHO publishYes
 POWERSHELL -noprofile -executionpolicy remotesigned -File "%cd%\PublishExtension.ps1"
 GOTO End
 
@@ -84,5 +89,6 @@ GOTO End
 
 :End
 ECHO.
+ECHO [Stage] End of Program...
 RMDIR /q /s "%cd%\temp"
 PAUSE
