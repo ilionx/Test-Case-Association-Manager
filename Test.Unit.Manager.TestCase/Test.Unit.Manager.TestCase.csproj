@@ -5,11 +5,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C37BD94E-7973-40A3-ACBE-4DDBE897E4B5}</ProjectGuid>
+    <ProjectGuid>{79B0001D-EEC2-4488-9617-8F37F014D946}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Test.Unit.Access.TestCase</RootNamespace>
-    <AssemblyName>Test.Unit.Access.TestCase</AssemblyName>
+    <RootNamespace>Test.Unit.Manager.TestCase</RootNamespace>
+    <AssemblyName>Test.Unit.Manager.TestCase</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -49,7 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestCaseAccessTests.cs" />
+    <Compile Include="GetTestCasesTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,63 +1,82 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using CommandLine;
 using System.Reflection;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Event;
-using Microsoft.TeamFoundation.Common;
 using AssociateTestsToTestCases.Message;
-using AssociateTestsToTestCases.Utility;
 using AssociateTestsToTestCases.Access.File;
+using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.DevOps;
+using AssociateTestsToTestCases.Manager.DevOps;
+using AssociateTestsToTestCases.Manager.Output;
 using AssociateTestsToTestCases.Access.TestCase;
+using AssociateTestsToTestCases.Manager.TestCase;
 
 namespace AssociateTestsToTestCases
 {
     internal static class Program
     {
-        private static List<TestCase> _testCases;
-        private static MethodInfo[] _testMethods;
+        private static bool _validationOnly;
+        private static bool _verboseLogging;
 
-        private static Messages _messages;
+        private static string _testType;
+        private static string _directory;
+        private static string _projectName;
+        private static string _collectionUri;
+        private static string _testPlanName;
+        private static string _personalAccessToken;
+
+        private static string[] _minimatchPatterns;
+        private static string[] _testAssemblyPaths;
+
         private static FileAccess _fileAccess;
         private static TestCaseAccess _testCaseAccess;
         private static AzureDevOpsAccess _azureDevOpsAccess;
-
-        private static bool _validationOnly;
-        private static bool _verboseLogging;
-        private static string[] _testAssemblyPaths;
-        private static string _testType = string.Empty;
-
         private static CommandLineAccess _commandLineAccess;
+
+        private static FileManager _fileManager;
+        private static OutputManager _outputManager;
+        private static TestCaseManager _testCaseManager;
+        private static AzureDevOpsManager _azureDevOpsManager;
+
+        private static Messages _messages;
         private static WriteToConsoleEventLogger _writeToConsoleEventLogger;
+
+        private static MethodInfo[] _testMethods;
+        private static List<TestCase> _testCases;
 
         private static void Main(string[] args)
         {
             Init(args);
 
-            GetTestMethods();
-
-            GetTestCases();
-
+            _testMethods = _fileManager.GetTestMethods(_testAssemblyPaths);
+            _testCases = _testCaseManager.GetTestCases();
             //ResetStatusTestCases(); TODO
+            _azureDevOpsManager.Associate(_testMethods, _testCases, _validationOnly, _testType);
 
-            Associate();
-
-            OutputSummary();
+            _outputManager.OutputSummary(_testMethods, _testCases);
         }
 
         private static void Init(string[] args)
         {
             _messages = new Messages();
-            _fileAccess = new FileAccess();
             _writeToConsoleEventLogger = new WriteToConsoleEventLogger();
-            _commandLineAccess = new CommandLineAccess(new Messages(), new AzureDevOpsColors());
-
+            _commandLineAccess = new CommandLineAccess(_messages, new AzureDevOpsColors());
             SubscribeMethods();
 
             ParseArguments(args);
+
+            _fileAccess = new FileAccess();
             _azureDevOpsAccess = new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging);
+            _testCaseAccess = new TestCaseAccess(_collectionUri, _personalAccessToken, _projectName, _testPlanName);
+
+            _outputManager = new OutputManager(_messages, _writeToConsoleEventLogger);
+            _fileManager = new FileManager(_messages, _fileAccess, _writeToConsoleEventLogger);
+            _testCaseManager = new TestCaseManager(_messages, _testCaseAccess, _writeToConsoleEventLogger);
+            _azureDevOpsManager = new AzureDevOpsManager(_messages, _outputManager, _testCaseAccess, _azureDevOpsAccess, _writeToConsoleEventLogger);
+
+            _testAssemblyPaths = _fileAccess.ListTestAssemblyPaths(_directory, _minimatchPatterns);
         }
 
         private static void SubscribeMethods()
@@ -71,59 +90,17 @@ namespace AssociateTestsToTestCases
             Parser.Default.ParseArguments<Program.Options>(args)
                 .WithParsed(o =>
                 {
-                    var minimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
-                    var directory = o.Directory.ToLowerInvariant();
-                    _testAssemblyPaths = _fileAccess.ListTestAssemblyPaths(directory, minimatchPatterns);
-
-                    _testCaseAccess = new TestCaseAccess(o.CollectionUri, o.PersonalAccessToken, o.ProjectName, o.TestPlanName);
-                    _validationOnly = o.ValidationOnly;
                     _testType = o.TestType;
+                    _projectName = o.ProjectName;
+                    _testPlanName = o.TestPlanName;
+                    _collectionUri = o.CollectionUri;
+                    _validationOnly = o.ValidationOnly;
                     _verboseLogging = o.VerboseLogging;
+                    _directory = o.Directory.ToLowerInvariant();
+                    _personalAccessToken = o.PersonalAccessToken;
+                    _minimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
                 });
             _writeToConsoleEventLogger.Write(_messages.Stages.Argument.Success, _messages.Types.Success);
-        }
-
-        private static void GetTestMethods()
-        {
-            _writeToConsoleEventLogger.Write(_messages.Stages.TestMethod.Status, _messages.Types.Stage);
-            _testMethods = _fileAccess.ListTestMethods(_testAssemblyPaths);
-            if (_testMethods.IsNullOrEmpty())
-            {
-                _writeToConsoleEventLogger.Write(_messages.Stages.TestMethod.Failure, _messages.Types.Error);
-                Environment.Exit(-1);
-            }
-
-            var duplicateTestMethods = _fileAccess.ListDuplicateTestMethods(_testMethods);
-            if (duplicateTestMethods.Count != 0)
-            {
-                _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.TestMethod.Duplicate, duplicateTestMethods.Count), _messages.Types.Error);
-                duplicateTestMethods.ForEach(x => _writeToConsoleEventLogger.Write(string.Format(_messages.TestMethods.Duplicate, x.Name, _messages.TestMethods.GetDuplicateTestMethodNamesString(x.TestMethods)), _messages.Types.Info));
-                Environment.Exit(-1);
-            }
-
-            _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.TestMethod.Success, _testMethods.Length),_messages.Types.Success);
-        }
-
-        private static void GetTestCases()
-        {
-            _writeToConsoleEventLogger.Write(_messages.Stages.TestCase.Status, _messages.Types.Stage);
-            _testCases = _testCaseAccess.GetTestCases();
-
-            if (_testCases.IsNullOrEmpty())
-            {
-                _writeToConsoleEventLogger.Write(_messages.Stages.TestCase.Failure, _messages.Types.Error);
-                Environment.Exit(-1);
-            }
-
-            var duplicateTestCases = _testCaseAccess.ListDuplicateTestCases(_testCases);
-            if (duplicateTestCases.Count != 0)
-            {
-                _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.TestCase.Duplicate, duplicateTestCases.Count), _messages.Types.Error);
-                duplicateTestCases.ForEach(x => _writeToConsoleEventLogger.Write(string.Format(_messages.TestCases.Duplicate, x.Name, _messages.TestCases.GetDuplicateTestCaseNamesString(x.TestCases)), _messages.Types.Info));
-                Environment.Exit(-1);
-            }
-
-            _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.TestCase.Success, _testCases.Count), _messages.Types.Success);
         }
 
         //private static void ResetStatusTestCases()
@@ -138,38 +115,6 @@ namespace AssociateTestsToTestCases
         //    //}
         //    //Console.WriteLine("[SUCCESS] VSTS Test Cases have been reset.\n");
         //}
-
-        private static void Associate()
-        {
-            _writeToConsoleEventLogger.Write(_messages.Stages.Association.Status, _messages.Types.Stage);
-
-            var testMethods = _testMethods.Select(x => new TestMethod(x.Name, x.Module.Name, x.DeclaringType.FullName)).ToList();
-
-            var testMethodsNotAvailable = _azureDevOpsAccess.ListTestCasesWithNotAvailableTestMethods(_testCases, testMethods);
-            if (testMethodsNotAvailable.Count != 0)
-            {
-               testMethodsNotAvailable.ForEach(x => _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseWithNotAvailableTestMethod, x.Title, x.Id, x.AutomatedTestName), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable));
-            }
-
-            var testMethodsAssociationErrorCount = _azureDevOpsAccess.Associate(testMethods, _testCases, _testCaseAccess, _validationOnly, _testType);
-            if (testMethodsAssociationErrorCount != 0)
-            {
-                _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Association.Failure, testMethodsAssociationErrorCount), _messages.Types.Error);
-
-                OutputSummary();
-
-                Environment.Exit(-1);
-            }
-
-            _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Association.Success, Counter.Success), _messages.Types.Success);
-        }
-
-        private static void OutputSummary()
-        {
-            _writeToConsoleEventLogger.Write(_messages.Stages.Summary.Status, _messages.Types.Stage);
-            _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Summary.Detailed, Counter.Success, Counter.FixedReference, Counter.Error, Counter.OperationFailed, Counter.TestCaseNotFound, Counter.Warning, Counter.TestMethodNotAvailable), _messages.Types.Summary);
-            _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Summary.Overview, _testCases.Count, _testMethods.Length, Counter.Total), _messages.Types.Summary);
-        }
 
         private class Options
         {
