@@ -8,15 +8,22 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AssociateTestsToTestCases.Access.File
 {
-    public class FileAccess
+    public class FileAccess : IFileAccess
     {
+        private readonly AssemblyHelper _assemblyAccess;
+
+        public FileAccess(AssemblyHelper assemblyAccess)
+        {
+            _assemblyAccess = assemblyAccess;
+        }
+
         public MethodInfo[] ListTestMethods(string[] testAssemblyPaths)
         {
             var testMethods = new List<MethodInfo>();
 
             foreach (var testAssemblyPath in testAssemblyPaths)
             {
-                var testAssembly = Assembly.LoadFrom(testAssemblyPath);
+                var testAssembly = _assemblyAccess.LoadFrom(testAssemblyPath);
                 testMethods.AddRange(testAssembly.GetTypes().Where(type => type.GetCustomAttribute<TestClassAttribute>() != null).SelectMany(type => type.GetMethods().Where(method => method.GetCustomAttribute<TestMethodAttribute>() != null)));
             }
 

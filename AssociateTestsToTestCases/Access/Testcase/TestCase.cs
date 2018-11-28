@@ -2,9 +2,17 @@
 {
     public class TestCase
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string AutomationStatus { get; set; }
-        public string AutomatedTestName { get; set; }
+        public readonly int Id;
+        public readonly string Title;
+        public readonly string AutomationStatus;
+        public readonly string AutomatedTestName;
+
+        public TestCase(int id, string title, string automationStatus, string automatedTestName)
+        {
+            Id = id;
+            Title = title;
+            AutomationStatus = automationStatus;
+            AutomatedTestName = automatedTestName;
+        }
     }
 }

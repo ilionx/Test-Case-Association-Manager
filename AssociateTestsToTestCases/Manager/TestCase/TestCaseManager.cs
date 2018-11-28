@@ -7,13 +7,13 @@ using AssociateTestsToTestCases.Access.TestCase;
 
 namespace AssociateTestsToTestCases.Manager.TestCase
 {
-    public class TestCaseManager
+    public class TestCaseManager : ITestCaseManager
     {
         private readonly Messages _messages;
-        private readonly TestCaseAccess _testCaseAccess;
-        private readonly WriteToConsoleEventLogger _writeToConsoleEventLogger;
+        private readonly ITestCaseAccess _testCaseAccess;
+        private readonly IWriteToConsoleEventLogger _writeToConsoleEventLogger;
 
-        public TestCaseManager(Messages messages, TestCaseAccess testCaseAccess, WriteToConsoleEventLogger writeToConsoleEventLogger)
+        public TestCaseManager(Messages messages, ITestCaseAccess testCaseAccess, IWriteToConsoleEventLogger writeToConsoleEventLogger)
         {
             _messages = messages;
             _testCaseAccess = testCaseAccess;
@@ -28,7 +28,7 @@ namespace AssociateTestsToTestCases.Manager.TestCase
             if (testCases.IsNullOrEmpty())
             {
                 _writeToConsoleEventLogger.Write(_messages.Stages.TestCase.Failure, _messages.Types.Error);
-                Environment.Exit(-1);
+                throw new InvalidOperationException("TestCases variable is null or empty.");
             }
 
             var duplicateTestCases = _testCaseAccess.ListDuplicateTestCases(testCases);
@@ -36,7 +36,7 @@ namespace AssociateTestsToTestCases.Manager.TestCase
             {
                 _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.TestCase.Duplicate, duplicateTestCases.Count), _messages.Types.Error);
                 duplicateTestCases.ForEach(x => _writeToConsoleEventLogger.Write(string.Format(_messages.TestCases.Duplicate, x.Name, _messages.TestCases.GetDuplicateTestCaseNamesString(x.TestCases)), _messages.Types.Info));
-                Environment.Exit(-1);
+                throw new InvalidOperationException(string.Format(_messages.Stages.TestCase.Duplicate, duplicateTestCases.Count));
             }
 
             _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.TestCase.Success, testCases.Count), _messages.Types.Success);

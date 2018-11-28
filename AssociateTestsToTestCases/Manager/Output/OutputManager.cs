@@ -6,12 +6,12 @@ using AssociateTestsToTestCases.Message;
 
 namespace AssociateTestsToTestCases.Manager.Output
 {
-    public class OutputManager
+    public class OutputManager : IOutputManager
     {
         private readonly Messages _messages;
-        private readonly WriteToConsoleEventLogger _writeToConsoleEventLogger;
+        private readonly IWriteToConsoleEventLogger _writeToConsoleEventLogger;
         
-        public OutputManager(Messages messages, WriteToConsoleEventLogger writeToConsoleEventLogger)
+        public OutputManager(Messages messages, IWriteToConsoleEventLogger writeToConsoleEventLogger)
         {
             _messages = messages;
             _writeToConsoleEventLogger = writeToConsoleEventLogger;

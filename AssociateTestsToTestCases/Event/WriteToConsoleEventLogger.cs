@@ -2,7 +2,7 @@
 
 namespace AssociateTestsToTestCases.Event
 {
-    public class WriteToConsoleEventLogger
+    public class WriteToConsoleEventLogger : IWriteToConsoleEventLogger
     {
         public event EventHandler<WriteToConsoleEventArgs> WriteToConsole;
 

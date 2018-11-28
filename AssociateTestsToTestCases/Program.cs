@@ -30,19 +30,19 @@ namespace AssociateTestsToTestCases
         private static string[] _minimatchPatterns;
         private static string[] _testAssemblyPaths;
 
-        private static FileAccess _fileAccess;
-        private static TestCaseAccess _testCaseAccess;
-        private static AzureDevOpsAccess _azureDevOpsAccess;
-        private static CommandLineAccess _commandLineAccess;
+        private static IFileAccess _fileAccess;
+        private static ITestCaseAccess _testCaseAccess;
+        private static IDevOpsAccess _azureDevOpsAccess;
+        private static IOutputAccess _commandLineAccess;
 
-        private static FileManager _fileManager;
-        private static OutputManager _outputManager;
-        private static TestCaseManager _testCaseManager;
-        private static AzureDevOpsManager _azureDevOpsManager;
+        private static IFileManager _fileManager;
+        private static IOutputManager _outputManager;
+        private static ITestCaseManager _testCaseManager;
+        private static IDevOpsManager _azureDevOpsManager;
+
+        private static IWriteToConsoleEventLogger _writeToConsoleEventLogger;
 
         private static Messages _messages;
-        private static WriteToConsoleEventLogger _writeToConsoleEventLogger;
-
         private static MethodInfo[] _testMethods;
         private static List<TestCase> _testCases;
 
@@ -62,19 +62,19 @@ namespace AssociateTestsToTestCases
         {
             _messages = new Messages();
             _writeToConsoleEventLogger = new WriteToConsoleEventLogger();
-            _commandLineAccess = new CommandLineAccess(_messages, new AzureDevOpsColors());
+            _commandLineAccess = new CommandLineAccess(_messages, new AzureDevOpsColors()); //Todo: fix this: use factory!
             SubscribeMethods();
 
             ParseArguments(args);
 
-            _fileAccess = new FileAccess();
-            _azureDevOpsAccess = new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging);
-            _testCaseAccess = new TestCaseAccess(_collectionUri, _personalAccessToken, _projectName, _testPlanName);
+            _fileAccess = new FileAccess(new AssemblyHelper()); //Todo: fix this: use factory!
+            _azureDevOpsAccess = new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging); //Todo: fix this: use factory!
+            _testCaseAccess = new TestCaseAccess(_collectionUri, _personalAccessToken, _projectName, _testPlanName); //Todo: fix this: use factory!
 
-            _outputManager = new OutputManager(_messages, _writeToConsoleEventLogger);
-            _fileManager = new FileManager(_messages, _fileAccess, _writeToConsoleEventLogger);
-            _testCaseManager = new TestCaseManager(_messages, _testCaseAccess, _writeToConsoleEventLogger);
-            _azureDevOpsManager = new AzureDevOpsManager(_messages, _outputManager, _testCaseAccess, _azureDevOpsAccess, _writeToConsoleEventLogger);
+            _outputManager = new OutputManager(_messages, _writeToConsoleEventLogger); //Todo: fix this: use factory!
+            _fileManager = new FileManager(_messages, _fileAccess, _writeToConsoleEventLogger); //Todo: fix this: use factory!
+            _testCaseManager = new TestCaseManager(_messages, _testCaseAccess, _writeToConsoleEventLogger); //Todo: fix this: use factory!
+            _azureDevOpsManager = new AzureDevOpsManager(_messages, _outputManager, _testCaseAccess, _azureDevOpsAccess, _writeToConsoleEventLogger); //Todo: fix this: use factory!
 
             _testAssemblyPaths = _fileAccess.ListTestAssemblyPaths(_directory, _minimatchPatterns);
         }

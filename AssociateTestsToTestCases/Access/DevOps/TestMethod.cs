@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace AssociateTestsToTestCases.Access.DevOps
+﻿namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class TestMethod
     {

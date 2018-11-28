@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
 namespace AssociateTestsToTestCases.Message.TestCase
 {
@@ -10,7 +9,7 @@ namespace AssociateTestsToTestCases.Message.TestCase
 
         public readonly string Duplicate = "Test Case '{0}' ({1})";
 
-        public string GetDuplicateTestCaseNamesString(Access.TestCase.TestCase[] testCases)
+        public virtual string GetDuplicateTestCaseNamesString(Access.TestCase.TestCase[] testCases)
         {
             return IdsName + string.Join(Separator, testCases.Select(x => x.Id));
         }

@@ -6,20 +6,20 @@ using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Utility;
 using AssociateTestsToTestCases.Access.DevOps;
-using AssociateTestsToTestCases.Access.TestCase;
 using AssociateTestsToTestCases.Manager.Output;
+using AssociateTestsToTestCases.Access.TestCase;
 
 namespace AssociateTestsToTestCases.Manager.DevOps
 {
-    public class AzureDevOpsManager
+    public class AzureDevOpsManager : IDevOpsManager
     {
         private readonly Messages _messages;
-        private readonly OutputManager _outputManager;
-        private readonly TestCaseAccess _testCaseAccess;
-        private readonly AzureDevOpsAccess _azureDevOpsAccess;
-        private readonly WriteToConsoleEventLogger _writeToConsoleEventLogger;
+        private readonly IOutputManager _outputManager;
+        private readonly ITestCaseAccess _testCaseAccess;
+        private readonly IDevOpsAccess _azureDevOpsAccess;
+        private readonly IWriteToConsoleEventLogger _writeToConsoleEventLogger;
 
-        public AzureDevOpsManager(Messages messages, OutputManager outputManager, TestCaseAccess testCaseAccess, AzureDevOpsAccess azureDevOpsAccess, WriteToConsoleEventLogger writeToConsoleEventLogger)
+        public AzureDevOpsManager(Messages messages, IOutputManager outputManager, ITestCaseAccess testCaseAccess, IDevOpsAccess azureDevOpsAccess, IWriteToConsoleEventLogger writeToConsoleEventLogger)
         {
             _messages = messages;
             _outputManager = outputManager;
@@ -47,7 +47,7 @@ namespace AssociateTestsToTestCases.Manager.DevOps
 
                 _outputManager.OutputSummary(methods, testCases);
 
-                Environment.Exit(-1);
+                throw new InvalidOperationException(string.Format(_messages.Stages.Association.Failure, testMethodsAssociationErrorCount));
             }
 
             _writeToConsoleEventLogger.Write(string.Format(_messages.Stages.Association.Success, Counter.Success), _messages.Types.Success);

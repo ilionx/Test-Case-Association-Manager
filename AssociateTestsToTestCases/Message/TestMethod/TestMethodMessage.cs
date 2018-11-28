@@ -9,7 +9,7 @@ namespace AssociateTestsToTestCases.Message.TestMethod
 
         public readonly string Duplicate = "Test Method '{0}' ({1})";
 
-        public string GetDuplicateTestMethodNamesString(MethodInfo[] testMethods)
+        public virtual string GetDuplicateTestMethodNamesString(MethodInfo[] testMethods)
         {
             return string.Join(Separator, testMethods.Select(x => x.DeclaringType.FullName));
         }

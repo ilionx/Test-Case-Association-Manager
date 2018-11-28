@@ -8,15 +8,15 @@ using AssociateTestsToTestCases.Access.TestCase;
 
 namespace AssociateTestsToTestCases.Access.DevOps
 {
-    public class AzureDevOpsAccess
+    public class AzureDevOpsAccess : IDevOpsAccess
     {
-        private const string AutomationName = "Automated";
+        private const string AutomatedName = "Automated";
 
         private readonly Messages _messages;
         private readonly bool _verboseLogging;
-        private readonly WriteToConsoleEventLogger _writeToConsoleEventLogger;
+        private readonly IWriteToConsoleEventLogger _writeToConsoleEventLogger;
 
-        public AzureDevOpsAccess(WriteToConsoleEventLogger writeToConsoleEventLogger, Messages messages, bool verboseLogging)
+        public AzureDevOpsAccess(IWriteToConsoleEventLogger writeToConsoleEventLogger, Messages messages, bool verboseLogging)
         {
             _messages = messages;
             _verboseLogging = verboseLogging;
@@ -25,7 +25,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
         public List<TestCase.TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase.TestCase> testCases, List<TestMethod> testMethods)
         {
-            var testCasesWithNotAvailableTestMethods = testCases.Where(x => x.AutomationStatus == AutomationName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToList();
+            var testCasesWithNotAvailableTestMethods = testCases.Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToList();
 
             Counter.Warning += testCasesWithNotAvailableTestMethods.Count;
             Counter.TestMethodNotAvailable += testCasesWithNotAvailableTestMethods.Count;
@@ -33,7 +33,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return testCasesWithNotAvailableTestMethods;
         }
 
-        public int Associate(List<TestMethod> testMethods, List<TestCase.TestCase> testCases, TestCaseAccess azureDevOpsAccessor, bool validationOnly, string testType)
+        public int Associate(List<TestMethod> testMethods, List<TestCase.TestCase> testCases, ITestCaseAccess testCaseAccess, bool validationOnly, string testType)
         {
             foreach (var testMethod in testMethods)
             {
@@ -47,13 +47,13 @@ namespace AssociateTestsToTestCases.Access.DevOps
                     continue;
                 }
 
-                if (testCase.AutomationStatus.Equals(AutomationName) && testCase.Title.Equals(testMethod.Name) & testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
+                if (testCase.AutomationStatus.Equals(AutomatedName) && testCase.Title.Equals(testMethod.Name) & testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
                 {
                     Counter.Total += 1;
                     continue;
                 }
 
-                if (testCase.AutomationStatus.Equals(AutomationName) && testCase.Title.Equals(testMethod.Name) & !testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
+                if (testCase.AutomationStatus.Equals(AutomatedName) && testCase.Title.Equals(testMethod.Name) & !testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
                 {
                     if (_verboseLogging)
                     {
@@ -63,7 +63,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
                     Counter.FixedReference += 1;
                 }
 
-                var operationSuccess = azureDevOpsAccessor.AssociateTestCaseWithTestMethod(testCase.Id, $"{testMethod.FullClassName}.{testMethod.Name}", testMethod.AssemblyName, Guid.NewGuid().ToString(), validationOnly, testType);
+                var operationSuccess = testCaseAccess.AssociateTestCaseWithTestMethod(testCase.Id, $"{testMethod.FullClassName}.{testMethod.Name}", testMethod.AssemblyName, Guid.NewGuid().ToString(), validationOnly, testType);
 
                 if (!operationSuccess)
                 {

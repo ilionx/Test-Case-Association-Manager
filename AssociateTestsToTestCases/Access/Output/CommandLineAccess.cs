@@ -6,7 +6,7 @@ using AssociateTestsToTestCases.Message.Type;
 
 namespace AssociateTestsToTestCases.Access.Output
 {
-    public class CommandLineAccess
+    public class CommandLineAccess : IOutputAccess
     {
         private const char SpaceChar = ' ';
         private const string SystemTeamProjectName = "SYSTEM_TeamProject";
@@ -29,7 +29,7 @@ namespace AssociateTestsToTestCases.Access.Output
         {
             Console.ForegroundColor = GetConsoleColor(_messages.Types, messageType);
 
-            var indention = message.Equals(string.Empty) | (reason.Length.Equals(0) & new[] { _messages.Types.Stage, _messages.Types.Success, _messages.Types.Error }.Contains(messageType)) ? string.Empty : _messages.Indention;
+            var indention = message.Equals(string.Empty) | (reason.Length.Equals(0) & new[] { _messages.Types.Stage, _messages.Types.Success, _messages.Types.Error }.Contains(messageType)) ? string.Empty : _messages.EnumerationPoint;
             var messageTypeFormat = messageType.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, messageType);
             var spaceMessageType = new string(SpaceChar, _messages.Types.LongestTypeCount - messageType.Count());
 

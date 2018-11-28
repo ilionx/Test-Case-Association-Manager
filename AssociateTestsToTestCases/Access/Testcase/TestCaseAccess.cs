@@ -11,7 +11,7 @@ using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
 namespace AssociateTestsToTestCases.Access.TestCase
 {
-    public class TestCaseAccess
+    public class TestCaseAccess : ITestCaseAccess
     {
         private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
         private readonly TestManagementHttpClient _testManagementHttpClient;
@@ -132,13 +132,12 @@ namespace AssociateTestsToTestCases.Access.TestCase
 
             foreach (var workItem in workItems)
             {
-                testCases.Add(new TestCase()
-                {
-                    Id = (int)workItem.Id,
-                    Title = workItem.Fields[SystemTitle].ToString(),
-                    AutomationStatus = workItem.Fields[AutomationStatusName].ToString(),
-                    AutomatedTestName = workItem.Fields.ContainsKey(AutomatedTestName) ? workItem.Fields[AutomatedTestName].ToString() : null
-                });
+                testCases.Add(new TestCase(
+                    id: (int)workItem.Id,
+                    title: workItem.Fields[SystemTitle].ToString(),
+                    automationStatus: workItem.Fields[AutomationStatusName].ToString(),
+                    automatedTestName: workItem.Fields.ContainsKey(AutomatedTestName) ? workItem.Fields[AutomatedTestName].ToString() : null)
+                );
             }
 
             return testCases;
