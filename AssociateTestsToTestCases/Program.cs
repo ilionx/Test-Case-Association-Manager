@@ -5,10 +5,10 @@ using System.Reflection;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
-using Microsoft.VisualStudio.Services.WebApi;
-using Microsoft.VisualStudio.Services.Common;
 using AssociateTestsToTestCases.Access.File;
 using AssociateTestsToTestCases.Manager.File;
+using Microsoft.VisualStudio.Services.WebApi;
+using Microsoft.VisualStudio.Services.Common;
 using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.DevOps;
 using AssociateTestsToTestCases.Manager.DevOps;
@@ -59,7 +59,6 @@ namespace AssociateTestsToTestCases
 
             _testMethods = _fileManager.GetTestMethods(_testAssemblyPaths);
             _testCases = _testCaseManager.GetTestCases();
-            //ResetStatusTestCases(); TODO
             _azureDevOpsManager.Associate(_testMethods, _testCases, _validationOnly, _testType);
 
             _outputManager.OutputSummary(_testMethods, _testCases);
@@ -71,23 +70,23 @@ namespace AssociateTestsToTestCases
 
             _messages = new Messages();
             _writeToConsoleEventLogger = new WriteToConsoleEventLogger();
-            _commandLineAccess = new CommandLineAccess(isLocal, _messages, new AzureDevOpsColors()); //Todo: fix this: use factory!
+            _commandLineAccess = new CommandLineAccess(isLocal, _messages, new AzureDevOpsColors());
             SubscribeMethods();
 
             ParseArguments(args);
 
-            _fileAccess = new FileAccess(new AssemblyHelper()); //Todo: fix this: use factory!
-            _azureDevOpsAccess = new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging); //Todo: fix this: use factory!
+            _fileAccess = new FileAccess(new AssemblyHelper());
+            _azureDevOpsAccess = new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging);
 
             var connection = new VssConnection(new Uri(_collectionUri), new VssBasicCredential(string.Empty, _personalAccessToken));
             var testManagementHttpClient = connection.GetClient<TestManagementHttpClient>();
             var workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
-            _testCaseAccess = new TestCaseAccess(testManagementHttpClient, workItemTrackingHttpClient, _testPlanName, _projectName); //Todo: fix this: use factory!
+            _testCaseAccess = new TestCaseAccess(testManagementHttpClient, workItemTrackingHttpClient, _testPlanName, _projectName);
 
-            _outputManager = new OutputManager(_messages, _writeToConsoleEventLogger); //Todo: fix this: use factory!
-            _fileManager = new FileManager(_messages, _fileAccess, _writeToConsoleEventLogger); //Todo: fix this: use factory!
-            _testCaseManager = new TestCaseManager(_messages, _testCaseAccess, _writeToConsoleEventLogger); //Todo: fix this: use factory!
-            _azureDevOpsManager = new AzureDevOpsManager(_messages, _outputManager, _testCaseAccess, _azureDevOpsAccess, _writeToConsoleEventLogger); //Todo: fix this: use factory!
+            _outputManager = new OutputManager(_messages, _writeToConsoleEventLogger);
+            _fileManager = new FileManager(_messages, _fileAccess, _writeToConsoleEventLogger);
+            _testCaseManager = new TestCaseManager(_messages, _testCaseAccess, _writeToConsoleEventLogger);
+            _azureDevOpsManager = new AzureDevOpsManager(_messages, _outputManager, _testCaseAccess, _azureDevOpsAccess, _writeToConsoleEventLogger);
 
             _testAssemblyPaths = _fileAccess.ListTestAssemblyPaths(_directory, _minimatchPatterns);
         }
@@ -115,19 +114,6 @@ namespace AssociateTestsToTestCases
                 });
             _writeToConsoleEventLogger.Write(_messages.Stages.Argument.Success, _messages.Types.Success);
         }
-
-        //private static void ResetStatusTestCases()
-        //{
-        //    //Console.WriteLine("Trying to reset the status of each test case");
-        //    //var resetStatusTestCasesSuccess = testCaseAccess.ResetStatusTestCases();
-
-        //    //if (!resetStatusTestCasesSuccess)
-        //    //{
-        //    //    Console.Write("[ERROR] Could not reset the status of each VSTS Test Case. Program has been terminated.\n");
-        //    //    Environment.Exit(-1);
-        //    //}
-        //    //Console.WriteLine("[SUCCESS] VSTS Test Cases have been reset.\n");
-        //}
 
         private class Options
         {

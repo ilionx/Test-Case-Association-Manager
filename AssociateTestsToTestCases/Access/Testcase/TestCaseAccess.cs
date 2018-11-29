@@ -138,33 +138,5 @@ namespace AssociateTestsToTestCases.Access.TestCase
 
             return testCases;
         }
-
-        //public bool ResetStatusTestCases()
-        //{
-        //    //var testPlans = _testManagementHttpClient.GetPlansAsync(ProjectName).Result;
-        //    //var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(ProjectName, testPlans[0].Id).Result;
-
-        //    //// option 1
-        //    //var pointUpdateModel = new PointUpdateModel(resetToActive: true); // if this doesn't work, then set Outcome to In progress?
-
-        //    //// option 2
-
-        //    ////var testPoints = _testManagementHttpClient.GetPointsAsync(ProjectName, testPlans[0].Id, testSuites[0].Id).Result;
-
-        //    ////foreach (var testPoint in testPoints)
-        //    ////{
-        //    ////    testPoint.State = TestPointState.InProgress.ToString(); // InProgress = for testing purpose.
-        //    ////}
-
-
-        //    //// sets status to active for 1 testpoint
-        //    //var updatedTestPoints = _testManagementHttpClient.UpdateTestPointsAsync(pointUpdateModel, ProjectName, testPlans[0].Id, testSuites[0].Id, "1").Result; // ToDo: for testing-purpose: set's outcome test point 1 linked to test case 53
-
-        //    //if (updatedTestPoints)
-        //    //{
-                
-        //    //}
-        //    return true;
-        //}
     }
 }
