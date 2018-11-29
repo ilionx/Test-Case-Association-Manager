@@ -1,17 +1,60 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Linq;
+using FluentAssertions;
+using System.Reflection;
+using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.Unit.Access.File
 {
     [TestClass]
     public class ListDuplicateTestMethodsTests
     {
-        // Todo
-        // Alternative: empty duplicateTestMethods
-        // Main: duplicateTestMethods is not empty
         [TestMethod]
-        public void ListDuplicateTestMethods()
+        public void FileAccess_ListDuplicateTestMethods_EmptyTestMethods()
         {
+            // Arrange
+            var testMethods = new MethodInfo[2];
 
+            var target = new FileAccessFactory().Create();
+
+            // Act
+            Action actual = () => target.ListDuplicateTestMethods(testMethods);
+
+            // Assert
+            actual.Should().Throw<NullReferenceException>();
+        }
+
+        [TestMethod]
+        public void FileAccess_ListDuplicateTestMethods_EmptyDuplicateTestMethods()
+        {
+            // Arrange
+            var testMethods = this.GetType().GetMethods().Where(x => x.Name.Contains("ListDuplicateTestMethods")).ToArray();
+
+            var target = new FileAccessFactory().Create();
+
+            // Act
+            var actual = target.ListDuplicateTestMethods(testMethods);
+
+            //// Assert
+            actual.Count.Should().Be(0);
+        }
+
+        [TestMethod]
+        public void FileAccess_ListDuplicateTestMethods_NotEmptyDuplicateTestMethods()
+        {
+            // Arrange
+            var testMethods = new List<MethodInfo>();
+            testMethods.AddRange(this.GetType().GetMethods().Where(x => x.Name.Contains("ListDuplicateTestMethods")).ToArray());
+            testMethods.AddRange(this.GetType().GetMethods().Where(x => x.Name.Contains("ListDuplicateTestMethods")).ToArray());
+
+            var target = new FileAccessFactory().Create();
+
+            // Act
+            var actual = target.ListDuplicateTestMethods(testMethods.ToArray());
+
+            //// Assert
+            actual.Count.Should().Be(testMethods.Count / 2);
         }
     }
 }

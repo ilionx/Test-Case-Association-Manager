@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.Services.Common;
-using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
@@ -13,8 +10,8 @@ namespace AssociateTestsToTestCases.Access.TestCase
 {
     public class TestCaseAccess : ITestCaseAccess
     {
-        private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
         private readonly TestManagementHttpClient _testManagementHttpClient;
+        private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
 
         private readonly string _projectName;
         private readonly string _testPlanName;
@@ -29,14 +26,13 @@ namespace AssociateTestsToTestCases.Access.TestCase
         private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
         private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
         
-        public TestCaseAccess(string collectionUri, string personalAccessToken, string projectName, string testName)
+        public TestCaseAccess(TestManagementHttpClient testManagementHttpClient, WorkItemTrackingHttpClient workItemTrackingHttpClient, string testName, string projectName)
         {
-            var connection = new VssConnection(new Uri(collectionUri), new VssBasicCredential(string.Empty, personalAccessToken));
-            _workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
-            _testManagementHttpClient = connection.GetClient<TestManagementHttpClient>();
+            _testManagementHttpClient = testManagementHttpClient;
+            _workItemTrackingHttpClient = workItemTrackingHttpClient;
 
-            _projectName = projectName;
             _testPlanName = testName;
+            _projectName = projectName;
         }
 
         public List<TestCase> GetTestCases()
@@ -48,24 +44,6 @@ namespace AssociateTestsToTestCases.Access.TestCase
             var testCases = chunkedTestCases.SelectMany(chunkedTestgroupCases => _workItemTrackingHttpClient.GetWorkItemsAsync(chunkedTestgroupCases).Result).ToList();
 
             return CreateTestCaseList(testCases);
-        }
-
-        private int[] GetTestCasesId()
-        {
-            var testPlan = _testManagementHttpClient.GetPlansAsync(_projectName).Result
-                .Single(x => x.Name.Equals(_testPlanName));
-
-            var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(_projectName, testPlan.Id).Result;
-
-            return _testManagementHttpClient.GetPointsAsync(_projectName, testPlan.Id, testSuites[0].Id).Result
-                .Select(x => int.Parse(x.TestCase.Id)).ToArray();
-        }
-
-        private static int[][] ChunkTestCases(int[] testCasesId)
-        {
-            var i = 0;
-            var chunkedTestCases = testCasesId.GroupBy(s => i++ / ChunkSize).Select(g => g.ToArray()).ToArray();
-            return chunkedTestCases;
         }
 
         public bool AssociateTestCaseWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, bool validationOnly, string testType)
@@ -124,6 +102,24 @@ namespace AssociateTestsToTestCases.Access.TestCase
             }
 
             return duplicateTestCases;
+        }
+
+        private int[] GetTestCasesId()
+        {
+            var testPlan = _testManagementHttpClient.GetPlansAsync(_projectName).Result
+                .Single(x => x.Name.Equals(_testPlanName));
+
+            var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(_projectName, testPlan.Id).Result;
+
+            return _testManagementHttpClient.GetPointsAsync(_projectName, testPlan.Id, testSuites[0].Id).Result
+                .Select(x => int.Parse(x.TestCase.Id)).ToArray();
+        }
+
+        private static int[][] ChunkTestCases(int[] testCasesId)
+        {
+            var i = 0;
+            var chunkedTestCases = testCasesId.GroupBy(s => i++ / ChunkSize).Select(g => g.ToArray()).ToArray();
+            return chunkedTestCases;
         }
 
         private List<TestCase> CreateTestCaseList(List<WorkItem> workItems)

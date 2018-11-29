@@ -24,7 +24,7 @@ namespace Test.Unit.Manager.DevOps
             _writeToConsoleEventLogger = writeToConsoleEventLogger;
         }
 
-        public AzureDevOpsManager Create()
+        public IDevOpsManager Create()
         {
             return new AzureDevOpsManager(_messages, _outputManager, _testCaseAccess, _devOpsAccess, _writeToConsoleEventLogger);
         }

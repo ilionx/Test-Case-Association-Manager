@@ -1,9 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using CommandLine;
 using System.Reflection;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
+using Microsoft.VisualStudio.Services.WebApi;
+using Microsoft.VisualStudio.Services.Common;
 using AssociateTestsToTestCases.Access.File;
 using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.Output;
@@ -12,11 +15,15 @@ using AssociateTestsToTestCases.Manager.DevOps;
 using AssociateTestsToTestCases.Manager.Output;
 using AssociateTestsToTestCases.Access.TestCase;
 using AssociateTestsToTestCases.Manager.TestCase;
+using Microsoft.TeamFoundation.TestManagement.WebApi;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 
 namespace AssociateTestsToTestCases
 {
     internal static class Program
     {
+        private const string SystemTeamProjectName = "SYSTEM_TeamProject";
+
         private static bool _validationOnly;
         private static bool _verboseLogging;
 
@@ -60,16 +67,22 @@ namespace AssociateTestsToTestCases
 
         private static void Init(string[] args)
         {
+            var isLocal = Environment.GetEnvironmentVariable(SystemTeamProjectName) == null;
+
             _messages = new Messages();
             _writeToConsoleEventLogger = new WriteToConsoleEventLogger();
-            _commandLineAccess = new CommandLineAccess(_messages, new AzureDevOpsColors()); //Todo: fix this: use factory!
+            _commandLineAccess = new CommandLineAccess(isLocal, _messages, new AzureDevOpsColors()); //Todo: fix this: use factory!
             SubscribeMethods();
 
             ParseArguments(args);
 
             _fileAccess = new FileAccess(new AssemblyHelper()); //Todo: fix this: use factory!
             _azureDevOpsAccess = new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging); //Todo: fix this: use factory!
-            _testCaseAccess = new TestCaseAccess(_collectionUri, _personalAccessToken, _projectName, _testPlanName); //Todo: fix this: use factory!
+
+            var connection = new VssConnection(new Uri(_collectionUri), new VssBasicCredential(string.Empty, _personalAccessToken));
+            var testManagementHttpClient = connection.GetClient<TestManagementHttpClient>();
+            var workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
+            _testCaseAccess = new TestCaseAccess(testManagementHttpClient, workItemTrackingHttpClient, _testPlanName, _projectName); //Todo: fix this: use factory!
 
             _outputManager = new OutputManager(_messages, _writeToConsoleEventLogger); //Todo: fix this: use factory!
             _fileManager = new FileManager(_messages, _fileAccess, _writeToConsoleEventLogger); //Todo: fix this: use factory!
