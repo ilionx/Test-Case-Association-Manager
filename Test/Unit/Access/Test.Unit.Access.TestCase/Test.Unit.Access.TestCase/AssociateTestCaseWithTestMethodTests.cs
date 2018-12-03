@@ -6,9 +6,9 @@ using System.Threading;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
+using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
 namespace Test.Unit.Access.TestCase
@@ -16,6 +16,12 @@ namespace Test.Unit.Access.TestCase
     [TestClass]
     public class AssociateTestCaseWithTestMethodTests
     {
+        private const string AutomatedName = "Automated";
+        private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
+        private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
+        private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
+        private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
+
         [TestMethod]
         public void TestCaseAccess_AssociateTestCaseWithTestMethod_Success()
         {
@@ -26,10 +32,6 @@ namespace Test.Unit.Access.TestCase
             const string testName = "";
             const string projectName = "";
             const bool validationOnly = true;
-            const string automatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
-            const string automatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
-            const string automationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
-            const string automatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
 
             var fixture = new Fixture();
             var testType = string.Empty;
@@ -41,10 +43,10 @@ namespace Test.Unit.Access.TestCase
             {
                 Fields = new Dictionary<string, object>()
                 {
-                    { automationStatusName, "Automated" },
-                    { automatedTestIdName, automatedTestId },
-                    { automatedTestStorageName, assemblyName },
-                    { automatedTestName, methodName }
+                    { AutomationStatusName, AutomatedName },
+                    { AutomatedTestIdName, automatedTestId },
+                    { AutomatedTestStorageName, assemblyName },
+                    { AutomatedTestName, methodName }
                 }
             };
 

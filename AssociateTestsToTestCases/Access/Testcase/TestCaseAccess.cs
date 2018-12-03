@@ -108,11 +108,10 @@ namespace AssociateTestsToTestCases.Access.TestCase
         {
             var testPlan = _testManagementHttpClient.GetPlansAsync(_projectName).Result
                 .Single(x => x.Name.Equals(_testPlanName));
-
             var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(_projectName, testPlan.Id).Result;
+            var testPoints = _testManagementHttpClient.GetPointsAsync(_projectName, testPlan.Id, testSuites[0].Id).Result;
 
-            return _testManagementHttpClient.GetPointsAsync(_projectName, testPlan.Id, testSuites[0].Id).Result
-                .Select(x => int.Parse(x.TestCase.Id)).ToArray();
+            return testPoints.Select(x => int.Parse(x.TestCase.Id)).ToArray();
         }
 
         private static int[][] ChunkTestCases(int[] testCasesId)
