@@ -1,7 +1,7 @@
 {
     "manifestVersion": 1,
     "id": "AssociateToolTask",
-    "version": "#{Build.BuildNumber}#",
+    "version": "#{VersionNumberFull}#",
     "name": "Test Methods - Test Cases Association Management Tool",
     "description": "An Azure DevOps task which manages the associations between test methods (code) and test cases (Azure DevOps).",
     "publisher": "QNH",
