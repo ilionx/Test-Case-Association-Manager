@@ -1,9 +1,9 @@
 {
-    "id": "20cc0294-c570-42ea-87b6-6970414d8d97",
+    "id": "7f969383-0ffb-4641-95ce-778b0d0510d8",
     "name": "AssociateTestMethodsWithTestCases",
-    "friendlyName": "Associate test methods with test cases",
-    "description": "Makes it possible to associate test methods (code) with test cases (Azure DevOps).",
-    "helpMarkDown": "Associates test methods with test cases.",
+    "friendlyName": "Association manager between Test Methods and Test Cases",
+    "description": "An Azure DevOps task which manages the associations between Test Methods (code) and Test Cases (Azure DevOps).",
+    "helpMarkDown": "Test Methods - Test Cases Association Management Tool",
     "category": "Deploy",
     "visibility": [
         "Release",
@@ -11,11 +11,11 @@
 	],
     "author": "QNH",
     "version": {
-        "Major": 1,
-        "Minor": 3,
-        "Patch": 0
+        "Major": #{VersionNumberMajor}#,
+        "Minor": #{VersionNumberMinor}#,
+        "Patch": #{VersionNumberPatch}#
     },
-    "instanceNameFormat": "Test Case - Test Method Association tool",
+    "instanceNameFormat": "Manages Test Methods - Test Cases associations",
     "inputs": [
         {
             "name": "SourceFolder",
