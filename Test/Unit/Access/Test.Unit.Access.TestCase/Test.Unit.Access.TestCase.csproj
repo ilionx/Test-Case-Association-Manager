@@ -3,11 +3,13 @@
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
 	<GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-	<GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>  
+	<GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
 	<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
 	<GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
 	<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-	<GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>    
+	<GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+	<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+	<GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
