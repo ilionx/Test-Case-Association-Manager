@@ -16,6 +16,11 @@
 	"categories": [
         "Azure Pipelines"
     ],
+	"content": {
+	    "details": {
+		    "path": "overview.md"
+		}
+	},
     "contributions": [
         {
             "id": "AssociateToolTask",
