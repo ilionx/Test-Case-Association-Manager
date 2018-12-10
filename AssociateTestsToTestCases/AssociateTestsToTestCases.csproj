@@ -5,6 +5,9 @@
     <TargetFramework>net461</TargetFramework>
     <ApplicationIcon />
     <StartupObject />
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+        None
+    </ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
 
   <ItemGroup>

@@ -11,6 +11,9 @@
 	<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
 	<GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <IsPackable>false</IsPackable>
+	<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+        None
+	</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
 
   <ItemGroup>

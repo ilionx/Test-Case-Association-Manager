@@ -34,7 +34,7 @@ To create a Personal Access Token please read chapter 'Create personal access to
 | Name | Required | Explanation | Example |
 | :--- | :---: | :--- | :--- |
 | SourceFolder | **X**  | The root directory to search in. | ``` $(System.DefaultWorkingDirectory) ``` |
-| MinimatchPatterns | **X** | The minimatch patterns to search for within the directory, separated by a semicolon. | ``` **\$(BuildConfiguration)\**\*Test.Integration*.dll;**\$(BuildConfiguration)\**\*Test.Unit*.dll;!**\obj\** ``` |
+| MinimatchPatterns | **X** | The [minimatch patterns] to search for within the directory, separated by a semicolon. | ``` **\$(BuildConfiguration)\**\*Test.Integration*.dll;**\$(BuildConfiguration)\**\*Test.Unit*.dll;!**\obj\** ``` |
 | CollectionUri | **X** | The Azure DevOps collection Uri used for accessing the project Test Cases. | ``` https://testorganization.visualstudio.com/DefaultCollection ``` |
 | PersonalAccesstoken | **X** | The Personal Access Token used for accessing the Azure DevOps project. | ``` d55d2f8e-f210-45a0-b09e-be55aeb835ea ``` |
 | ProjectName | **X** | The Project name containing the Test Plan. | ``` HelloProject ``` |
@@ -80,6 +80,7 @@ If you want to contribute, have some feedback, or report any issues, don't hesit
 
 
 [//]: # (Reference links placement)
-   [email]: <mailto:visualstudio@qnh.nl>
-   [this guide]: <https://docs.microsoft.com/nl-nl/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts>
    [Azure DevOps Services REST API]: <https://docs.microsoft.com/en-us/rest/api/azure/devops/>
+   [this guide]: <https://docs.microsoft.com/nl-nl/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts>
+   [minimatch patterns]: <https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/file-matching-patterns?view=vsts>
+   [email]: <mailto:visualstudio@qnh.nl>
