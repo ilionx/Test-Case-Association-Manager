@@ -4,7 +4,7 @@
     "version": "#{VersionNumberFull}#",
     "name": "Test Methods - Test Cases Association Manager",
     "description": "An Azure DevOps task which manages the associations between Test Methods (code) and Test Cases (Azure DevOps).",
-    "publisher": "QNH-Consulting",
+    "publisher": "QNH-Consulting-BV",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"

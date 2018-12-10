@@ -9,7 +9,7 @@
         "Release",
         "Build"
 	],
-    "author": "QNH-Consulting",
+    "author": "QNH-Consulting-BV",
     "version": {
         "Major": #{VersionNumberMajor}#,
         "Minor": #{VersionNumberMinor}#,
