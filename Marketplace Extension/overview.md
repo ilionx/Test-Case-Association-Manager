@@ -24,7 +24,8 @@ The Azure DevOps Services REST API requires user authentication. For security re
 
 # 3. Installation
 ## 3.1 Personal Access Token
-To create a PAT read chapter 'Create personal access tokens to authenticate access' of this [guide]. Your PAT options should be as follows: ![PAT settings](https://i.imgur.com/BvJkre6.png)
+To create a PAT read chapter 'Create personal access tokens to authenticate access' of this [guide]. Your PAT options should be as follows:
+![PAT settings](https://image.frl/i/s3blya3zo18bvzyh.png)
 
 # 4. Setup
 ## 4.1 Variables
@@ -46,7 +47,7 @@ At the moment of writing there are two ways to create a pipeline definition: the
 **Caution!** The position of the task is very important. It should **always** be placed **after** the **Build Task**, but **before** the **Test Run Task**.
 
 ### 4.2.1 Non-YAML
-![](https://i.imgur.com/50AcCSY.png)
+![](https://image.frl/i/kkd7f6foylr083sz.png)
 
 ### 4.2.2 YAML
 ```sh
