@@ -1,9 +1,9 @@
 {
     "id": "7f969383-0ffb-4641-95ce-778b0d0510d8",
     "name": "AssociateTestMethodsWithTestCases",
-    "friendlyName": "Test Methods - Test Cases Association Manager",
+    "friendlyName": "Test Case Association Manager",
     "description": "An Azure DevOps task which manages the associations between Test Methods (code) and Test Cases (Azure DevOps).",
-    "helpMarkDown": "Test Methods - Test Cases Association Manager",
+    "helpMarkDown": "Test Case Association Manager",
     "category": "Deploy",
     "visibility": [
         "Release",

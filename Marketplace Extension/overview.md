@@ -1,5 +1,5 @@
-# Test Methods - Test Cases Association Manager
-A Visual Studio Code extension which manages the associations between Test Methods (code) and Test Cases (Azure DevOps). It uses the [Azure DevOps Services REST API] to achieve this. The Test Method loading happens through its assemblies. These assemblies will be detected by using minimatch patterns which are provided by the user.
+# Test Case Association Manager
+An Azure DevOps extension which manages the associations between Test Methods (code) and Test Cases (Azure DevOps). It uses the [Azure DevOps Services REST API] to achieve this. The Test Method loading happens through its assemblies. These assemblies will be detected by using minimatch patterns which are provided by the user.
 
 # 1. Features
 * **Associations**: associates Test Methods (code) with Test Cases (Azure DevOps) by ***name***.
@@ -53,8 +53,8 @@ There are two ways to create a pipeline definition: the old fashioned way or thr
 
 ### 4.2.2 YAML
 ```
-- task: QNH-Consulting.AssociateToolTask.AssociateToolTask.AssociateTestMethodsWithTestCases@1
-  displayName: 'Test Case - Test Method Association tool'
+- task: QNH-Consulting-BV.AssociateToolTask.AssociateToolTask.AssociateTestMethodsWithTestCases@1
+  displayName: 'Test Case Association Manager'
   inputs:
     sourceFolder: '$(System.DefaultWorkingDirectory)'
 
