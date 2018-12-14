@@ -51,6 +51,9 @@ There are two ways to create a pipeline definition: the old fashioned way or thr
 ### 4.2.1 Non-YAML
 ![](https://image.frl/i/kkd7f6foylr083sz.png)
 
+When you're setting up the **Run test task**, it is important to select **Test plan** under **Select tests using**. This makes it possible to link the outcome of the Test Run to the Test plan.
+![](https://image.frl/i/voqc1wcd384ef810.png)
+
 ### 4.2.2 YAML
 ```
 - task: QNH-Consulting-BV.AssociateToolTask.AssociateToolTask.AssociateTestMethodsWithTestCases@1
@@ -75,11 +78,28 @@ There are two ways to create a pipeline definition: the old fashioned way or thr
     verboseLogging: true
 ```
 
+When you're setting up the **Run Test task**, it is important to set the **testSelector**-property to  **'testPlan'**. This makes it possible to link the outcome of the Test Run to the Test plan.
+```
+- task: VSTest@2
+  displayName: 'Run unit tests using test plan'
+  inputs:
+    testSelector: testPlan
+    testPlan: 51
+    testSuite: 52
+    testConfiguration: 3
+    searchFolder: '$(System.DefaultWorkingDirectory)\Test\Unit'
+    vsTestVersion: toolsInstaller
+    runInParallel: true
+    codeCoverageEnabled: true
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+```
+
 # 5. Contribute, Feedback, Issues
 If you want to contribute, have some feedback, or report any issues, don't hesitate sending us an [email]. 
 
 # 6. Contributers
-We would like to thank [Flaticon] for their icons created by [Freepik] which are used in the creation of this extension logo ([CC BY 3.0]).
+We would like to thank [Flaticon] for their beautiful icons created by [Freepik] which are used in the creation of this extension logo ([CC BY 3.0]).
 
 
 [//]: # (Reference links placement)
