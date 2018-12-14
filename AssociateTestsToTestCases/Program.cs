@@ -55,13 +55,20 @@ namespace AssociateTestsToTestCases
 
         private static void Main(string[] args)
         {
-            Init(args);
+            try
+            {
+                Init(args);
 
-            _testMethods = _fileManager.GetTestMethods(_testAssemblyPaths);
-            _testCases = _testCaseManager.GetTestCases();
-            _azureDevOpsManager.Associate(_testMethods, _testCases, _validationOnly, _testType);
+                _testMethods = _fileManager.GetTestMethods(_testAssemblyPaths);
+                _testCases = _testCaseManager.GetTestCases();
+                _azureDevOpsManager.Associate(_testMethods, _testCases, _validationOnly, _testType);
 
-            _outputManager.OutputSummary(_testMethods, _testCases);
+                _outputManager.OutputSummary(_testMethods, _testCases);
+            }
+            catch
+            {
+                Environment.ExitCode = -1;
+            }
         }
 
         private static void Init(string[] args)
