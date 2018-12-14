@@ -3,7 +3,7 @@
     "id": "AssociateToolTask",
     "version": "#{VersionNumberFull}#",
     "name": "Test Case Association Manager",
-    "description": "An Azure DevOps task which manages the associations between Test Methods (code) and Test Cases (Azure DevOps).",
+    "description": "Azure DevOps task for managing the associations between Test Methods (code) and Test Cases (Azure DevOps).",
     "publisher": "QNH-Consulting-BV",
     "targets": [
         {
@@ -21,6 +21,37 @@
 		    "path": "overview.md"
 		}
 	},
+	"links": {
+        "support": {
+            "uri": "mailto:visualstudio@qnh.nl"
+        }
+	},
+	"tags": [
+        "Test",
+		"Testing",
+		"Test hub",
+		"Associate"
+		"Test plan",
+        "Test case",
+		"Automation", 
+        "Test method",
+        "Association",
+		"Test manager",
+		"Traceability",
+		"Automated test",
+		"Associate test",
+		"Azure Test Plan",
+        "Association manager",
+        "Test case association",
+        "Test method association"
+	],
+	"badges": [
+	    {
+		    "href": "#",
+			"uri": "https://qnh.visualstudio.com/Copper/_apis/build/status/AssociateTestsToTestCases/AssociateTestsToTestCases",
+			"description": "Build"
+		}
+	],
     "contributions": [
         {
             "id": "AssociateToolTask",

@@ -1,5 +1,5 @@
 # Test Case Association Manager
-An Azure DevOps extension which manages the associations between Test Methods (code) and Test Cases (Azure DevOps). It uses the [Azure DevOps Services REST API] to achieve this. The Test Method loading happens through its assemblies. These assemblies will be detected by using minimatch patterns which are provided by the user.
+Azure DevOps extension for managing the associations between Test Methods (code) and Test Cases (Azure DevOps). It uses the [Azure DevOps Services REST API] to achieve this. The Test Method loading happens through its assemblies. These assemblies will be detected by using minimatch patterns which are provided by the user.
 
 # 1. Features
 * **Associations**: associates Test Methods (code) with Test Cases (Azure DevOps) by ***name***.
@@ -78,9 +78,15 @@ There are two ways to create a pipeline definition: the old fashioned way or thr
 # 5. Contribute, Feedback, Issues
 If you want to contribute, have some feedback, or report any issues, don't hesitate sending us an [email]. 
 
+# 6. Contributers
+We would like to thank [Flaticon] for their icons created by [Freepik] which are used in the creation of this extension logo ([CC BY 3.0]).
+
 
 [//]: # (Reference links placement)
    [Azure DevOps Services REST API]: <https://docs.microsoft.com/en-us/rest/api/azure/devops/>
    [this guide]: <https://docs.microsoft.com/nl-nl/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts>
    [minimatch patterns]: <https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/file-matching-patterns?view=vsts>
    [email]: <mailto:visualstudio@qnh.nl>
+   [Freepik]: <https://www.freepik.com/>
+   [Flaticon]: <https://www.flaticon.com>
+   [CC BY 3.0]: <http://creativecommons.org/licenses/by/3.0/>
