@@ -28,7 +28,7 @@ namespace AssociateTestsToTestCases.Manager.TestCase
             if (testCases.IsNullOrEmpty())
             {
                 _writeToConsoleEventLogger.Write(_messages.Stages.TestCase.Failure, _messages.Types.Error);
-                throw new InvalidOperationException("TestCases variable is null or empty.");
+                throw new InvalidOperationException(_messages.Stages.TestCase.Failure);
             }
 
             var duplicateTestCases = _testCaseAccess.ListDuplicateTestCases(testCases);

@@ -3,7 +3,7 @@
     "id": "AssociateToolTask",
     "version": "#{VersionNumberFull}#",
     "name": "Test Case Association Manager",
-    "description": "Azure DevOps task for managing the associations between Test Methods (code) and Test Cases (Azure DevOps).",
+    "description": "Azure DevOps task for managing the associations between Test Methods and Test Cases.",
     "publisher": "QNH-Consulting-BV",
     "targets": [
         {
