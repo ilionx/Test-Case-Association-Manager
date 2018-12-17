@@ -114,7 +114,7 @@ namespace Test.Unit.Access.File
             using (var fs = new FileStream(tempTestUnitFileName, FileMode.Create)) { }
             using (var fs = new FileStream(tempTestIntegrationFileName, FileMode.Create)) { }
 
-            var directory = _tempDirListTestAssemblyPathsTestsDirectoryInfo.FullName.ToLowerInvariant();
+            var directory = _tempDirListTestAssemblyPathsTestsDirectoryInfo.FullName;
             var minimatchPatterns = new string[]
             {
                 "**\\Debug\\**\\*Test.Integration*.dll",
@@ -129,8 +129,8 @@ namespace Test.Unit.Access.File
 
             // Assert
             actual.Length.Should().Be(2);
-            actual.Should().Contain(tempTestUnitFileName.ToLowerInvariant());
-            actual.Should().Contain(tempTestIntegrationFileName.ToLowerInvariant());
+            actual.Should().Contain(tempTestUnitFileName);
+            actual.Should().Contain(tempTestIntegrationFileName);
         }
     }
 }

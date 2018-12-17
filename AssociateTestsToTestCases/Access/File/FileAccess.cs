@@ -32,12 +32,12 @@ namespace AssociateTestsToTestCases.Access.File
 
         public string[] ListTestAssemblyPaths(string directory, string[] minimatchPatterns)
         {
-            var files = ListAllAccessibleFilesInDirectory(directory).Select(s => s.ToLowerInvariant()).ToArray();
+            var files = ListAllAccessibleFilesInDirectory(directory);
             var matchingFilesToBeIncluded = new List<string>();
 
             foreach (var minimatchPattern in minimatchPatterns.Where(minimatchPattern => !minimatchPattern.StartsWith("!")))
             {
-                var mm = new Minimatcher(minimatchPattern, new Minimatch.Options() { AllowWindowsPaths = true });
+                var mm = new Minimatcher(minimatchPattern, new Minimatch.Options() { AllowWindowsPaths = true, IgnoreCase = true });
                 matchingFilesToBeIncluded.AddRange(mm.Filter(files));
             }
 
@@ -45,7 +45,7 @@ namespace AssociateTestsToTestCases.Access.File
             foreach (var minimatchPattern in minimatchPatterns.Where(minimatchPattern => minimatchPattern.StartsWith("!")))
             {
                 var actualMinimatchPattern = minimatchPattern.TrimStart('!');
-                var mm = new Minimatcher(actualMinimatchPattern, new Minimatch.Options() { AllowWindowsPaths = true });
+                var mm = new Minimatcher(actualMinimatchPattern, new Minimatch.Options() { AllowWindowsPaths = true, IgnoreCase = true });
                 matchingFilesToBeExcluded.AddRange(mm.Filter(files));
             }
 
