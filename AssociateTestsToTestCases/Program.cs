@@ -3,7 +3,6 @@ using System.Linq;
 using CommandLine;
 using System.Reflection;
 using System.Collections.Generic;
-using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Access.File;
 using AssociateTestsToTestCases.Manager.File;
@@ -47,8 +46,6 @@ namespace AssociateTestsToTestCases
         private static ITestCaseManager _testCaseManager;
         private static IDevOpsManager _azureDevOpsManager;
 
-        private static IWriteToConsoleEventLogger _writeToConsoleEventLogger;
-
         private static Messages _messages;
         private static MethodInfo[] _testMethods;
         private static List<TestCase> _testCases;
@@ -76,36 +73,28 @@ namespace AssociateTestsToTestCases
             var isLocal = Environment.GetEnvironmentVariable(SystemTeamProjectName) == null;
 
             _messages = new Messages();
-            _writeToConsoleEventLogger = new WriteToConsoleEventLogger();
             _commandLineAccess = new CommandLineAccess(isLocal, _messages, new AzureDevOpsColors());
-            SubscribeMethods();
-
             ParseArguments(args);
 
             _fileAccess = new FileAccess(new AssemblyHelper());
-            _azureDevOpsAccess = new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging);
+            _azureDevOpsAccess = new AzureDevOpsAccess(_messages, _commandLineAccess, _verboseLogging);
 
             var connection = new VssConnection(new Uri(_collectionUri), new VssBasicCredential(string.Empty, _personalAccessToken));
             var testManagementHttpClient = connection.GetClient<TestManagementHttpClient>();
             var workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
             _testCaseAccess = new TestCaseAccess(testManagementHttpClient, workItemTrackingHttpClient, _testPlanName, _projectName);
 
-            _outputManager = new OutputManager(_messages, _writeToConsoleEventLogger);
-            _fileManager = new FileManager(_messages, _fileAccess, _writeToConsoleEventLogger);
-            _testCaseManager = new TestCaseManager(_messages, _testCaseAccess, _writeToConsoleEventLogger);
-            _azureDevOpsManager = new AzureDevOpsManager(_messages, _outputManager, _testCaseAccess, _azureDevOpsAccess, _writeToConsoleEventLogger);
+            _outputManager = new OutputManager(_messages, _commandLineAccess);
+            _fileManager = new FileManager(_messages, _fileAccess, _commandLineAccess);
+            _testCaseManager = new TestCaseManager(_messages, _commandLineAccess, _testCaseAccess);
+            _azureDevOpsManager = new AzureDevOpsManager(_messages, _commandLineAccess, _outputManager, _testCaseAccess, _azureDevOpsAccess);
 
             _testAssemblyPaths = _fileAccess.ListTestAssemblyPaths(_directory, _minimatchPatterns);
         }
 
-        private static void SubscribeMethods()
-        {
-            _writeToConsoleEventLogger.WriteToConsole += _commandLineAccess.OnWriteToConsole;
-        }
-
         private static void ParseArguments(string[] args)
         {
-            _writeToConsoleEventLogger.Write(_messages.Stages.Argument.Status, _messages.Types.Stage);
+           _commandLineAccess.WriteToConsole(_messages.Stages.Argument.Status, _messages.Types.Stage);
             Parser.Default.ParseArguments<Program.Options>(args)
                 .WithParsed(o =>
                 {
@@ -119,7 +108,7 @@ namespace AssociateTestsToTestCases
                     _personalAccessToken = o.PersonalAccessToken;
                     _minimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
                 });
-            _writeToConsoleEventLogger.Write(_messages.Stages.Argument.Success, _messages.Types.Success);
+           _commandLineAccess.WriteToConsole(_messages.Stages.Argument.Success, _messages.Types.Success);
         }
 
         private class Options

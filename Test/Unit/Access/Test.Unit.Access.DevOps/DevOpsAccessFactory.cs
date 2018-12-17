@@ -1,6 +1,6 @@
-﻿using AssociateTestsToTestCases.Event;
-using AssociateTestsToTestCases.Message;
+﻿using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Access.DevOps;
+using AssociateTestsToTestCases.Access.Output;
 
 namespace Test.Unit.Access.DevOps
 {
@@ -8,18 +8,18 @@ namespace Test.Unit.Access.DevOps
     {
         private readonly Messages _messages;
         private readonly bool _verboseLogging;
-        private readonly IWriteToConsoleEventLogger _writeToConsoleEventLogger;
+        private readonly IOutputAccess _outputAccess;
 
-        public DevOpsAccessFactory(IWriteToConsoleEventLogger writeToConsoleEventLogger, Messages messages, bool verboseLogging)
+        public DevOpsAccessFactory(Messages messages, IOutputAccess outputAccess, bool verboseLogging)
         {
             _messages = messages;
+            _outputAccess = outputAccess;
             _verboseLogging = verboseLogging;
-            _writeToConsoleEventLogger = writeToConsoleEventLogger;
         }
 
         public IDevOpsAccess Create()
         {
-            return new AzureDevOpsAccess(_writeToConsoleEventLogger, _messages, _verboseLogging);
+            return new AzureDevOpsAccess(_messages, _outputAccess, _verboseLogging);
         }
     }
 }

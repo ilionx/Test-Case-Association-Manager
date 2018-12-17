@@ -3,8 +3,8 @@ using AutoFixture;
 using System.Linq;
 using FluentAssertions;
 using System.Collections.Generic;
-using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.DevOps;
 using AssociateTestsToTestCases.Access.TestCase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,7 +21,7 @@ namespace Test.Unit.Access.DevOps
         public void DevOpsAccess_ListTestCasesWithNotAvailableTestMethods_EmptyListTestCasesWithNotAvailableTestMethodsWhereAutomationStatusIsEqualToAutomatedName()
         {
             // Arrange
-            var writeToConsoleEventLoggerMock = new Mock<IWriteToConsoleEventLogger>();
+            var outputAccess = new Mock<IOutputAccess>();
 
             const bool verboseLogging = true;
 
@@ -32,7 +32,7 @@ namespace Test.Unit.Access.DevOps
             var testCases =  fixture.Create<List<TestCase>>();
             var testMethods = testCases.Select(x => new TestMethod(x.Title, string.Empty, string.Empty)).ToList();
 
-            var target = new DevOpsAccessFactory(writeToConsoleEventLoggerMock.Object, messages, verboseLogging).Create();
+            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
 
             // Act
             var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
@@ -46,7 +46,7 @@ namespace Test.Unit.Access.DevOps
         public void DevOpsAccess_ListTestCasesWithNotAvailableTestMethods_EmptyListTestCasesWithNotAvailableTestMethodsWhereAutomationStatusIsNotEqualToAutomatedName()
         {
             // Arrange
-            var writeToConsoleEventLoggerMock = new Mock<IWriteToConsoleEventLogger>();
+            var outputAccess = new Mock<IOutputAccess>();
 
             const bool verboseLogging = true;
 
@@ -57,7 +57,7 @@ namespace Test.Unit.Access.DevOps
             var testCases = fixture.Create<List<TestCase>>();
             var testMethods = fixture.Create<List<TestMethod>>();
 
-            var target = new DevOpsAccessFactory(writeToConsoleEventLoggerMock.Object, messages, verboseLogging).Create();
+            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
 
             // Act
             var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
@@ -70,7 +70,7 @@ namespace Test.Unit.Access.DevOps
         public void DevOpsAccess_ListTestCasesWithNotAvailableTestMethods_ListTestCasesWithNotAvailableTestMethods()
         {
             // Arrange
-            var writeToConsoleEventLoggerMock = new Mock<IWriteToConsoleEventLogger>();
+            var outputAccess = new Mock<IOutputAccess>();
 
             const bool verboseLogging = true;
 
@@ -81,7 +81,7 @@ namespace Test.Unit.Access.DevOps
             var testCases = fixture.Create<List<TestCase>>();
             var testMethods = testCases.Select(x => new TestMethod(string.Empty, string.Empty, string.Empty)).ToList();
 
-            var target = new DevOpsAccessFactory(writeToConsoleEventLoggerMock.Object, messages, verboseLogging).Create();
+            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
 
             // Act
             var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);

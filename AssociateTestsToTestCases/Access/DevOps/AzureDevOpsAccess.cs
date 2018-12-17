@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Utility;
+using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.TestCase;
 
 namespace AssociateTestsToTestCases.Access.DevOps
@@ -14,13 +14,13 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
         private readonly Messages _messages;
         private readonly bool _verboseLogging;
-        private readonly IWriteToConsoleEventLogger _writeToConsoleEventLogger;
+        private readonly IOutputAccess _outputAccess;
 
-        public AzureDevOpsAccess(IWriteToConsoleEventLogger writeToConsoleEventLogger, Messages messages, bool verboseLogging)
+        public AzureDevOpsAccess(Messages messages, IOutputAccess outputAccess, bool verboseLogging)
         {
             _messages = messages;
+            _outputAccess = outputAccess;
             _verboseLogging = verboseLogging;
-            _writeToConsoleEventLogger = writeToConsoleEventLogger;
         }
 
         public List<TestCase.TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase.TestCase> testCases, List<TestMethod> testMethods)
@@ -41,7 +41,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
                 if (testCase == null)
                 {
-                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestMethodInfo, testMethod.Name, $"{testMethod.FullClassName}.{testMethod.Name}"), _messages.Types.Error, _messages.Reasons.MissingTestCase);
+                   _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestMethodInfo, testMethod.Name, $"{testMethod.FullClassName}.{testMethod.Name}"), _messages.Types.Error, _messages.Reasons.MissingTestCase);
 
                     Counter.TestCaseNotFound += 1;
                     continue;
@@ -57,7 +57,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
                 {
                     if (_verboseLogging)
                     {
-                        _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Info, _messages.Reasons.FixedAssociationTestCase);
+                       _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Info, _messages.Reasons.FixedAssociationTestCase);
                     }
 
                     Counter.FixedReference += 1;
@@ -67,7 +67,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
                 if (!operationSuccess)
                 {
-                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Failure, _messages.Reasons.Association);
+                   _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Failure, _messages.Reasons.Association);
 
                     Counter.OperationFailed += 1;
                     continue;
@@ -75,7 +75,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
                 if (_verboseLogging)
                 {
-                    _writeToConsoleEventLogger.Write(string.Format(_messages.Associations.TestMethodMapped, testMethod.Name, testCase.Id), _messages.Types.Success, _messages.Reasons.Association);
+                   _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestMethodMapped, testMethod.Name, testCase.Id), _messages.Types.Success, _messages.Reasons.Association);
                 }
 
                 Counter.Success += 1;

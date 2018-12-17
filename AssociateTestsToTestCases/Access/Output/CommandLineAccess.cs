@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Message.Type;
 
@@ -18,7 +17,7 @@ namespace AssociateTestsToTestCases.Access.Output
         private readonly Messages _messages;
         private readonly AzureDevOpsColors _azureDevOpsColors;
 
-        public CommandLineAccess(bool isLocal , Messages messages, AzureDevOpsColors azureDevOpsColors)
+        public CommandLineAccess(bool isLocal, Messages messages, AzureDevOpsColors azureDevOpsColors)
         {
             _isLocal = isLocal;
             _messages = messages;
@@ -99,11 +98,6 @@ namespace AssociateTestsToTestCases.Access.Output
             colorOutput += spaceMessageType;
 
             return colorOutput;
-        }
-
-        public void OnWriteToConsole(object sender, WriteToConsoleEventArgs eventArgs)
-        {
-            WriteToConsole(eventArgs.Message, eventArgs.MessageType, eventArgs.Reason);
         }
     }
 }

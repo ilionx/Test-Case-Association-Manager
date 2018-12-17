@@ -4,9 +4,9 @@ using AutoFixture;
 using FluentAssertions;
 using System.Reflection;
 using System.Collections.Generic;
-using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Access.DevOps;
+using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Manager.Output;
 using AssociateTestsToTestCases.Access.TestCase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,9 +23,9 @@ namespace Test.Unit.Manager.DevOps
         {
             // Arrange
             var devOpsAccessMock = new Mock<IDevOpsAccess>();
+            var outputAccessMock = new Mock<IOutputAccess>();
             var outputManagerMock = new Mock<IOutputManager>();
             var testCaseAccessMock = new Mock<ITestCaseAccess>();
-            var writeToConsoleEventLoggerMock = new Mock<IWriteToConsoleEventLogger>();
 
             const bool validateOnly = true;
 
@@ -45,14 +45,14 @@ namespace Test.Unit.Manager.DevOps
             devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<List<TestMethod>>())).Returns(testMethodsNotAvailable);
             devOpsAccessMock.Setup(x => x.Associate(It.IsAny<List<TestMethod>>(), It.IsAny<List<TestCase>>(), It.IsAny<ITestCaseAccess>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(0);
 
-            var target = new DevOpsManagerFactory(outputManagerMock.Object, testCaseAccessMock.Object, devOpsAccessMock.Object, writeToConsoleEventLoggerMock.Object, messages).Create();
+            var target = new DevOpsManagerFactory(devOpsAccessMock.Object, outputManagerMock.Object, outputAccessMock.Object, testCaseAccessMock.Object, messages).Create();
 
             // Act
             Action actual = () => target.Associate(methods, testCases, validateOnly, testType);
 
             // Assert
             actual.Should().NotThrow<InvalidOperationException>();
-            writeToConsoleEventLoggerMock.Verify(x => x.Write(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount + testMethodsNotAvailable.Count));
+            outputAccessMock.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount + testMethodsNotAvailable.Count));
         }
 
         [TestMethod]
@@ -60,10 +60,10 @@ namespace Test.Unit.Manager.DevOps
         {
             // Arrange
             var messages = new Messages();
+            var outputAccess = new Mock<IOutputAccess>();
             var devOpsAccessMock = new Mock<IDevOpsAccess>();
             var outputManagerMock = new Mock<IOutputManager>();
             var testCaseAccessMock = new Mock<ITestCaseAccess>();
-            var writeToConsoleEventLoggerMock = new Mock<IWriteToConsoleEventLogger>();
 
             const bool validateOnly = true;
 
@@ -81,14 +81,14 @@ namespace Test.Unit.Manager.DevOps
             devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<List<TestMethod>>())).Returns(new List<TestCase>());
             devOpsAccessMock.Setup(x => x.Associate(It.IsAny<List<TestMethod>>(), It.IsAny<List<TestCase>>(), It.IsAny<ITestCaseAccess>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(3);
 
-            var target = new DevOpsManagerFactory(outputManagerMock.Object, testCaseAccessMock.Object, devOpsAccessMock.Object, writeToConsoleEventLoggerMock.Object, messages).Create();
+            var target = new DevOpsManagerFactory(devOpsAccessMock.Object, outputManagerMock.Object, outputAccess.Object, testCaseAccessMock.Object, messages).Create();
 
             // Act
             Action actual = () => target.Associate(methods, testCases, validateOnly, testType);
 
             // Assert
             actual.Should().Throw<InvalidOperationException>();
-            writeToConsoleEventLoggerMock.Verify(x => x.Write(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -96,10 +96,10 @@ namespace Test.Unit.Manager.DevOps
         {
             // Arrange
             var messages = new Messages();
+            var outputAccess = new Mock<IOutputAccess>();
             var devOpsAccessMock = new Mock<IDevOpsAccess>();
             var outputManagerMock = new Mock<IOutputManager>();
             var testCaseAccessMock = new Mock<ITestCaseAccess>();
-            var writeToConsoleEventLoggerMock = new Mock<IWriteToConsoleEventLogger>();
 
             const bool validateOnly = true;
 
@@ -117,15 +117,14 @@ namespace Test.Unit.Manager.DevOps
             devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<List<TestMethod>>())).Returns(new List<TestCase>());
             devOpsAccessMock.Setup(x => x.Associate(It.IsAny<List<TestMethod>>(), It.IsAny<List<TestCase>>(), It.IsAny<ITestCaseAccess>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(0);
 
-            var target = new DevOpsManagerFactory(outputManagerMock.Object, testCaseAccessMock.Object, devOpsAccessMock.Object, writeToConsoleEventLoggerMock.Object, messages).Create();
+            var target = new DevOpsManagerFactory(devOpsAccessMock.Object, outputManagerMock.Object, outputAccess.Object, testCaseAccessMock.Object, messages).Create();
 
             // Act
             Action actual = () => target.Associate(methods, testCases, validateOnly, testType);
 
             // Assert
             actual.Should().NotThrow<InvalidOperationException>();
-            writeToConsoleEventLoggerMock.Verify(x => x.Write(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
         }
-
     }
 }

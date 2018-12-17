@@ -1,7 +1,7 @@
-﻿using AssociateTestsToTestCases.Event;
-using AssociateTestsToTestCases.Message;
+﻿using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Access.File;
 using AssociateTestsToTestCases.Manager.File;
+using AssociateTestsToTestCases.Access.Output;
 
 namespace Test.Unit.Manager.File
 {
@@ -9,18 +9,18 @@ namespace Test.Unit.Manager.File
     {
         private readonly Messages _messages;
         private readonly IFileAccess _fileAccess;
-        private readonly IWriteToConsoleEventLogger _writeToConsoleEventLogger;
+        private readonly IOutputAccess _outputAccess;
 
-        public FileManagerFactory(IFileAccess fileAccess, IWriteToConsoleEventLogger writeToConsoleEventLogger, Messages messages = null)
+        public FileManagerFactory(IFileAccess fileAccess, IOutputAccess outputAccess, Messages messages = null)
         {
             _fileAccess = fileAccess;
-            _writeToConsoleEventLogger = writeToConsoleEventLogger;
+            _outputAccess = outputAccess;
             _messages = messages ?? new Messages();
         }
 
         public IFileManager Create()
         {
-            return new FileManager(_messages, _fileAccess, _writeToConsoleEventLogger);
+            return new FileManager(_messages, _fileAccess, _outputAccess);
         }
     }
 }

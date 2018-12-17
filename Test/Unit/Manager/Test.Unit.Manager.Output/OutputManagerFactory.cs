@@ -1,5 +1,5 @@
-﻿using AssociateTestsToTestCases.Event;
-using AssociateTestsToTestCases.Message;
+﻿using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Manager.Output;
 
 namespace Test.Unit.Manager.Output
@@ -7,17 +7,17 @@ namespace Test.Unit.Manager.Output
     public class OutputManagerFactory
     {
         private readonly Messages _messages;
-        private readonly IWriteToConsoleEventLogger _writeToConsoleEventLogger;
+        private readonly IOutputAccess _outputAccess;
 
-        public OutputManagerFactory(Messages messages, IWriteToConsoleEventLogger writeToConsoleEventLogger )
+        public OutputManagerFactory(Messages messages, IOutputAccess outputAccess )
         {
             _messages = messages;
-            _writeToConsoleEventLogger = writeToConsoleEventLogger;
+            _outputAccess = outputAccess;
         }
 
         public IOutputManager Create()
         {
-            return new OutputManager(_messages, _writeToConsoleEventLogger);
+            return new OutputManager(_messages, _outputAccess);
         }
     }
 }

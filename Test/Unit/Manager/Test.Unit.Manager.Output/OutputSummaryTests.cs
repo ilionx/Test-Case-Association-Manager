@@ -4,8 +4,8 @@ using AutoFixture;
 using FluentAssertions;
 using System.Reflection;
 using System.Collections.Generic;
-using AssociateTestsToTestCases.Event;
 using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.TestCase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -19,7 +19,7 @@ namespace Test.Unit.Manager.Output
         {
             // Arrange
             var messages = new Messages();
-            var writeToConsoleEventLoggerMock = new Mock<IWriteToConsoleEventLogger>();
+            var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
             var testCases = fixture.Create<List<TestCase>>();
@@ -30,14 +30,14 @@ namespace Test.Unit.Manager.Output
                 GetType().GetMethod(MethodBase.GetCurrentMethod().Name)
             };
 
-            var target = new OutputManagerFactory(messages, writeToConsoleEventLoggerMock.Object).Create();
+            var target = new OutputManagerFactory(messages, outputAccess.Object).Create();
 
             // Act
             Action actual = () => target.OutputSummary(methods, testCases);
 
             // Assert
             actual.Should().NotThrow<InvalidOperationException>();
-            writeToConsoleEventLoggerMock.Verify(x => x.Write(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(3));
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(3));
         }
     }
 }
