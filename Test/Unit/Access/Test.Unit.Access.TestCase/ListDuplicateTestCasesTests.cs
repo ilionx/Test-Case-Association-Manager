@@ -2,31 +2,43 @@
 using System;
 using AutoFixture;
 using FluentAssertions;
+using AssociateTestsToTestCases;
 using System.Collections.Generic;
+using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Counter;
 using Microsoft.VisualStudio.Services.Common;
+using AssociateTestsToTestCases.Access.Output;
+using AssociateTestsToTestCases.Access.DevOps;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 
-namespace Test.Unit.Access.TestCase
+namespace Test.Unit.Access.DevOps
 {
     [TestClass]
     public class ListDuplicateTestCasesTests
     {
         [TestMethod]
-        public void TestCaseAccess_ListDuplicateTestCases_EmptyDuplicateTestCases()
+        public void DevOpsAccess_ListDuplicateTestCases_EmptyDuplicateTestCases()
         {
             // Arrange
             var testManagementHttpClient = new Mock<TestManagementHttpClient>(new Uri("http://dummy.url"), new VssCredentials());
             var workItemTrackingHttpClient = new Mock<WorkItemTrackingHttpClient>(new Uri("http://dummy.url"), new VssCredentials());
 
-            const string testName = "";
-            const string projectName = "";
+            var outputAccess = new Mock<IOutputAccess>();
+            var messages = new Messages();
 
             var fixture = new Fixture();
-            var testCases = fixture.Create<List<AssociateTestsToTestCases.Access.TestCase.TestCase>>();
+            var testCases = fixture.Create<List<TestCase>>();
 
-            var target = new TestCaseAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, testName, projectName).Create();
+            var options = new InputOptions()
+            {
+                ValidationOnly = true,
+                VerboseLogging = true
+            };
+            var counter = new Counter();
+
+            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
             var actual = target.ListDuplicateTestCases(testCases);
@@ -36,22 +48,29 @@ namespace Test.Unit.Access.TestCase
         }
 
         [TestMethod]
-        public void TestCaseAccess_ListDuplicateTestCases_NotEmptyDuplicateTestCases()
+        public void DevOpsAccess_ListDuplicateTestCases_NotEmptyDuplicateTestCases()
         {
             // Arrange
             var testManagementHttpClient = new Mock<TestManagementHttpClient>(new Uri("http://dummy.url"), new VssCredentials());
             var workItemTrackingHttpClient = new Mock<WorkItemTrackingHttpClient>(new Uri("http://dummy.url"), new VssCredentials());
 
-            const string testName = "";
-            const string projectName = "";
+            var outputAccess = new Mock<IOutputAccess>();
+            var messages = new Messages();
 
             var fixture = new Fixture();
-            var testCases = new List<AssociateTestsToTestCases.Access.TestCase.TestCase>();
-            var testCasesToBeDuplicated = fixture.Create<List<AssociateTestsToTestCases.Access.TestCase.TestCase>>();
+            var testCases = new List<TestCase>();
+            var testCasesToBeDuplicated = fixture.Create<List<TestCase>>();
             testCases.AddRange(testCasesToBeDuplicated);
             testCases.AddRange(testCasesToBeDuplicated);
 
-            var target = new TestCaseAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, testName, projectName).Create();
+            var options = new InputOptions()
+            {
+                ValidationOnly = true,
+                VerboseLogging = true
+            };
+            var counter = new Counter();
+
+            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
             var actual = target.ListDuplicateTestCases(testCases);

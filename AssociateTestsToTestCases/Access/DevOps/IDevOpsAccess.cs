@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
-using AssociateTestsToTestCases.Access.TestCase;
 
 namespace AssociateTestsToTestCases.Access.DevOps
 {
     public interface IDevOpsAccess
     {
-        List<TestCase.TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase.TestCase> testCases, List<TestMethod> testMethods);
-        int Associate(List<TestMethod> testMethods, List<TestCase.TestCase> testCases, ITestCaseAccess testCaseAccess, bool validationOnly, string testType);
+        int[] GetTestCasesId();
+        List<TestCase> GetTestCases();
+        int Associate(List<TestMethod> testMethods, List<TestCase> testCases, string testType);
+        List<DuplicateTestCase> ListDuplicateTestCases(List<TestCase> testCases);
+        List<TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase> testCases, List<TestMethod> testMethods);
     }
 }

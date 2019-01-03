@@ -1,10 +1,13 @@
 ﻿using System.Reflection;
 using System.Collections.Generic;
+using AssociateTestsToTestCases.Access.DevOps;
 
 namespace AssociateTestsToTestCases.Manager.DevOps
 {
     public interface IDevOpsManager
     {
-        void Associate(MethodInfo[] methods, List<Access.TestCase.TestCase> testCases, bool validationOnly, string testType);
+        bool TestPlanIsEmpty();
+        List<TestCase> GetTestCases();
+        void Associate(MethodInfo[] methods, List<TestCase> testCases, string testType);
     }
 }

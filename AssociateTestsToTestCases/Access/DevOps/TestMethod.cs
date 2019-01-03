@@ -1,4 +1,6 @@
-﻿namespace AssociateTestsToTestCases.Access.DevOps
+﻿using System;
+
+namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class TestMethod
     {
@@ -6,11 +8,14 @@
         public readonly string AssemblyName;
         public readonly string FullClassName;
 
-        public TestMethod(string name, string assemblyName, string fullClassName)
+        public readonly Guid TempId;
+
+        public TestMethod(string name, string assemblyName, string fullClassName, Guid id)
         {
             Name = name;
             AssemblyName = assemblyName;
             FullClassName = fullClassName;
+            TempId = id;
         }
     }
 }

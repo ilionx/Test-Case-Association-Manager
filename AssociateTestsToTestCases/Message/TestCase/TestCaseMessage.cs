@@ -9,7 +9,7 @@ namespace AssociateTestsToTestCases.Message.TestCase
 
         public readonly string Duplicate = "Test Case '{0}' ({1})";
 
-        public virtual string GetDuplicateTestCaseNamesString(Access.TestCase.TestCase[] testCases)
+        public virtual string GetDuplicateTestCaseNamesString(Access.DevOps.TestCase[] testCases)
         {
             return IdsName + string.Join(Separator, testCases.Select(x => x.Id));
         }

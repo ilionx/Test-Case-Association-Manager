@@ -3,11 +3,12 @@ using System;
 using AutoFixture;
 using FluentAssertions;
 using System.Collections.Generic;
-using AssociateTestsToTestCases.Access.Output;
-using AssociateTestsToTestCases.Access.TestCase;
+using AssociateTestsToTestCases.Counter;
+using AssociateTestsToTestCases.Access.DevOps;
+using AssociateTestsToTestCases.Manager.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Unit.Manager.TestCase
+namespace Test.Unit.Manager.DevOps
 {
     [TestClass]
     public class GetTestCasesTests
@@ -15,77 +16,83 @@ namespace Test.Unit.Manager.TestCase
         private const int DefaultWriteCount = 2;
 
         [TestMethod]
-        public void Program_GetTestCases_TestCasesIsNullOrEmpty()
+        public void DevOpsManager_GetTestCases_TestCasesIsNullOrEmpty()
         {
             // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+            var outputManagerMock = new Mock<IOutputManager>();
+            var devOpsAccessMock = new Mock<IDevOpsAccess>();
 
             var fixture = new Fixture();
             var message = fixture.Create<string>();
             var messageType = fixture.Create<string>();
             var messageReason = fixture.Create<string>();
-            var testCases = new List<AssociateTestsToTestCases.Access.TestCase.TestCase>();
+            var testCases = new List<TestCase>();
 
-            testCaseAccessMock.Setup(x => x.GetTestCases()).Returns(testCases);
-            outputAccess.Setup(x => x.WriteToConsole(message, messageType, messageReason));
+            var counter = new Counter();
 
-            var target = new TestCaseManagerFactory(testCaseAccessMock.Object, outputAccess.Object).Create();
+            devOpsAccessMock.Setup(x => x.GetTestCases()).Returns(testCases);
+            outputManagerMock.Setup(x => x.WriteToConsole(message, messageType, messageReason));
+
+            var target = new DevOpsManagerFactory(devOpsAccessMock.Object, outputManagerMock.Object, counter).Create();
 
             // Act
             Action actual = () => target.GetTestCases();
 
             // Assert
             actual.Should().Throw<InvalidOperationException>();
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount));
+            outputManagerMock.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount));
         }
 
         [TestMethod]
-        public void Program_GetTestCases_DuplicateTestCasesCountIsNotEqualToZero()
+        public void DevOpsManager_GetTestCases_DuplicateTestCasesCountIsNotEqualToZero()
         {
             // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+            var outputManagerMock = new Mock<IOutputManager>();
+            var devOpsAccessMock = new Mock<IDevOpsAccess>();
 
             var fixture = new Fixture();
             var message = fixture.Create<string>();
             var messageType = fixture.Create<string>();
             var messageReason = fixture.Create<string>();
             var duplicateTestCases = fixture.Create<List<DuplicateTestCase>>();
-            var testCases = fixture.Create<List<AssociateTestsToTestCases.Access.TestCase.TestCase>>();
+            var testCases = fixture.Create<List<TestCase>>();
 
-            testCaseAccessMock.Setup(x => x.GetTestCases()).Returns(testCases);
-            testCaseAccessMock.Setup(x => x.ListDuplicateTestCases(testCases)).Returns(duplicateTestCases);
-            outputAccess.Setup(x => x.WriteToConsole(message, messageType, messageReason));
+            var counter = new Counter();
 
-            var target = new TestCaseManagerFactory(testCaseAccessMock.Object, outputAccess.Object).Create();
+            devOpsAccessMock.Setup(x => x.GetTestCases()).Returns(testCases);
+            devOpsAccessMock.Setup(x => x.ListDuplicateTestCases(testCases)).Returns(duplicateTestCases);
+            outputManagerMock.Setup(x => x.WriteToConsole(message, messageType, messageReason));
+
+            var target = new DevOpsManagerFactory(devOpsAccessMock.Object, outputManagerMock.Object, counter).Create();
 
             // Act
             Action actual = () =>  target.GetTestCases();
 
             // Assert
             actual.Should().Throw<InvalidOperationException>();
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount + duplicateTestCases.Count));
+            outputManagerMock.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount + duplicateTestCases.Count));
         }
 
         [TestMethod]
-        public void Program_GetTestCases_Success()
+        public void DevOpsManager_GetTestCases_Success()
         {
             // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+            var outputManagerMock = new Mock<IOutputManager>();
+            var devOpsAccessMock = new Mock<IDevOpsAccess>();
 
             var fixture = new Fixture();
             var message = fixture.Create<string>();
             var messageType = fixture.Create<string>();
             var messageReason = fixture.Create<string>();
-            var testCases = fixture.Create<List<AssociateTestsToTestCases.Access.TestCase.TestCase>>();
+            var testCases = fixture.Create<List<TestCase>>();
 
-            testCaseAccessMock.Setup(x => x.GetTestCases()).Returns(testCases);
-            outputAccess.Setup(x => x.WriteToConsole(message, messageType, messageReason));
-            testCaseAccessMock.Setup(x => x.ListDuplicateTestCases(testCases)).Returns(new List<DuplicateTestCase>());
+            var counter = new Counter();
 
-            var target = new TestCaseManagerFactory(testCaseAccessMock.Object, outputAccess.Object).Create();
+            devOpsAccessMock.Setup(x => x.GetTestCases()).Returns(testCases);
+            outputManagerMock.Setup(x => x.WriteToConsole(message, messageType, messageReason));
+            devOpsAccessMock.Setup(x => x.ListDuplicateTestCases(testCases)).Returns(new List<DuplicateTestCase>());
+
+            var target = new DevOpsManagerFactory(devOpsAccessMock.Object, outputManagerMock.Object, counter).Create();
 
             // Act
             var actual = target.GetTestCases();
@@ -93,7 +100,7 @@ namespace Test.Unit.Manager.TestCase
             // Assert
             actual.Should().NotBeNullOrEmpty();
             actual.Count.Should().Be(testCases.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount));
+            outputManagerMock.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount));
         }
     }
 }

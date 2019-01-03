@@ -12,18 +12,25 @@ namespace AssociateTestsToTestCases.Manager.File
         private readonly Messages _messages;
         private readonly IFileAccess _fileAccess;
         private readonly IOutputAccess _outputAccess;
+        private readonly InputOptions _options;
 
-        public FileManager(Messages messages, IFileAccess fileAccess, IOutputAccess outputAccess)
+        public FileManager(Messages messages, IFileAccess fileAccess, IOutputAccess outputAccess, InputOptions options)
         {
             _messages = messages;
             _fileAccess = fileAccess;
             _outputAccess = outputAccess;
+            _options = options;
         }
 
-        public MethodInfo[] GetTestMethods(string[] testAssemblyPaths)
+        public bool TestMethodsPathIsEmpty()
+        {
+            return _fileAccess.ListTestMethods(_options.TestAssemblyPaths).IsNullOrEmpty();
+        }
+
+        public MethodInfo[] GetTestMethods()
         {
            _outputAccess.WriteToConsole(_messages.Stages.TestMethod.Status, _messages.Types.Stage);
-            var testMethods = _fileAccess.ListTestMethods(testAssemblyPaths);
+            var testMethods = _fileAccess.ListTestMethods(_options.TestAssemblyPaths);
             if (testMethods.IsNullOrEmpty())
             {
                _outputAccess.WriteToConsole(_messages.Stages.TestMethod.Failure, _messages.Types.Error);

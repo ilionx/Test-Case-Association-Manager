@@ -1,303 +1,321 @@
-﻿using Moq;
-using System.Linq;
-using AutoFixture;
-using FluentAssertions;
-using System.Collections.Generic;
-using AssociateTestsToTestCases.Message;
-using AssociateTestsToTestCases.Utility;
-using AssociateTestsToTestCases.Access.Output;
-using AssociateTestsToTestCases.Access.DevOps;
-using AssociateTestsToTestCases.Access.TestCase;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿//using Moq;
+//using System.Linq;
+//using AutoFixture;
+//using FluentAssertions;
+//using System.Collections.Generic;
+//using AssociateTestsToTestCases.Counter;
+//using AssociateTestsToTestCases.Message;
+//using AssociateTestsToTestCases.Access.Output;
+//using AssociateTestsToTestCases.Access.DevOps;
+//using AssociateTestsToTestCases.Access.TestCase;
+//using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Unit.Access.DevOps
-{
-    [TestClass]
-    public class AssociateTests : DevOpsAccessTestsBase
-    {
-        private const string AutomatedName = "Automated";
-        private const string NotAutomatedName = "Not Automated";
+//namespace Test.Unit.Access.DevOps
+//{
+//    [TestClass]
+//    public class AssociateTests : DevOpsAccessTestsBase
+//    {
+//        private const string AutomatedName = "Automated";
+//        private const string NotAutomatedName = "Not Automated";
 
-        [TestMethod]
-        public void DevOpsAccess_Associate_TestCaseIsNull()
-        {
-            // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+//        [TestMethod]
+//        public void DevOpsAccess_Associate_TestCaseIsNull()
+//        {
+//            // Arrange
+//            var outputAccess = new Mock<IOutputAccess>();
+//            var testCaseAccessMock = new Mock<ITestCaseAccess>();
 
-            const bool validationOnly = true;
-            const bool verboseLogging = true;
+//            const bool validationOnly = true;
+//            const bool verboseLogging = true;
 
-            var fixture = new Fixture();
-            var testType = string.Empty;
-            var messages = new Messages();
-            var testCases = fixture.Create<List<TestCase>>();
-            var testMethods = fixture.Create<List<TestMethod>>();
+//            var fixture = new Fixture();
+//            var testType = string.Empty;
+//            var messages = new Messages();
+//            var testCases = fixture.Create<List<TestCase>>();
+//            var testMethods = fixture.Create<List<TestMethod>>();
 
-            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
+//            var counter = new Counter();
 
-            // Act
-            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, validationOnly, testType);
+//            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging, counter).Create();
 
-            // Assert
-            errorCount.Should().Be(testMethods.Count);
-            Counter.Error.Should().Be(testMethods.Count);
-            Counter.TestCaseNotFound.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
-        }
+//            // Act
+//            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, testType);
 
-        [TestMethod]
-        public void DevOpsAccess_Associate_AlreadyAssociated()
-        {
-            // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+//            // Assert
+//            errorCount.Should().Be(testMethods.Count);
+//            counter.Error.Total.Should().Be(testMethods.Count);
+//            counter.Error.TestCaseNotFound.Should().Be(testMethods.Count);
+//            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+//        }
 
-            const bool validationOnly = true;
-            const bool verboseLogging = true;
+//        [TestMethod]
+//        public void DevOpsAccess_Associate_AlreadyAssociated()
+//        {
+//            // Arrange
+//            var outputAccess = new Mock<IOutputAccess>();
+//            var testCaseAccessMock = new Mock<ITestCaseAccess>();
 
-            var fixture = new Fixture();
-            var testType = string.Empty;
-            var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, $"{x.FullClassName}.{x.Name}")).ToList();
+//            const bool validationOnly = true;
+//            const bool verboseLogging = true;
 
-            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
+//            var fixture = new Fixture();
+//            var testType = string.Empty;
+//            var messages = new Messages();
+//            var testMethods = fixture.Create<List<TestMethod>>();
+//            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, $"{x.FullClassName}.{x.Name}")).ToList();
 
-            // Act
-            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, validationOnly, testType);
+//            var counter = new Counter();
 
-            // Assert
-            errorCount.Should().Be(0);
-            Counter.Total.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        }
+//            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging, counter).Create();
 
-        [TestMethod]
-        public void DevOpsAccess_Associate_WrongAssociationWhereOperationSuccessIsFalseAndVerboseLoggingIsFalse()
-        {
-            // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+//            // Act
+//            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, testType);
 
-            const bool validationOnly = true;
-            const bool verboseLogging = false;
-            const bool operationSuccess = false;
+//            // Assert
+//            errorCount.Should().Be(0);
+//            counter.Total.Should().Be(testMethods.Count);
+//            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+//        }
 
-            var fixture = new Fixture();
-            var testType = string.Empty;
-            var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+//        [TestMethod]
+//        public void DevOpsAccess_Associate_WrongAssociationWhereOperationSuccessIsFalseAndVerboseLoggingIsFalse()
+//        {
+//            // Arrange
+//            var outputAccess = new Mock<IOutputAccess>();
+//            var testCaseAccessMock = new Mock<ITestCaseAccess>();
 
-            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(operationSuccess);
+//            const bool validationOnly = true;
+//            const bool verboseLogging = false;
+//            const bool operationSuccess = false;
 
-            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
+//            var fixture = new Fixture();
+//            var testType = string.Empty;
+//            var messages = new Messages();
+//            var testMethods = fixture.Create<List<TestMethod>>();
+//            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
 
-            // Act
-            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, validationOnly, testType);
+//            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(operationSuccess);
 
-            // Assert
-            errorCount.Should().Be(testMethods.Count);
-            Counter.Total.Should().Be(0);
-            Counter.FixedReference.Should().Be(testMethods.Count);
-            Counter.OperationFailed.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
-        }
+//            var counter = new Counter();
 
-        [TestMethod]
-        public void DevOpsAccess_Associate_WrongAssociationWhereOperationSuccessIsFalseAndVerboseLoggingIsTrue()
-        {
-            // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+//            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging, counter).Create();
 
-            const bool validationOnly = true;
-            const bool verboseLogging = true;
-            const bool operationSuccess = false;
+//            // Act
+//            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, testType);
 
-            var fixture = new Fixture();
-            var testType = string.Empty;
-            var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+//            // Assert
+//            errorCount.Should().Be(testMethods.Count);
+//            counter.Total.Should().Be(0);
+//            counter.Success.FixedReference.Should().Be(testMethods.Count);
+//            counter.Error.OperationFailed.Should().Be(testMethods.Count);
+//            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+//        }
 
-            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(operationSuccess);
+//        [TestMethod]
+//        public void DevOpsAccess_Associate_WrongAssociationWhereOperationSuccessIsFalseAndVerboseLoggingIsTrue()
+//        {
+//            // Arrange
+//            var outputAccess = new Mock<IOutputAccess>();
+//            var testCaseAccessMock = new Mock<ITestCaseAccess>();
 
-            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
+//            const bool validationOnly = true;
+//            const bool verboseLogging = true;
+//            const bool operationSuccess = false;
 
-            // Act
-            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, validationOnly, testType);
+//            var fixture = new Fixture();
+//            var testType = string.Empty;
+//            var messages = new Messages();
+//            var testMethods = fixture.Create<List<TestMethod>>();
+//            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
 
-            // Assert
-            errorCount.Should().Be(testMethods.Count);
-            Counter.Total.Should().Be(0);
-            Counter.FixedReference.Should().Be(testMethods.Count);
-            Counter.OperationFailed.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count * 2));
-        }
+//            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(operationSuccess);
 
-        [TestMethod]
-        public void DevOpsAccess_Associate_WrongAssociationWhereOperationSuccessIsTrueAndVerboseLoggingIsFalse()
-        {
-            // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+//            var counter = new Counter();
 
-            const bool validationOnly = true;
-            const bool verboseLogging = false;
-            const bool operationSuccess = true;
+//            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging, counter).Create();
 
-            var fixture = new Fixture();
-            var testType = string.Empty;
-            var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+//            // Act
+//            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, testType);
 
-            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(operationSuccess);
+//            // Assert
+//            errorCount.Should().Be(testMethods.Count);
+//            counter.Total.Should().Be(0);
+//            counter.Success.FixedReference.Should().Be(testMethods.Count);
+//            counter.Error.OperationFailed.Should().Be(testMethods.Count);
+//            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count * 2));
+//        }
 
-            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
+//        [TestMethod]
+//        public void DevOpsAccess_Associate_WrongAssociationWhereOperationSuccessIsTrueAndVerboseLoggingIsFalse()
+//        {
+//            // Arrange
+//            var outputAccess = new Mock<IOutputAccess>();
+//            var testCaseAccessMock = new Mock<ITestCaseAccess>();
 
-            // Act
-            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, validationOnly, testType);
+//            const bool validationOnly = true;
+//            const bool verboseLogging = false;
+//            const bool operationSuccess = true;
 
-            // Assert
-            errorCount.Should().Be(0);
-            Counter.OperationFailed.Should().Be(0);
-            Counter.Total.Should().Be(testMethods.Count);
-            Counter.FixedReference.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        }
+//            var fixture = new Fixture();
+//            var testType = string.Empty;
+//            var messages = new Messages();
+//            var testMethods = fixture.Create<List<TestMethod>>();
+//            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
 
-        [TestMethod]
-        public void DevOpsAccess_Associate_WrongAssociationWhereOperationSuccessIsTrueAndVerboseLoggingIsTrue()
-        {
-            // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+//            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(operationSuccess);
 
-            const bool validationOnly = true;
-            const bool verboseLogging = true;
-            const bool operationSuccess = true;
+//            var counter = new Counter();
 
-            var fixture = new Fixture();
-            var testType = string.Empty;
-            var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+//            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging, counter).Create();
 
-            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(operationSuccess);
+//            // Act
+//            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, testType);
 
-            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
+//            // Assert
+//            errorCount.Should().Be(0);
+//            counter.Error.OperationFailed.Should().Be(0);
+//            counter.Total.Should().Be(testMethods.Count);
+//            counter.Success.FixedReference.Should().Be(testMethods.Count);
+//            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+//        }
 
-            // Act
-            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, validationOnly, testType);
+//        [TestMethod]
+//        public void DevOpsAccess_Associate_WrongAssociationWhereOperationSuccessIsTrueAndVerboseLoggingIsTrue()
+//        {
+//            // Arrange
+//            var outputAccess = new Mock<IOutputAccess>();
+//            var testCaseAccessMock = new Mock<ITestCaseAccess>();
 
-            // Assert
-            errorCount.Should().Be(0);
-            Counter.OperationFailed.Should().Be(0);
-            Counter.Total.Should().Be(testMethods.Count);
-            Counter.FixedReference.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count * 2));
-        }
+//            const bool validationOnly = true;
+//            const bool verboseLogging = true;
+//            const bool operationSuccess = true;
 
-        [TestMethod]
-        public void DevOpsAccess_Associate_OperationSuccessIsFalse()
-        {
-            // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+//            var fixture = new Fixture();
+//            var testType = string.Empty;
+//            var messages = new Messages();
+//            var testMethods = fixture.Create<List<TestMethod>>();
+//            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
 
-            const bool validationOnly = true;
-            const bool verboseLogging = false;
-            const bool operationSuccess = false;
+//            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(operationSuccess);
 
-            var fixture = new Fixture();
-            var testType = string.Empty;
-            var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+//            var counter = new Counter();
 
-            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(operationSuccess);
+//            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging, counter).Create();
 
-            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
+//            // Act
+//            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, testType);
 
-            // Act
-            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, validationOnly, testType);
+//            // Assert
+//            errorCount.Should().Be(0);
+//            counter.Error.OperationFailed.Should().Be(0);
+//            counter.Total.Should().Be(testMethods.Count);
+//            counter.Success.FixedReference.Should().Be(testMethods.Count);
+//            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count * 2));
+//        }
 
-            // Assert
-            errorCount.Should().Be(testMethods.Count);
-            Counter.Total.Should().Be(0);
-            Counter.FixedReference.Should().Be(0);
-            Counter.TestCaseNotFound.Should().Be(0);
-            Counter.OperationFailed.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
-        }
+//        [TestMethod]
+//        public void DevOpsAccess_Associate_OperationSuccessIsFalse()
+//        {
+//            // Arrange
+//            var outputAccess = new Mock<IOutputAccess>();
+//            var testCaseAccessMock = new Mock<ITestCaseAccess>();
 
-        [TestMethod]
-        public void DevOpsAccess_Associate_OperationSuccessIsTrueWhereVerboseLoggingIsFalse()
-        {
-            // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+//            const bool validationOnly = true;
+//            const bool verboseLogging = false;
+//            const bool operationSuccess = false;
 
-            const bool validationOnly = true;
-            const bool verboseLogging = false;
-            const bool operationSuccess = true;
+//            var fixture = new Fixture();
+//            var testType = string.Empty;
+//            var messages = new Messages();
+//            var testMethods = fixture.Create<List<TestMethod>>();
+//            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
 
-            var fixture = new Fixture();
-            var testType = string.Empty;
-            var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+//            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(operationSuccess);
 
-            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(operationSuccess);
+//            var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
+//            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging, counter).Create();
 
-            // Act
-            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, validationOnly, testType);
+//            // Act
+//            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, testType);
 
-            // Assert
-            errorCount.Should().Be(0);
-            Counter.FixedReference.Should().Be(0);
-            Counter.OperationFailed.Should().Be(0);
-            Counter.TestCaseNotFound.Should().Be(0);
-            Counter.Total.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        }
+//            // Assert
+//            errorCount.Should().Be(testMethods.Count);
+//            counter.Total.Should().Be(0);
+//            counter.Success.FixedReference.Should().Be(0);
+//            counter.Error.TestCaseNotFound.Should().Be(0);
+//            counter.Error.OperationFailed.Should().Be(testMethods.Count);
+//            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+//        }
 
-        [TestMethod]
-        public void DevOpsAccess_Associate_OperationSuccessIsTrueWhereVerboseLoggingIsTrue()
-        {
-            // Arrange
-            var outputAccess = new Mock<IOutputAccess>();
-            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+//        [TestMethod]
+//        public void DevOpsAccess_Associate_OperationSuccessIsTrueWhereVerboseLoggingIsFalse()
+//        {
+//            // Arrange
+//            var outputAccess = new Mock<IOutputAccess>();
+//            var testCaseAccessMock = new Mock<ITestCaseAccess>();
 
-            const bool validationOnly = true;
-            const bool verboseLogging = true;
-            const bool operationSuccess = true;
+//            const bool validationOnly = true;
+//            const bool verboseLogging = false;
+//            const bool operationSuccess = true;
 
-            var fixture = new Fixture();
-            var testType = string.Empty;
-            var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+//            var fixture = new Fixture();
+//            var testType = string.Empty;
+//            var messages = new Messages();
+//            var testMethods = fixture.Create<List<TestMethod>>();
+//            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
 
-            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>())).Returns(operationSuccess);
+//            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(operationSuccess);
 
-            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging).Create();
+//            var counter = new Counter();
 
-            // Act
-            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, validationOnly, testType);
+//            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging, counter).Create();
 
-            // Assert
-            errorCount.Should().Be(0);
-            Counter.FixedReference.Should().Be(0);
-            Counter.OperationFailed.Should().Be(0);
-            Counter.TestCaseNotFound.Should().Be(0);
-            Counter.Total.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
-        }
-    }
-}
+//            // Act
+//            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, testType);
+
+//            // Assert
+//            errorCount.Should().Be(0);
+//            counter.Success.FixedReference.Should().Be(0);
+//            counter.Error.OperationFailed.Should().Be(0);
+//            counter.Error.TestCaseNotFound.Should().Be(0);
+//            counter.Total.Should().Be(testMethods.Count);
+//            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+//        }
+
+//        [TestMethod]
+//        public void DevOpsAccess_Associate_OperationSuccessIsTrueWhereVerboseLoggingIsTrue()
+//        {
+//            // Arrange
+//            var outputAccess = new Mock<IOutputAccess>();
+//            var testCaseAccessMock = new Mock<ITestCaseAccess>();
+
+//            const bool validationOnly = true;
+//            const bool verboseLogging = true;
+//            const bool operationSuccess = true;
+
+//            var fixture = new Fixture();
+//            var testType = string.Empty;
+//            var messages = new Messages();
+//            var testMethods = fixture.Create<List<TestMethod>>();
+//            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+
+//            testCaseAccessMock.Setup(x => x.AssociateTestCaseWithTestMethod(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(operationSuccess);
+
+//            var counter = new Counter();
+
+//            var target = new DevOpsAccessFactory(messages, outputAccess.Object, verboseLogging, counter).Create();
+
+//            // Act
+//            var errorCount = target.Associate(testMethods, testCases, testCaseAccessMock.Object, testType);
+
+//            // Assert
+//            errorCount.Should().Be(0);
+//            counter.Success.FixedReference.Should().Be(0);
+//            counter.Error.OperationFailed.Should().Be(0);
+//            counter.Error.TestCaseNotFound.Should().Be(0);
+//            counter.Total.Should().Be(testMethods.Count);
+//            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+//        }
+//    }
+//}

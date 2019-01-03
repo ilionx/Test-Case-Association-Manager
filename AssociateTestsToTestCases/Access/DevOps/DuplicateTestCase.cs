@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AssociateTestsToTestCases.Access.TestCase
+namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class DuplicateTestCase
     {

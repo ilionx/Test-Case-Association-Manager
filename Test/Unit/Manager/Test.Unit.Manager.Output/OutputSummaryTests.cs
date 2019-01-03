@@ -4,9 +4,10 @@ using AutoFixture;
 using FluentAssertions;
 using System.Reflection;
 using System.Collections.Generic;
+using AssociateTestsToTestCases.Counter;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Access.Output;
-using AssociateTestsToTestCases.Access.TestCase;
+using AssociateTestsToTestCases.Access.DevOps;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.Unit.Manager.Output
@@ -30,7 +31,9 @@ namespace Test.Unit.Manager.Output
                 GetType().GetMethod(MethodBase.GetCurrentMethod().Name)
             };
 
-            var target = new OutputManagerFactory(messages, outputAccess.Object).Create();
+            var counter = new Counter();
+
+            var target = new OutputManagerFactory(messages, outputAccess.Object, counter).Create();
 
             // Act
             Action actual = () => target.OutputSummary(methods, testCases);

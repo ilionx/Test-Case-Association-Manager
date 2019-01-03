@@ -87,7 +87,7 @@
             "label": "Verbose logging",
             "defaultValue": true,
             "required": false,
-            "helpMarkDown": "When turned on it also outputs the successful matchings next to the warnings."
+            "helpMarkDown": "When turned on it also outputs the successful matchings and the fixes next to the warnings/errors."
 		}
 	],
 	"outputVariables": [],

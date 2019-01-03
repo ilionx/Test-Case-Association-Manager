@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Access.File;
+using AssociateTestsToTestCases;
 using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Message.TestCase;
 using AssociateTestsToTestCases.Message.TestMethod;
@@ -29,12 +30,17 @@ namespace Test.Unit.Manager.File
             var fixture = new Fixture();
             var testAssemblyPaths = fixture.Create<string[]>();
 
+            var options = new InputOptions()
+            {
+                TestAssemblyPaths = testAssemblyPaths
+            };
+
             fileAccessMock.Setup(x => x.ListTestMethods(It.IsAny<string[]>())).Returns(new MethodInfo[0]);
 
-            var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object).Create();
+            var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object, options).Create();
 
             // Act
-            Action actual = () => target.GetTestMethods(testAssemblyPaths);
+            Action actual = () => target.GetTestMethods();
 
             // Assert
             actual.Should().Throw<InvalidOperationException>();
@@ -56,16 +62,21 @@ namespace Test.Unit.Manager.File
             var duplicateTestMethodName = fixture.Create<string>();
             var duplicateTestMethods = fixture.Create<List<string>>().Select(x => new DuplicateTestMethod(x, new MethodInfo[2])).ToList();
 
+            var options = new InputOptions()
+            {
+                TestAssemblyPaths = testAssemblyPaths
+            };
+
             fileAccessMock.Setup(x => x.ListTestMethods(It.IsAny<string[]>())).Returns(testMethods);
             fileAccessMock.Setup(x => x.ListDuplicateTestMethods(It.IsAny<MethodInfo[]>())).Returns(duplicateTestMethods);
             testMethodMessageMock.Setup(x => x.GetDuplicateTestMethodNamesString(It.IsAny<MethodInfo[]>())).Returns(duplicateTestMethodName);
 
             var messagesMock = new Mock<Messages>(MockBehavior.Default, testCaseMessageMock.Object, testMethodMessageMock.Object);
 
-            var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object, messagesMock.Object).Create();
+            var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object, options, messagesMock.Object).Create();
 
             // Act
-            Action actual = () => target.GetTestMethods(testAssemblyPaths);
+            Action actual = () => target.GetTestMethods();
 
             // Assert
             actual.Should().Throw<InvalidOperationException>();
@@ -83,13 +94,18 @@ namespace Test.Unit.Manager.File
             var testAssemblyPaths = fixture.Create<string[]>();
             var testMethods = new MethodInfo[20];
 
+            var options = new InputOptions()
+            {
+                TestAssemblyPaths = testAssemblyPaths
+            };
+
             fileAccessMock.Setup(x => x.ListTestMethods(It.IsAny<string[]>())).Returns(testMethods);
             fileAccessMock.Setup(x => x.ListDuplicateTestMethods(It.IsAny<MethodInfo[]>())).Returns(new List<DuplicateTestMethod>());
 
-            var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object).Create();
+            var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object, options).Create();
 
             // Act
-            var actual = target.GetTestMethods(testAssemblyPaths);
+            var actual = target.GetTestMethods();
 
             // Assert
             actual.Length.Should().Be(testMethods.Length);

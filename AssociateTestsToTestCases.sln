@@ -13,21 +13,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Access", "Access", "{EF785D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Manager", "Manager", "{812398D1-9086-43B2-9AE8-5BC33D7C63B6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Access.TestCase", "Test\Unit\Access\Test.Unit.Access.TestCase\Test.Unit.Access.TestCase.csproj", "{D1B09E4C-5E1B-408E-AF8C-92622E6E219F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Access.DevOps", "Test\Unit\Access\Test.Unit.Access.TestCase\Test.Unit.Access.DevOps.csproj", "{D1B09E4C-5E1B-408E-AF8C-92622E6E219F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Access.Output", "Test\Unit\Access\Test.Unit.Access.Output\Test.Unit.Access.Output.csproj", "{509CA740-6C6F-4EBC-94AA-4DA07ED4BD70}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Access.File", "Test\Unit\Access\Test.Unit.Access.File\Test.Unit.Access.File.csproj", "{B1EADB6B-4448-426A-989C-B0CFEBFFD89C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Access.DevOps", "Test\Unit\Access\Test.Unit.Access.DevOps\Test.Unit.Access.DevOps.csproj", "{E0ABA1E1-FBDD-482E-B3DE-11B0F99EBF12}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Manager.DevOps", "Test\Unit\Manager\Test.Unit.Manager.DevOps\Test.Unit.Manager.DevOps.csproj", "{11EDB842-BBFC-479F-B659-435577A008DC}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Manager.File", "Test\Unit\Manager\Test.Unit.Manager.File\Test.Unit.Manager.File.csproj", "{C36B0CE0-8842-49FA-8F22-5E95F481526D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Manager.Output", "Test\Unit\Manager\Test.Unit.Manager.Output\Test.Unit.Manager.Output.csproj", "{D1FB32B9-7C6F-4074-A77D-2CE5FDB7D7C6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Manager.TestCase", "Test\Unit\Manager\Test.Unit.Manager.TestCase\Test.Unit.Manager.TestCase.csproj", "{BBEB0B78-B2E8-4E26-8D4B-A422C3FC820F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Unit.Manager.DevOps", "Test\Unit\Manager\Test.Unit.Manager.TestCase\Test.Unit.Manager.DevOps.csproj", "{BBEB0B78-B2E8-4E26-8D4B-A422C3FC820F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,14 +47,6 @@ Global
 		{B1EADB6B-4448-426A-989C-B0CFEBFFD89C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1EADB6B-4448-426A-989C-B0CFEBFFD89C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1EADB6B-4448-426A-989C-B0CFEBFFD89C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E0ABA1E1-FBDD-482E-B3DE-11B0F99EBF12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E0ABA1E1-FBDD-482E-B3DE-11B0F99EBF12}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E0ABA1E1-FBDD-482E-B3DE-11B0F99EBF12}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E0ABA1E1-FBDD-482E-B3DE-11B0F99EBF12}.Release|Any CPU.Build.0 = Release|Any CPU
-		{11EDB842-BBFC-479F-B659-435577A008DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{11EDB842-BBFC-479F-B659-435577A008DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{11EDB842-BBFC-479F-B659-435577A008DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{11EDB842-BBFC-479F-B659-435577A008DC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C36B0CE0-8842-49FA-8F22-5E95F481526D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C36B0CE0-8842-49FA-8F22-5E95F481526D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C36B0CE0-8842-49FA-8F22-5E95F481526D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -82,8 +70,6 @@ Global
 		{D1B09E4C-5E1B-408E-AF8C-92622E6E219F} = {EF785D63-2A91-4D84-B121-BD5F4268AFDF}
 		{509CA740-6C6F-4EBC-94AA-4DA07ED4BD70} = {EF785D63-2A91-4D84-B121-BD5F4268AFDF}
 		{B1EADB6B-4448-426A-989C-B0CFEBFFD89C} = {EF785D63-2A91-4D84-B121-BD5F4268AFDF}
-		{E0ABA1E1-FBDD-482E-B3DE-11B0F99EBF12} = {EF785D63-2A91-4D84-B121-BD5F4268AFDF}
-		{11EDB842-BBFC-479F-B659-435577A008DC} = {812398D1-9086-43B2-9AE8-5BC33D7C63B6}
 		{C36B0CE0-8842-49FA-8F22-5E95F481526D} = {812398D1-9086-43B2-9AE8-5BC33D7C63B6}
 		{D1FB32B9-7C6F-4074-A77D-2CE5FDB7D7C6} = {812398D1-9086-43B2-9AE8-5BC33D7C63B6}
 		{BBEB0B78-B2E8-4E26-8D4B-A422C3FC820F} = {812398D1-9086-43B2-9AE8-5BC33D7C63B6}

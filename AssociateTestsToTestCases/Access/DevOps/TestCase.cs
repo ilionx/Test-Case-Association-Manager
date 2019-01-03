@@ -1,4 +1,4 @@
-﻿namespace AssociateTestsToTestCases.Access.TestCase
+﻿namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class TestCase
     {

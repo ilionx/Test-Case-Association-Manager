@@ -41,7 +41,7 @@ To create a Personal Access Token please read chapter 'Create personal access to
 | TestPlanName | **X** | The name of the Test Plan containing the Test Cases. | ``` System Test Plan ``` |
 | TestType |  | Specifies the Test Type. You could leave this field *empty*. As far as we know it does nothing other than filling its field in a Test Case. |  |
 | ValidateOnly |  | Indicates if you only want to validate the associations without persisting the changes. This makes it possible to insert this task within your pull request definition. |  |
-| VerboseLogging |  | When Verbose logging is turned on it also outputs the successful matchings next to the warnings/errors/fixes. |  |
+| VerboseLogging |  | When Verbose logging is turned on it also outputs the successful matchings and the fixes next to the warnings/errors. |  |
 
 ## 4.2 Usage
 There are two ways to create a pipeline definition: the old fashioned way or through YAML. Within this chapter the usage of this task will be explained for both methods.
