@@ -5,4 +5,5 @@
 // a specific target and scoped to a namespace, type, member, etc.
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3885:\"Assembly.Load\" should be used", Justification = "<Pending>", Scope = "member", Target = "~M:AssociateTestsToTestCases.Program.ListTestMethods(System.String[])")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3885:\"Assembly.Load\" should be used", Justification = "<Pending>", Scope = "member", Target = "~M:AssociateTestsToTestCases.Access.File.AssemblyHelper.LoadFrom(System.String)~System.Reflection.Assembly")]
 
