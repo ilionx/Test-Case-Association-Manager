@@ -9,6 +9,6 @@ namespace AssociateTestsToTestCases.Access.DevOps
         TestCase[] GetTestCases();
         int Associate(TestMethod[] testMethods, Dictionary<string, TestCase> testCases);
         List<DuplicateTestCase> ListDuplicateTestCases(TestCase[] testCases);
-        TestCase[] ListTestCasesWithNotAvailableTestMethods(TestCase[] testCases, TestMethod[] testMethods); // todo: switch test parameters
+        List<TestCase> ListTestCasesWithNotAvailableTestMethods(TestMethod[] testMethods, TestCase[] testCases);
     }
 }

@@ -45,7 +45,7 @@ namespace AssociateTestsToTestCases.Manager.DevOps
         {
             _outputManager.WriteToConsole(_messages.Stages.Association.Status, _messages.Types.Stage);
 
-            ValidateTestMethodsNotAvailable(_devOpsAccess.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods));
+            ValidateTestMethodsNotAvailable(_devOpsAccess.ListTestCasesWithNotAvailableTestMethods(testMethods, testCases));
             ValidateAssociationErrors(_devOpsAccess.Associate(testMethods, GetTestCaseDictionary(testCases)), testMethods, testCases);
 
             _outputManager.WriteToConsole(string.Format(_messages.Stages.Association.Success, _counter.Success.Total), _messages.Types.Success);
@@ -79,13 +79,13 @@ namespace AssociateTestsToTestCases.Manager.DevOps
             }
         }
 
-        private void ValidateTestMethodsNotAvailable(TestCase[] testMethodsNotAvailable)
+        private void ValidateTestMethodsNotAvailable(List<TestCase> testMethodsNotAvailable)
         {
-            if (testMethodsNotAvailable.Length != 0)
+            if (testMethodsNotAvailable.Count != 0)
             {
-                testMethodsNotAvailable.ToList().ForEach(x => _outputManager.WriteToConsole(string.Format(_messages.Associations.TestCaseWithNotAvailableTestMethod, x.Title, x.Id, x.AutomatedTestName), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable));
+                testMethodsNotAvailable.ForEach(x => _outputManager.WriteToConsole(string.Format(_messages.Associations.TestCaseWithNotAvailableTestMethod, x.Title, x.Id, x.AutomatedTestName), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable));
 
-                _counter.Warning.TestMethodNotAvailable += testMethodsNotAvailable.Length;
+                _counter.Warning.TestMethodNotAvailable += testMethodsNotAvailable.Count;
             }
         }
 

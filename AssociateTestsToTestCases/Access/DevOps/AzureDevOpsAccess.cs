@@ -59,15 +59,14 @@ namespace AssociateTestsToTestCases.Access.DevOps
         {
             foreach (var testMethod in testMethods)
             {
-                if (!testCases.ContainsKey(testMethod.Name))
+                var testCase = GetTestCase(testCases, testMethod);
+                if (testCase == null)
                 {
                     _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestMethodInfo, testMethod.Name, $"{testMethod.FullClassName}.{testMethod.Name}"), _messages.Types.Error, _messages.Reasons.MissingTestCase);
 
                     _counter.Error.TestCaseNotFound++;
                     continue;
                 }
-
-                var testCase = testCases[testMethod.Name];
 
                 var testCaseHasAutomatedStatus = TestCaseHasAutomatedStatus(testCase, testMethod);
                 var testCaseIsAlreadyAutomated = testCaseHasAutomatedStatus && TestCaseIsAlreadyAutomated(testCase, testMethod);
@@ -114,23 +113,17 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return _counter.Error.Total;
         }
 
+
         public List<DuplicateTestCase> ListDuplicateTestCases(TestCase[] testCases)
         {
-            var duplicateTestCases = new List<DuplicateTestCase>();
-
             var duplicates = testCases.Select(x => x.Title).GroupBy(x => x).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
 
-            foreach (var duplicate in duplicates)
-            {
-                duplicateTestCases.Add(new DuplicateTestCase(duplicate, testCases.Where(y => y.Title.Equals(duplicate)).ToArray()));
-            }
-
-            return duplicateTestCases;
+            return duplicates.Select(x => new DuplicateTestCase(x, testCases.Where(y => y.Title.Equals(x)).ToArray())).ToList();
         }
 
-        public TestCase[] ListTestCasesWithNotAvailableTestMethods(TestCase[] testCases, TestMethod[] testMethods)
+        public List<TestCase> ListTestCasesWithNotAvailableTestMethods(TestMethod[] testMethods, TestCase[] testCases)
         {
-            return testCases.Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToArray();
+            return testCases.Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToList();
         }
 
         public int[] GetTestCasesId()
@@ -141,8 +134,6 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
             return testPoints.Select(x => int.Parse(x.TestCase.Id)).ToArray();
         }
-
-        #region GetTestCases
 
         private static int[][] ChunkTestCases(int[] testCasesId)
         {
@@ -161,23 +152,13 @@ namespace AssociateTestsToTestCases.Access.DevOps
                 ).ToArray();
         }
 
-        #endregion
-
-        #region Validations
-
-        private bool TestCaseHasAutomatedStatus(TestCase testCase, TestMethod testMethod)
+        private TestCase GetTestCase(Dictionary<string, TestCase> testCases, TestMethod testMethod)
         {
-            return testCase.AutomationStatus.Equals(AutomatedName) && testCase.Title.Equals(testMethod.Name);
+            TestCase testCase = null;
+            testCases.TryGetValue(testMethod.Name, out testCase);
+
+            return testCase;
         }
-
-        private bool TestCaseIsAlreadyAutomated(TestCase testCase, TestMethod testMethod)
-        {
-            return testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}");
-        }
-
-        #endregion
-
-        #region Assocation
 
         private bool AssociateTestCaseWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, string testType)
         {
@@ -221,6 +202,18 @@ namespace AssociateTestsToTestCases.Access.DevOps
                    result.Fields[AutomatedTestIdName].ToString() == automatedTestId &&
                    result.Fields[AutomatedTestStorageName].ToString() == assemblyName &&
                    result.Fields[AutomatedTestName].ToString() == methodName;
+        }
+
+        #region Validations
+
+        private bool TestCaseHasAutomatedStatus(TestCase testCase, TestMethod testMethod)
+        {
+            return testCase.AutomationStatus.Equals(AutomatedName) && testCase.Title.Equals(testMethod.Name);
+        }
+
+        private bool TestCaseIsAlreadyAutomated(TestCase testCase, TestMethod testMethod)
+        {
+            return testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}");
         }
 
         #endregion

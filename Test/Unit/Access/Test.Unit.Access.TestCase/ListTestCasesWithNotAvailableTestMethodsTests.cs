@@ -4,7 +4,6 @@ using AutoFixture;
 using System.Linq;
 using FluentAssertions;
 using AssociateTestsToTestCases;
-using System.Collections.Generic;
 using AssociateTestsToTestCases.Counter;
 using AssociateTestsToTestCases.Message;
 using Microsoft.VisualStudio.Services.Common;
@@ -49,10 +48,10 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
+            var actual = target.ListTestCasesWithNotAvailableTestMethods(testMethods, testCases);
 
             // Assert
-            actual.Length.Should().Be(0);
+            actual.Count.Should().Be(0);
         }
 
         [TestMethod]
@@ -81,10 +80,10 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
+            var actual = target.ListTestCasesWithNotAvailableTestMethods(testMethods, testCases);
 
             // Assert
-            actual.Length.Should().Be(0);
+            actual.Count.Should().Be(0);
         }
 
         [TestMethod]
@@ -113,10 +112,10 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
+            var actual = target.ListTestCasesWithNotAvailableTestMethods(testMethods, testCases);
 
             // Assert
-            actual.Length.Should().Be(3);
+            actual.Count.Should().Be(3);
         }
     }
 }
