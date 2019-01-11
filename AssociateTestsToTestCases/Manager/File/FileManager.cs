@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using Microsoft.TeamFoundation.Common;
@@ -28,7 +29,7 @@ namespace AssociateTestsToTestCases.Manager.File
             return _fileAccess.ListTestMethods(_options.TestAssemblyPaths).IsNullOrEmpty();
         }
 
-        public MethodInfo[] GetTestMethods() //todo: return List<TestMethod>
+        public TestMethod[] GetTestMethods()
         {
             _outputAccess.WriteToConsole(_messages.Stages.TestMethod.Status, _messages.Types.Stage);
 
@@ -37,7 +38,13 @@ namespace AssociateTestsToTestCases.Manager.File
             ValidateTestMethodsHasDuplicates(_fileAccess.ListDuplicateTestMethods(testMethods));
 
             _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestMethod.Success, testMethods.Length), _messages.Types.Success);
-            return testMethods;
+
+            return MapTestMethods(testMethods);
+        }
+
+        private TestMethod[] MapTestMethods(MethodInfo[] methods)
+        {
+            return methods.Select(x => new TestMethod(x.Name, x.Module.Name, x.DeclaringType.FullName, Guid.NewGuid())).ToArray();
         }
 
         #region Validations

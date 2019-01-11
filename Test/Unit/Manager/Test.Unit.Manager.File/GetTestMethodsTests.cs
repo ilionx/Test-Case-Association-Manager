@@ -4,10 +4,10 @@ using System.Linq;
 using AutoFixture;
 using FluentAssertions;
 using System.Reflection;
+using AssociateTestsToTestCases;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Access.File;
-using AssociateTestsToTestCases;
 using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Message.TestCase;
 using AssociateTestsToTestCases.Message.TestMethod;
@@ -92,7 +92,12 @@ namespace Test.Unit.Manager.File
 
             var fixture = new Fixture();
             var testAssemblyPaths = fixture.Create<string[]>();
-            var testMethods = new MethodInfo[20];
+            var testMethods = new MethodInfo[]
+            {
+                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
+                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
+                GetType().GetMethod(MethodBase.GetCurrentMethod().Name)
+            };
 
             var options = new InputOptions()
             {

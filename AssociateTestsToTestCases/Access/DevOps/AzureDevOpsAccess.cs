@@ -8,6 +8,8 @@ using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
+using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
+
 namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class AzureDevOpsAccess : IDevOpsAccess
@@ -54,7 +56,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return CreateTestCaseList(testCases);
         }
 
-        public int Associate(List<TestMethod> testMethods, List<TestCase> testCases) // todo: Dictionary<string, TestCase>
+        public int Associate(TestMethod[] testMethods, List<TestCase> testCases) // todo: Dictionary<string, TestCase>
         {
             foreach (var testMethod in testMethods)
             {
@@ -127,7 +129,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return duplicateTestCases;
         }
 
-        public List<TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase> testCases, List<TestMethod> testMethods)
+        public List<TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase> testCases, TestMethod[] testMethods)
         {
             return testCases.Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToList();
         }

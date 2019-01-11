@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AssociateTestsToTestCases.Access.DevOps
+namespace AssociateTestsToTestCases.Manager.File
 {
     public class TestMethod
     {

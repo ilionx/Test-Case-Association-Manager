@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.DevOps;
 
@@ -24,7 +25,7 @@ namespace AssociateTestsToTestCases.Manager.Output
             _outputAccess.WriteToConsole(message, messageType, reason);
         }
 
-        public void OutputSummary(MethodInfo[] testMethods, List<TestCase> testCases)
+        public void OutputSummary(TestMethod[] testMethods, List<TestCase> testCases)
         {
             var testMethodsLength = testMethods == null ? 0 : testMethods.Length;
             var testCasesCount = testCases == null ? 0 : testCases.Count;

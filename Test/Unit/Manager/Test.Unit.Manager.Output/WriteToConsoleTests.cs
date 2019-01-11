@@ -3,7 +3,6 @@ using System;
 using FluentAssertions;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Access.Output;
-using AssociateTestsToTestCases.Access.DevOps;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.Unit.Manager.Output

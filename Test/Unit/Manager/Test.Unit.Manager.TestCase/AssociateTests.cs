@@ -2,9 +2,9 @@
 using System;
 using AutoFixture;
 using FluentAssertions;
-using System.Reflection;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Counter;
+using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.DevOps;
 using AssociateTestsToTestCases.Manager.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,19 +24,12 @@ namespace Test.Unit.Manager.DevOps
             var devOpsAccessMock = new Mock<IDevOpsAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
-            var methods = new MethodInfo[]
-            {
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name)
-            };
-
+            var methods = fixture.Create<TestMethod[]>();
             var testCases = fixture.Create<List<TestCase>>();
             var testMethodsNotAvailable = fixture.Create<List<TestCase>>();
 
-            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<List<TestMethod>>())).Returns(testMethodsNotAvailable);
-            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<List<TestMethod>>(), It.IsAny<List<TestCase>>())).Returns(0);
+            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<TestMethod[]>())).Returns(testMethodsNotAvailable);
+            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<List<TestCase>>())).Returns(0);
 
             var counter = new Counter();
 
@@ -58,18 +51,11 @@ namespace Test.Unit.Manager.DevOps
             var devOpsAccessMock = new Mock<IDevOpsAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
-            var methods = new MethodInfo[]
-            {
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name)
-            };
-
+            var methods = fixture.Create<TestMethod[]>();
             var testCases = fixture.Create<List<TestCase>>();
 
-            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<List<TestMethod>>())).Returns(new List<TestCase>());
-            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<List<TestMethod>>(), It.IsAny<List<TestCase>>())).Returns(3);
+            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<TestMethod[]>())).Returns(new List<TestCase>());
+            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<List<TestCase>>())).Returns(3);
 
             var counter = new Counter();
 
@@ -91,18 +77,11 @@ namespace Test.Unit.Manager.DevOps
             var devOpsAccessMock = new Mock<IDevOpsAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
-            var methods = new MethodInfo[]
-            {
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name)
-            };
-
+            var methods = fixture.Create<TestMethod[]>();
             var testCases = fixture.Create<List<TestCase>>();
 
-            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<List<TestMethod>>())).Returns(new List<TestCase>());
-            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<List<TestMethod>>(), It.IsAny<List<TestCase>>())).Returns(0);
+            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<TestMethod[]>())).Returns(new List<TestCase>());
+            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<List<TestCase>>())).Returns(0);
 
             var counter = new Counter();
 

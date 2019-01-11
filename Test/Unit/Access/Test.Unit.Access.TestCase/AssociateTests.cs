@@ -15,7 +15,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
-using TestMethod = AssociateTestsToTestCases.Access.DevOps.TestMethod;
+
+using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
 
 namespace Test.Unit.Access.DevOps
 {
@@ -42,7 +43,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var messages = new Messages();
             var testCases = fixture.Create<List<TestCase>>();
-            var testMethods = fixture.Create<List<TestMethod>>();
+            var testMethods = fixture.Create<TestMethod[]>();
 
             var options = new InputOptions()
             {
@@ -57,10 +58,10 @@ namespace Test.Unit.Access.DevOps
             var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
-            errorCount.Should().Be(testMethods.Count);
-            counter.Error.Total.Should().Be(testMethods.Count);
-            counter.Error.TestCaseNotFound.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+            errorCount.Should().Be(testMethods.Length);
+            counter.Error.Total.Should().Be(testMethods.Length);
+            counter.Error.TestCaseNotFound.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length));
         }
 
         [TestMethod]
@@ -74,7 +75,7 @@ namespace Test.Unit.Access.DevOps
 
             var fixture = new Fixture();
             var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
+            var testMethods = fixture.Create<TestMethod[]>();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, $"{x.FullClassName}.{x.Name}")).ToList();
 
             var options = new InputOptions()
@@ -91,7 +92,7 @@ namespace Test.Unit.Access.DevOps
 
             // Assert
             errorCount.Should().Be(0);
-            counter.Total.Should().Be(testMethods.Count);
+            counter.Total.Should().Be(testMethods.Length);
             outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -106,7 +107,7 @@ namespace Test.Unit.Access.DevOps
 
             var fixture = new Fixture();
             var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
+            var testMethods = fixture.Create<TestMethod[]>();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
 
             var methodName = fixture.Create<string>();
@@ -138,11 +139,11 @@ namespace Test.Unit.Access.DevOps
             var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
-            errorCount.Should().Be(testMethods.Count);
+            errorCount.Should().Be(testMethods.Length);
             counter.Total.Should().Be(0);
             counter.Success.FixedReference.Should().Be(0);
-            counter.Error.OperationFailed.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+            counter.Error.OperationFailed.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length));
         }
 
         [TestMethod]
@@ -156,7 +157,7 @@ namespace Test.Unit.Access.DevOps
 
             var fixture = new Fixture();
             var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
+            var testMethods = fixture.Create<TestMethod[]>();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
 
             var methodName = fixture.Create<string>();
@@ -188,11 +189,11 @@ namespace Test.Unit.Access.DevOps
             var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
-            errorCount.Should().Be(testMethods.Count);
+            errorCount.Should().Be(testMethods.Length);
             counter.Total.Should().Be(0);
             counter.Success.FixedReference.Should().Be(0);
-            counter.Error.OperationFailed.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count * 2));
+            counter.Error.OperationFailed.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length * 2));
         }
 
         [TestMethod]
@@ -206,7 +207,7 @@ namespace Test.Unit.Access.DevOps
 
             var fixture = new Fixture();
             var messages = new Messages();
-            var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
+            var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
@@ -253,7 +254,7 @@ namespace Test.Unit.Access.DevOps
 
             var fixture = new Fixture();
             var messages = new Messages();
-            var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
+            var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
@@ -283,9 +284,9 @@ namespace Test.Unit.Access.DevOps
             // Assert
             errorCount.Should().Be(0);
             counter.Error.OperationFailed.Should().Be(0);
-            counter.Total.Should().Be(testMethods.Count);
-            counter.Success.FixedReference.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count * 2));
+            counter.Total.Should().Be(testMethods.Length);
+            counter.Success.FixedReference.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length * 2));
         }
 
         [TestMethod]
@@ -299,7 +300,7 @@ namespace Test.Unit.Access.DevOps
 
             var fixture = new Fixture();
             var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
+            var testMethods = fixture.Create<TestMethod[]>();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
 
             var methodName = fixture.Create<string>();
@@ -331,12 +332,12 @@ namespace Test.Unit.Access.DevOps
             var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
-            errorCount.Should().Be(testMethods.Count);
+            errorCount.Should().Be(testMethods.Length);
             counter.Total.Should().Be(0);
             counter.Success.FixedReference.Should().Be(0);
             counter.Error.TestCaseNotFound.Should().Be(0);
-            counter.Error.OperationFailed.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+            counter.Error.OperationFailed.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length));
         }
 
         [TestMethod]
@@ -351,7 +352,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var messages = new Messages();
 
-            var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
+            var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
@@ -380,7 +381,7 @@ namespace Test.Unit.Access.DevOps
 
             // Assert
             errorCount.Should().Be(0);
-            counter.Total.Should().Be(testMethods.Count);
+            counter.Total.Should().Be(testMethods.Length);
             counter.Success.FixedReference.Should().Be(0);
             counter.Error.OperationFailed.Should().Be(0);
             counter.Error.TestCaseNotFound.Should().Be(0);
@@ -399,7 +400,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var messages = new Messages();
 
-            var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
+            var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
@@ -431,8 +432,8 @@ namespace Test.Unit.Access.DevOps
             counter.Success.FixedReference.Should().Be(0);
             counter.Error.OperationFailed.Should().Be(0);
             counter.Error.TestCaseNotFound.Should().Be(0);
-            counter.Total.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+            counter.Total.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length));
         }
     }
 }

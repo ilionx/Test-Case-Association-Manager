@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 using Microsoft.TeamFoundation.Common;
 using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.DevOps;
 using AssociateTestsToTestCases.Manager.Output;
 
@@ -41,20 +40,14 @@ namespace AssociateTestsToTestCases.Manager.DevOps
             return testCases;
         }
 
-        public void Associate(MethodInfo[] methods, List<TestCase> testCases)
+        public void Associate(TestMethod[] testMethods, List<TestCase> testCases)
         {
             _outputManager.WriteToConsole(_messages.Stages.Association.Status, _messages.Types.Stage);
 
-            var testMethods = MapTestMethods(methods);
             ValidateTestMethodsNotAvailable(_devOpsAccess.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods));
-            ValidateAssociationErrors(_devOpsAccess.Associate(testMethods, testCases), methods, testCases);
+            ValidateAssociationErrors(_devOpsAccess.Associate(testMethods, testCases), testMethods, testCases);
 
             _outputManager.WriteToConsole(string.Format(_messages.Stages.Association.Success, _counter.Success.Total), _messages.Types.Success);
-        }
-
-        private List<TestMethod> MapTestMethods(MethodInfo[] methods)
-        {
-            return methods.Select(x => new TestMethod(x.Name, x.Module.Name, x.DeclaringType.FullName, Guid.NewGuid())).ToList();
         }
 
         #region Validations
@@ -90,7 +83,7 @@ namespace AssociateTestsToTestCases.Manager.DevOps
             }
         }
 
-        private void ValidateAssociationErrors(int totalAssociationErrors, MethodInfo[] testMethods, List<TestCase> testCases)
+        private void ValidateAssociationErrors(int totalAssociationErrors, TestMethod[] testMethods, List<TestCase> testCases)
         {
             if (totalAssociationErrors != 0)
             {

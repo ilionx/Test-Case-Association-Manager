@@ -16,6 +16,8 @@ using AssociateTestsToTestCases.Manager.Output;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 
+using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
+
 namespace AssociateTestsToTestCases
 {
     internal static class Program
@@ -35,7 +37,7 @@ namespace AssociateTestsToTestCases
         private static IDevOpsManager _devOpsManager;
 
         private static Messages _messages;
-        private static MethodInfo[] _testMethods;
+        private static TestMethod[] _testMethods;
         private static List<TestCase> _testCases;
 
         private static bool _isLocal;

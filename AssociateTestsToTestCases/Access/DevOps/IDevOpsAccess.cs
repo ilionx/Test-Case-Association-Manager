@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AssociateTestsToTestCases.Manager.File;
 
 namespace AssociateTestsToTestCases.Access.DevOps
 {
@@ -6,8 +7,8 @@ namespace AssociateTestsToTestCases.Access.DevOps
     {
         int[] GetTestCasesId();
         List<TestCase> GetTestCases();
-        int Associate(List<TestMethod> testMethods, List<TestCase> testCases);
+        int Associate(TestMethod[] testMethods, List<TestCase> testCases);
         List<DuplicateTestCase> ListDuplicateTestCases(List<TestCase> testCases);
-        List<TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase> testCases, List<TestMethod> testMethods); // todo: switch test parameters
+        List<TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase> testCases, TestMethod[] testMethods); // todo: switch test parameters
     }
 }

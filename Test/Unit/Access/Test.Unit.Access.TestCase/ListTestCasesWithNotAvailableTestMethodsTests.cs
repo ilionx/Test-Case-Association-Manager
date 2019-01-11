@@ -13,6 +13,7 @@ using AssociateTestsToTestCases.Access.DevOps;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
+using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
 
 namespace Test.Unit.Access.DevOps
 {
@@ -36,7 +37,7 @@ namespace Test.Unit.Access.DevOps
 
             fixture.Customize<TestCase>(c => c.With(x => x.AutomationStatus, AutomatedName));
             var testCases =  fixture.Create<List<TestCase>>();
-            var testMethods = testCases.Select(x => new AssociateTestsToTestCases.Access.DevOps.TestMethod(x.Title, string.Empty, string.Empty, Guid.NewGuid())).ToList();
+            var testMethods = testCases.Select(x => new TestMethod(x.Title, string.Empty, string.Empty, Guid.NewGuid())).ToArray();
 
             var options = new InputOptions()
             {
@@ -68,7 +69,7 @@ namespace Test.Unit.Access.DevOps
 
             fixture.Customize<TestCase>(c => c.With(x => x.AutomationStatus, NotAutomatedName));
             var testCases = fixture.Create<List<TestCase>>();
-            var testMethods = fixture.Create<List<AssociateTestsToTestCases.Access.DevOps.TestMethod>>();
+            var testMethods = fixture.Create<TestMethod[]>();
 
             var options = new InputOptions()
             {
@@ -100,7 +101,7 @@ namespace Test.Unit.Access.DevOps
 
             fixture.Customize<TestCase>(c => c.With(x => x.AutomationStatus, AutomatedName));
             var testCases = fixture.Create<List<TestCase>>();
-            var testMethods = testCases.Select(x => new AssociateTestsToTestCases.Access.DevOps.TestMethod(string.Empty, string.Empty, string.Empty, Guid.NewGuid())).ToList();
+            var testMethods = testCases.Select(x => new TestMethod(string.Empty, string.Empty, string.Empty, Guid.NewGuid())).ToArray();
 
             var options = new InputOptions()
             {
