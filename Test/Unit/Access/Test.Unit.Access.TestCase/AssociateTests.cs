@@ -42,7 +42,7 @@ namespace Test.Unit.Access.DevOps
 
             var fixture = new Fixture();
             var messages = new Messages();
-            var testCases = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
             var testMethods = fixture.Create<TestMethod[]>();
 
             var options = new InputOptions()
@@ -76,7 +76,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var messages = new Messages();
             var testMethods = fixture.Create<TestMethod[]>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, $"{x.FullClassName}.{x.Name}")).ToList();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, $"{x.FullClassName}.{x.Name}")).ToArray();
 
             var options = new InputOptions()
             {
@@ -108,7 +108,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var messages = new Messages();
             var testMethods = fixture.Create<TestMethod[]>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToArray();
 
             var methodName = fixture.Create<string>();
             var assemblyName = fixture.Create<string>();
@@ -158,7 +158,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var messages = new Messages();
             var testMethods = fixture.Create<TestMethod[]>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToArray();
 
             var methodName = fixture.Create<string>();
             var assemblyName = fixture.Create<string>();
@@ -208,7 +208,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var messages = new Messages();
             var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToArray();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
                 Fields = new Dictionary<string, object>()
@@ -255,7 +255,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var messages = new Messages();
             var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToArray();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
                 Fields = new Dictionary<string, object>()
@@ -301,7 +301,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var messages = new Messages();
             var testMethods = fixture.Create<TestMethod[]>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToArray();
 
             var methodName = fixture.Create<string>();
             var assemblyName = fixture.Create<string>();
@@ -353,7 +353,7 @@ namespace Test.Unit.Access.DevOps
             var messages = new Messages();
 
             var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToArray();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
                 Fields = new Dictionary<string, object>()
@@ -401,7 +401,7 @@ namespace Test.Unit.Access.DevOps
             var messages = new Messages();
 
             var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToArray();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
                 Fields = new Dictionary<string, object>()

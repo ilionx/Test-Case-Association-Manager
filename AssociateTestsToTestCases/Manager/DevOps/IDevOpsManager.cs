@@ -7,7 +7,7 @@ namespace AssociateTestsToTestCases.Manager.DevOps
     public interface IDevOpsManager
     {
         bool TestPlanIsEmpty();
-        List<TestCase> GetTestCases();
-        void Associate(TestMethod[] testMethods, List<TestCase> testCases);
+        TestCase[] GetTestCases();
+        void Associate(TestMethod[] testMethods, TestCase[] testCases);
     }
 }

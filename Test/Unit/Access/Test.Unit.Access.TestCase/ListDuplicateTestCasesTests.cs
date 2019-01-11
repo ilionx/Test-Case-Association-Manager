@@ -29,7 +29,7 @@ namespace Test.Unit.Access.DevOps
             var messages = new Messages();
 
             var fixture = new Fixture();
-            var testCases = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
 
             var options = new InputOptions()
             {
@@ -59,7 +59,7 @@ namespace Test.Unit.Access.DevOps
 
             var fixture = new Fixture();
             var testCases = new List<TestCase>();
-            var testCasesToBeDuplicated = fixture.Create<List<TestCase>>();
+            var testCasesToBeDuplicated = fixture.Create<TestCase[]>();
             testCases.AddRange(testCasesToBeDuplicated);
             testCases.AddRange(testCasesToBeDuplicated);
 
@@ -73,7 +73,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var actual = target.ListDuplicateTestCases(testCases);
+            var actual = target.ListDuplicateTestCases(testCases.ToArray());
 
             // Assert
             actual.Count.Should().Be(testCases.Count / 2);

@@ -157,7 +157,7 @@ namespace Test.Unit.Access.DevOps
             var actual = target.GetTestCases();
 
             // Assert
-            actual.Count.Should().Be(3);
+            actual.Length.Should().Be(3);
         }
     }
 }

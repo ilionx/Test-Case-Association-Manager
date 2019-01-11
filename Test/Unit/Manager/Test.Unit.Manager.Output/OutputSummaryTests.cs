@@ -2,7 +2,6 @@
 using System;
 using AutoFixture;
 using FluentAssertions;
-using System.Collections.Generic;
 using AssociateTestsToTestCases.Counter;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Manager.File;
@@ -23,7 +22,7 @@ namespace Test.Unit.Manager.Output
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testCases = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
 
             var methods = fixture.Create<TestMethod[]>();
             var counter = new Counter();

@@ -2,7 +2,6 @@
 using System;
 using AutoFixture;
 using FluentAssertions;
-using System.Collections.Generic;
 using AssociateTestsToTestCases.Counter;
 using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.DevOps;
@@ -25,11 +24,11 @@ namespace Test.Unit.Manager.DevOps
 
             var fixture = new Fixture();
             var methods = fixture.Create<TestMethod[]>();
-            var testCases = fixture.Create<List<TestCase>>();
-            var testMethodsNotAvailable = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
+            var testMethodsNotAvailable = fixture.Create<TestCase[]>();
 
-            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<TestMethod[]>())).Returns(testMethodsNotAvailable);
-            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<List<TestCase>>())).Returns(0);
+            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<TestCase[]>(), It.IsAny<TestMethod[]>())).Returns(testMethodsNotAvailable);
+            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<TestCase[]>())).Returns(0);
 
             var counter = new Counter();
 
@@ -40,7 +39,7 @@ namespace Test.Unit.Manager.DevOps
 
             // Assert
             actual.Should().NotThrow<InvalidOperationException>();
-            outputManagerMock.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount + testMethodsNotAvailable.Count));
+            outputManagerMock.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount + testMethodsNotAvailable.Length));
         }
 
         [TestMethod]
@@ -52,10 +51,10 @@ namespace Test.Unit.Manager.DevOps
 
             var fixture = new Fixture();
             var methods = fixture.Create<TestMethod[]>();
-            var testCases = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
 
-            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<TestMethod[]>())).Returns(new List<TestCase>());
-            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<List<TestCase>>())).Returns(3);
+            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<TestCase[]>(), It.IsAny<TestMethod[]>())).Returns(new TestCase[0]);
+            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<TestCase[]>())).Returns(3);
 
             var counter = new Counter();
 
@@ -78,10 +77,10 @@ namespace Test.Unit.Manager.DevOps
 
             var fixture = new Fixture();
             var methods = fixture.Create<TestMethod[]>();
-            var testCases = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
 
-            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<List<TestCase>>(), It.IsAny<TestMethod[]>())).Returns(new List<TestCase>());
-            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<List<TestCase>>())).Returns(0);
+            devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<TestCase[]>(), It.IsAny<TestMethod[]>())).Returns(new TestCase[0]);
+            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<TestCase[]>())).Returns(0);
 
             var counter = new Counter();
 

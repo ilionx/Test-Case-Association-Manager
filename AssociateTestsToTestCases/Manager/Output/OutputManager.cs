@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.Output;
@@ -25,10 +24,10 @@ namespace AssociateTestsToTestCases.Manager.Output
             _outputAccess.WriteToConsole(message, messageType, reason);
         }
 
-        public void OutputSummary(TestMethod[] testMethods, List<TestCase> testCases)
+        public void OutputSummary(TestMethod[] testMethods, TestCase[] testCases)
         {
             var testMethodsLength = testMethods == null ? 0 : testMethods.Length;
-            var testCasesCount = testCases == null ? 0 : testCases.Count;
+            var testCasesCount = testCases == null ? 0 : testCases.Length;
 
             _outputAccess.WriteToConsole(_messages.Stages.Summary.Status, _messages.Types.Stage);
             _outputAccess.WriteToConsole(string.Format(_messages.Stages.Summary.Detailed, _counter.Success.Total, _counter.Success.FixedReference, _counter.Error.Total, _counter.Error.OperationFailed, _counter.Error.TestCaseNotFound, _counter.Warning.Total, _counter.Warning.TestMethodNotAvailable, _counter.Unaffected.Total, _counter.Unaffected.AlreadyAutomated), _messages.Types.Summary);

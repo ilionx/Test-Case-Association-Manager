@@ -7,6 +7,6 @@ namespace AssociateTestsToTestCases.Manager.Output
     public interface IOutputManager
     {
         void WriteToConsole(string message, string messageType = "", string reason = "");
-        void OutputSummary(TestMethod[] testMethods, List<TestCase> testCases);
+        void OutputSummary(TestMethod[] testMethods, TestCase[] testCases);
     }
 }

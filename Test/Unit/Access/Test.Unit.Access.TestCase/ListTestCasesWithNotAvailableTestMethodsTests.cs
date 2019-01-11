@@ -36,7 +36,7 @@ namespace Test.Unit.Access.DevOps
             var messages = new Messages();
 
             fixture.Customize<TestCase>(c => c.With(x => x.AutomationStatus, AutomatedName));
-            var testCases =  fixture.Create<List<TestCase>>();
+            var testCases =  fixture.Create<TestCase[]>();
             var testMethods = testCases.Select(x => new TestMethod(x.Title, string.Empty, string.Empty, Guid.NewGuid())).ToArray();
 
             var options = new InputOptions()
@@ -52,7 +52,7 @@ namespace Test.Unit.Access.DevOps
             var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
 
             // Assert
-            actual.Count.Should().Be(0);
+            actual.Length.Should().Be(0);
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@ namespace Test.Unit.Access.DevOps
             var messages = new Messages();
 
             fixture.Customize<TestCase>(c => c.With(x => x.AutomationStatus, NotAutomatedName));
-            var testCases = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
             var testMethods = fixture.Create<TestMethod[]>();
 
             var options = new InputOptions()
@@ -84,7 +84,7 @@ namespace Test.Unit.Access.DevOps
             var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
 
             // Assert
-            actual.Count.Should().Be(0);
+            actual.Length.Should().Be(0);
         }
 
         [TestMethod]
@@ -100,7 +100,7 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
 
             fixture.Customize<TestCase>(c => c.With(x => x.AutomationStatus, AutomatedName));
-            var testCases = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
             var testMethods = testCases.Select(x => new TestMethod(string.Empty, string.Empty, string.Empty, Guid.NewGuid())).ToArray();
 
             var options = new InputOptions()
@@ -116,7 +116,7 @@ namespace Test.Unit.Access.DevOps
             var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
 
             // Assert
-            actual.Count.Should().Be(3);
+            actual.Length.Should().Be(3);
         }
     }
 }

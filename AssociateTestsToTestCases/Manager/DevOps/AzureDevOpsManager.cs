@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.TeamFoundation.Common;
 using AssociateTestsToTestCases.Message;
@@ -28,7 +29,7 @@ namespace AssociateTestsToTestCases.Manager.DevOps
             return _devOpsAccess.GetTestCasesId().IsNullOrEmpty();
         }
 
-        public List<TestCase> GetTestCases()
+        public TestCase[] GetTestCases()
         {
             _outputManager.WriteToConsole(_messages.Stages.TestCase.Status, _messages.Types.Stage);
 
@@ -36,11 +37,11 @@ namespace AssociateTestsToTestCases.Manager.DevOps
             ValidateTestCasesIsNullOrEmpty(testCases);
             ValidateTestCasesHasDuplicates(_devOpsAccess.ListDuplicateTestCases(testCases));
 
-            _outputManager.WriteToConsole(string.Format(_messages.Stages.TestCase.Success, testCases.Count), _messages.Types.Success);
+            _outputManager.WriteToConsole(string.Format(_messages.Stages.TestCase.Success, testCases.Length), _messages.Types.Success);
             return testCases;
         }
 
-        public void Associate(TestMethod[] testMethods, List<TestCase> testCases)
+        public void Associate(TestMethod[] testMethods, TestCase[] testCases)
         {
             _outputManager.WriteToConsole(_messages.Stages.Association.Status, _messages.Types.Stage);
 
@@ -52,7 +53,7 @@ namespace AssociateTestsToTestCases.Manager.DevOps
 
         #region Validations
 
-        private void ValidateTestCasesIsNullOrEmpty(List<TestCase> testCases)
+        private void ValidateTestCasesIsNullOrEmpty(TestCase[] testCases)
         {
             if (testCases.IsNullOrEmpty())
             {
@@ -73,17 +74,17 @@ namespace AssociateTestsToTestCases.Manager.DevOps
             }
         }
 
-        private void ValidateTestMethodsNotAvailable(List<TestCase> testMethodsNotAvailable)
+        private void ValidateTestMethodsNotAvailable(TestCase[] testMethodsNotAvailable)
         {
-            if (testMethodsNotAvailable.Count != 0)
+            if (testMethodsNotAvailable.Length != 0)
             {
-                testMethodsNotAvailable.ForEach(x => _outputManager.WriteToConsole(string.Format(_messages.Associations.TestCaseWithNotAvailableTestMethod, x.Title, x.Id, x.AutomatedTestName), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable));
+                testMethodsNotAvailable.ToList().ForEach(x => _outputManager.WriteToConsole(string.Format(_messages.Associations.TestCaseWithNotAvailableTestMethod, x.Title, x.Id, x.AutomatedTestName), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable));
 
-                _counter.Warning.TestMethodNotAvailable += testMethodsNotAvailable.Count;
+                _counter.Warning.TestMethodNotAvailable += testMethodsNotAvailable.Length;
             }
         }
 
-        private void ValidateAssociationErrors(int totalAssociationErrors, TestMethod[] testMethods, List<TestCase> testCases)
+        private void ValidateAssociationErrors(int totalAssociationErrors, TestMethod[] testMethods, TestCase[] testCases)
         {
             if (totalAssociationErrors != 0)
             {

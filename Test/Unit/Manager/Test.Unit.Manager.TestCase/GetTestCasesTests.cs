@@ -26,7 +26,7 @@ namespace Test.Unit.Manager.DevOps
             var message = fixture.Create<string>();
             var messageType = fixture.Create<string>();
             var messageReason = fixture.Create<string>();
-            var testCases = new List<TestCase>();
+            var testCases = new TestCase[0];
 
             var counter = new Counter();
 
@@ -55,7 +55,7 @@ namespace Test.Unit.Manager.DevOps
             var messageType = fixture.Create<string>();
             var messageReason = fixture.Create<string>();
             var duplicateTestCases = fixture.Create<List<DuplicateTestCase>>();
-            var testCases = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
 
             var counter = new Counter();
 
@@ -84,7 +84,7 @@ namespace Test.Unit.Manager.DevOps
             var message = fixture.Create<string>();
             var messageType = fixture.Create<string>();
             var messageReason = fixture.Create<string>();
-            var testCases = fixture.Create<List<TestCase>>();
+            var testCases = fixture.Create<TestCase[]>();
 
             var counter = new Counter();
 
@@ -99,7 +99,7 @@ namespace Test.Unit.Manager.DevOps
 
             // Assert
             actual.Should().NotBeNullOrEmpty();
-            actual.Count.Should().Be(testCases.Count);
+            actual.Length.Should().Be(testCases.Length);
             outputManagerMock.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount));
         }
     }

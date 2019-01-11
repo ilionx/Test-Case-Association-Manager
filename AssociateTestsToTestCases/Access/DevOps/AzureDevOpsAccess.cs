@@ -7,7 +7,6 @@ using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-
 using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
 
 namespace AssociateTestsToTestCases.Access.DevOps
@@ -45,7 +44,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
             _counter = counter;
         }
 
-        public List<TestCase> GetTestCases()
+        public TestCase[] GetTestCases()
         {
             var testCasesId = GetTestCasesId();
 
@@ -53,10 +52,10 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
             var testCases = chunkedTestCases.SelectMany(chunkedTestgroupCases => _workItemTrackingHttpClient.GetWorkItemsAsync(chunkedTestgroupCases).Result).ToList();
 
-            return CreateTestCaseList(testCases);
+            return CreateTestCaseArray(testCases);
         }
 
-        public int Associate(TestMethod[] testMethods, List<TestCase> testCases) // todo: Dictionary<string, TestCase>
+        public int Associate(TestMethod[] testMethods, TestCase[] testCases) // todo: Dictionary<string, TestCase>
         {
             foreach (var testMethod in testMethods)
             {
@@ -115,7 +114,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return _counter.Error.Total;
         }
 
-        public List<DuplicateTestCase> ListDuplicateTestCases(List<TestCase> testCases)
+        public List<DuplicateTestCase> ListDuplicateTestCases(TestCase[] testCases)
         {
             var duplicateTestCases = new List<DuplicateTestCase>();
 
@@ -129,9 +128,9 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return duplicateTestCases;
         }
 
-        public List<TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase> testCases, TestMethod[] testMethods)
+        public TestCase[] ListTestCasesWithNotAvailableTestMethods(TestCase[] testCases, TestMethod[] testMethods)
         {
-            return testCases.Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToList();
+            return testCases.Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToArray();
         }
 
         public int[] GetTestCasesId()
@@ -152,21 +151,14 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return chunkedTestCases;
         }
 
-        private List<TestCase> CreateTestCaseList(List<WorkItem> workItems)
+        private TestCase[] CreateTestCaseArray(List<WorkItem> workItems)
         {
-            var testCases = new List<TestCase>();
-
-            foreach (var workItem in workItems)
-            {
-                testCases.Add(new TestCase(
-                    id: (int)workItem.Id,
-                    title: workItem.Fields[SystemTitle].ToString(),
-                    automationStatus: workItem.Fields[AutomationStatusName].ToString(),
-                    automatedTestName: workItem.Fields.ContainsKey(AutomatedTestName) ? workItem.Fields[AutomatedTestName].ToString() : null)
-                );
-            }
-
-            return testCases;
+            return workItems.Select(x => new TestCase(
+                    id: (int)x.Id,
+                    title: x.Fields[SystemTitle].ToString(),
+                    automationStatus: x.Fields[AutomationStatusName].ToString(),
+                    automatedTestName: x.Fields.ContainsKey(AutomatedTestName) ? x.Fields[AutomatedTestName].ToString() : null)
+                ).ToArray();
         }
 
         #endregion

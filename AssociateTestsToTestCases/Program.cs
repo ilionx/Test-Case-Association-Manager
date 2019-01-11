@@ -38,7 +38,7 @@ namespace AssociateTestsToTestCases
 
         private static Messages _messages;
         private static TestMethod[] _testMethods;
-        private static List<TestCase> _testCases;
+        private static TestCase[] _testCases;
 
         private static bool _isLocal;
         private static Counter.Counter _counter;
