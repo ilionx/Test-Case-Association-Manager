@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using AssociateTestsToTestCases.Message;
-using AssociateTestsToTestCases.Message.Type;
 
 namespace AssociateTestsToTestCases.Access.Output
 {
@@ -26,17 +25,20 @@ namespace AssociateTestsToTestCases.Access.Output
 
         public void WriteToConsole(string message, string messageType = "", string reason = "")
         {
-            var enumerationPointFormat = GetEnumerationPointFormat(message, messageType, reason);
-            var messageTypeFormat = GetMessageTypeFormat(messageType);
-            var spaceMessageTypeFormat = GetSpaceMessageTypeFormat(messageType);
-            var reasonOutputFormat = GetReasonOutputFormat(reason);
-            var spaceReasonFormat = GetSpaceReasonFormat(reason);
+            var outputMessage = new OutputMessage()
+            {
+                SpaceReason = GetSpaceReasonFormat(reason),
+                ReasonOutput = GetReasonOutputFormat(reason),
+                MessageType = GetMessageTypeFormat(messageType),
+                SpaceMessageType = GetSpaceMessageTypeFormat(messageType),
+                EnumerationPoint = GetEnumerationPointFormat(message, messageType, reason)
+            };
 
-            var messageOutput = GetMessageOutput(enumerationPointFormat, messageTypeFormat, spaceMessageTypeFormat, reasonOutputFormat, spaceReasonFormat, message, messageType);
+            var messageOutput = GetMessageOutput(outputMessage, message, messageType);
 
             if (_isLocal)
             {
-                Console.ForegroundColor = GetConsoleColor(_messages.Types, messageType);
+                Console.ForegroundColor = GetConsoleColor(messageType);
             }
 
             Console.WriteLine(messageOutput);
@@ -44,10 +46,14 @@ namespace AssociateTestsToTestCases.Access.Output
 
         #region Outputformatting
 
-        private string GetEnumerationPointFormat(string message, string messageType, string reason)
+        private string GetSpaceReasonFormat(string reason)
         {
-            var messageTypesWithNoIndention = new[] { _messages.Types.Stage, _messages.Types.Success, _messages.Types.Error };
-            return message.Equals(string.Empty) || (reason.Length.Equals(0) && messageTypesWithNoIndention.Contains(messageType)) ? string.Empty : _messages.EnumerationPoint;
+            return reason.Length.Equals(0) ? string.Empty : new string(SpaceChar, _messages.Reasons.LongestReasonCount - reason.Count() + 1);
+        }
+
+        private string GetReasonOutputFormat(string reason)
+        {
+            return reason.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, reason);
         }
 
         private string GetMessageTypeFormat(string messageType)
@@ -60,19 +66,15 @@ namespace AssociateTestsToTestCases.Access.Output
             return new string(SpaceChar, _messages.Types.LongestTypeCount - messageType.Count());
         }
 
-        private string GetReasonOutputFormat(string reason)
+        private string GetEnumerationPointFormat(string message, string messageType, string reason)
         {
-            return reason.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, reason);
+            var messageTypesWithNoIndention = new[] { _messages.Types.Stage, _messages.Types.Success, _messages.Types.Error };
+            return message.Equals(string.Empty) || (reason.Length.Equals(0) && messageTypesWithNoIndention.Contains(messageType)) ? string.Empty : _messages.EnumerationPoint;
         }
 
-        private string GetSpaceReasonFormat(string reason)
+        private string GetMessageOutput(OutputMessage outputMessage, string message, string messageType)
         {
-            return reason.Length.Equals(0) ? string.Empty : new string(SpaceChar, _messages.Reasons.LongestReasonCount - reason.Count() + 1);
-        }
-
-        private string GetMessageOutput(string enumerationPoint, string messageTypeFormat, string spaceMessageType, string reasonOutputFormat, string spaceReason, string message, string messageType)
-        {
-            var messageOutput = string.Format(_messages.Output, enumerationPoint, messageTypeFormat, spaceMessageType, reasonOutputFormat, spaceReason, message);
+            var messageOutput = string.Format(_messages.Output, outputMessage.EnumerationPoint, outputMessage.MessageType, outputMessage.SpaceMessageType, outputMessage.ReasonOutput, outputMessage.SpaceReason, message);
             return PrependPipelineColor(messageOutput, messageType);
         }
 
@@ -85,20 +87,20 @@ namespace AssociateTestsToTestCases.Access.Output
 
         #region Outputcolors
 
-        private ConsoleColor GetConsoleColor(TypeMessage types, string messageType)
+        private ConsoleColor GetConsoleColor(string messageType)
         {
             var consoleColor = ConsoleColor.DarkCyan;
 
-            if (messageType.Equals(types.Success))
+            if (messageType.Equals(_messages.Types.Success))
             {
                 consoleColor = ConsoleColor.DarkGreen;
-            } else if (messageType.Equals(types.Warning))
+            } else if (messageType.Equals(_messages.Types.Warning))
             {
                 consoleColor = ConsoleColor.DarkYellow;
-            } else if (messageType.Equals(types.Error) || messageType.Equals(types.Failure))
+            } else if (messageType.Equals(_messages.Types.Error) || messageType.Equals(_messages.Types.Failure))
             {
                 consoleColor = ConsoleColor.DarkRed;
-            } else if (messageType.Equals(types.Stage) || messageType.Equals(string.Empty))
+            } else if (messageType.Equals(_messages.Types.Stage) || messageType.Equals(string.Empty))
             {
                 consoleColor = ConsoleColor.Gray;
             }

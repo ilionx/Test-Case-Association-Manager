@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using CommandLine;
-using System.Reflection;
-using System.Collections.Generic;
 using AssociateTestsToTestCases.Message;
 using Microsoft.TeamFoundation.Core.WebApi;
 using AssociateTestsToTestCases.Access.File;
@@ -172,6 +170,7 @@ namespace AssociateTestsToTestCases
             }
 
             _commandLineAccess.WriteToConsole(_messages.Stages.HttpClient.Success, _messages.Types.Success);
+
             return (workItemTrackingHttpClient, testManagementHttpClient);
         }
 

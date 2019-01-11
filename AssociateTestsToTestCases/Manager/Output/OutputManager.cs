@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AssociateTestsToTestCases.Message;
+﻿using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.DevOps;

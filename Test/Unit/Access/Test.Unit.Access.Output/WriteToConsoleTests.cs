@@ -50,5 +50,6 @@ namespace Test.Unit.Access.Output
         }
 
         // Todo: test output formats!!!
+        // SUCCESS, STAGE, EMPTY, ERROR, WARNING, INFO, PRESSANYKEYTOCONTINUE
     }
 }

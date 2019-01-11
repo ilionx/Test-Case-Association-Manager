@@ -55,7 +55,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return CreateTestCaseArray(testCases);
         }
 
-        public int Associate(TestMethod[] testMethods, Dictionary<string,TestCase> testCases)
+        public int Associate(TestMethod[] testMethods, Dictionary<string, TestCase> testCases)
         {
             foreach (var testMethod in testMethods)
             {
@@ -70,13 +70,14 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
                 var testCaseHasAutomatedStatus = TestCaseHasAutomatedStatus(testCase, testMethod);
                 var testCaseIsAlreadyAutomated = testCaseHasAutomatedStatus && TestCaseIsAlreadyAutomated(testCase, testMethod);
-                var testCaseHasIncorrectAssociation = testCaseHasAutomatedStatus && !testCaseIsAlreadyAutomated;
                 if (testCaseIsAlreadyAutomated)
                 {
                     _counter.Unaffected.AlreadyAutomated += 1;
                     continue;
                 }
-                else if (testCaseHasIncorrectAssociation)
+
+                var testCaseHasIncorrectAssociation = testCaseHasAutomatedStatus && !testCaseIsAlreadyAutomated;
+                if (testCaseHasIncorrectAssociation)
                 {
                     if (_inputOptions.VerboseLogging)
                     {
