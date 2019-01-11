@@ -15,7 +15,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
-
 using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
 
 namespace Test.Unit.Access.DevOps
@@ -55,7 +54,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(testMethods.Length);
@@ -88,7 +87,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);
@@ -136,7 +135,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(testMethods.Length);
@@ -186,7 +185,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(testMethods.Length);
@@ -232,7 +231,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);
@@ -279,7 +278,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);
@@ -329,7 +328,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(testMethods.Length);
@@ -377,7 +376,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);
@@ -425,7 +424,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);

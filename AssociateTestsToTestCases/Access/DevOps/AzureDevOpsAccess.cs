@@ -55,19 +55,19 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return CreateTestCaseArray(testCases);
         }
 
-        public int Associate(TestMethod[] testMethods, TestCase[] testCases) // todo: Dictionary<string, TestCase>
+        public int Associate(TestMethod[] testMethods, Dictionary<string,TestCase> testCases)
         {
             foreach (var testMethod in testMethods)
             {
-                var testCase = testCases.SingleOrDefault(x => x.Title.Equals(testMethod.Name));
-
-                if (testCase == null)
+                if (!testCases.ContainsKey(testMethod.Name))
                 {
                     _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestMethodInfo, testMethod.Name, $"{testMethod.FullClassName}.{testMethod.Name}"), _messages.Types.Error, _messages.Reasons.MissingTestCase);
 
                     _counter.Error.TestCaseNotFound++;
                     continue;
                 }
+
+                var testCase = testCases[testMethod.Name];
 
                 var testCaseHasAutomatedStatus = TestCaseHasAutomatedStatus(testCase, testMethod);
                 var testCaseIsAlreadyAutomated = testCaseHasAutomatedStatus && TestCaseIsAlreadyAutomated(testCase, testMethod);

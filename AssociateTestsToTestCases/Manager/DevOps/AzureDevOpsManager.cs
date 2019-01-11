@@ -46,9 +46,14 @@ namespace AssociateTestsToTestCases.Manager.DevOps
             _outputManager.WriteToConsole(_messages.Stages.Association.Status, _messages.Types.Stage);
 
             ValidateTestMethodsNotAvailable(_devOpsAccess.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods));
-            ValidateAssociationErrors(_devOpsAccess.Associate(testMethods, testCases), testMethods, testCases);
+            ValidateAssociationErrors(_devOpsAccess.Associate(testMethods, GetTestCaseDictionary(testCases)), testMethods, testCases);
 
             _outputManager.WriteToConsole(string.Format(_messages.Stages.Association.Success, _counter.Success.Total), _messages.Types.Success);
+        }
+
+        private Dictionary<string, TestCase> GetTestCaseDictionary(TestCase[] testCases)
+        {
+            return testCases.ToDictionary(v => v.Title, t => t);
         }
 
         #region Validations

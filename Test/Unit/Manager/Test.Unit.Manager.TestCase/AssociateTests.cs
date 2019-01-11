@@ -2,6 +2,7 @@
 using System;
 using AutoFixture;
 using FluentAssertions;
+using System.Collections.Generic;
 using AssociateTestsToTestCases.Counter;
 using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.DevOps;
@@ -28,7 +29,7 @@ namespace Test.Unit.Manager.DevOps
             var testMethodsNotAvailable = fixture.Create<TestCase[]>();
 
             devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<TestCase[]>(), It.IsAny<TestMethod[]>())).Returns(testMethodsNotAvailable);
-            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<TestCase[]>())).Returns(0);
+            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<Dictionary<string,TestCase>>())).Returns(0);
 
             var counter = new Counter();
 
@@ -54,7 +55,7 @@ namespace Test.Unit.Manager.DevOps
             var testCases = fixture.Create<TestCase[]>();
 
             devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<TestCase[]>(), It.IsAny<TestMethod[]>())).Returns(new TestCase[0]);
-            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<TestCase[]>())).Returns(3);
+            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<Dictionary<string, TestCase>>())).Returns(3);
 
             var counter = new Counter();
 
@@ -80,7 +81,7 @@ namespace Test.Unit.Manager.DevOps
             var testCases = fixture.Create<TestCase[]>();
 
             devOpsAccessMock.Setup(x => x.ListTestCasesWithNotAvailableTestMethods(It.IsAny<TestCase[]>(), It.IsAny<TestMethod[]>())).Returns(new TestCase[0]);
-            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<TestCase[]>())).Returns(0);
+            devOpsAccessMock.Setup(x => x.Associate(It.IsAny<TestMethod[]>(), It.IsAny<Dictionary<string, TestCase>>())).Returns(0);
 
             var counter = new Counter();
 
