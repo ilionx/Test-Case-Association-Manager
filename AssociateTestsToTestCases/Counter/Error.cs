@@ -1,52 +1,18 @@
-﻿namespace AssociateTestsToTestCases.Counter
+﻿using System.Linq;
+
+namespace AssociateTestsToTestCases.Counter
 {
     public class Error
     {
-        private readonly Counter _counter;
+        public int OperationFailed { get; set; }
 
-        public Error(Counter counter)
-        {
-            _counter = counter;
-        }
+        public int TestCaseNotFound { get; set; }
 
-        private int _operationFailed;
-        private int _testCaseNotFound;
-
-        public int Total { get; internal set; }
-
-        public int OperationFailed
+        public int Total
         {
             get
             {
-                return _operationFailed;
-            }
-            set
-            {
-                if (value != 0)
-                {
-                    var difference = value - _operationFailed;
-
-                    this.Total += difference;
-                }
-                _operationFailed = value;
-            }
-        }
-
-        public int TestCaseNotFound
-        {
-            get
-            {
-                return _testCaseNotFound;
-            }
-            set
-            {
-                if (value != 0)
-                {
-                    var difference = value - _testCaseNotFound;
-
-                    this.Total += difference;
-                }
-                _testCaseNotFound = value;
+                return GetType().GetProperties().Where(x => x.Name != "Total").Select(x => (int) x.GetValue(this)).Sum();
             }
         }
     }

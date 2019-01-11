@@ -40,7 +40,6 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
             var testCases = fixture.Create<List<TestCase>>();
             var testMethods = fixture.Create<List<TestMethod>>();
@@ -55,7 +54,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
             errorCount.Should().Be(testMethods.Count);
@@ -74,7 +73,6 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
             var testMethods = fixture.Create<List<TestMethod>>();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, $"{x.FullClassName}.{x.Name}")).ToList();
@@ -89,7 +87,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
             errorCount.Should().Be(0);
@@ -107,7 +105,6 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
             var testMethods = fixture.Create<List<TestMethod>>();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
@@ -138,12 +135,12 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
             errorCount.Should().Be(testMethods.Count);
             counter.Total.Should().Be(0);
-            counter.Success.FixedReference.Should().Be(testMethods.Count);
+            counter.Success.FixedReference.Should().Be(0);
             counter.Error.OperationFailed.Should().Be(testMethods.Count);
             outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
         }
@@ -158,7 +155,6 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
             var testMethods = fixture.Create<List<TestMethod>>();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
@@ -189,12 +185,12 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
             errorCount.Should().Be(testMethods.Count);
             counter.Total.Should().Be(0);
-            counter.Success.FixedReference.Should().Be(testMethods.Count);
+            counter.Success.FixedReference.Should().Be(0);
             counter.Error.OperationFailed.Should().Be(testMethods.Count);
             outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count * 2));
         }
@@ -209,7 +205,6 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
             var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
@@ -236,7 +231,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
             errorCount.Should().Be(0);
@@ -257,7 +252,6 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
             var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
@@ -284,7 +278,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
             errorCount.Should().Be(0);
@@ -304,7 +298,6 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
             var testMethods = fixture.Create<List<TestMethod>>();
             var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
@@ -335,7 +328,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
             errorCount.Should().Be(testMethods.Count);
@@ -356,7 +349,6 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
 
             var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
@@ -384,7 +376,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
             errorCount.Should().Be(0);
@@ -405,7 +397,6 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
 
             var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
@@ -433,7 +424,7 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases);
 
             // Assert
             errorCount.Should().Be(0);

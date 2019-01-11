@@ -15,6 +15,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
             Name = name;
             AssemblyName = assemblyName;
             FullClassName = fullClassName;
+
             TempId = id;
         }
     }

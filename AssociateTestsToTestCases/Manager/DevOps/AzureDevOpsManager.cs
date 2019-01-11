@@ -32,15 +32,45 @@ namespace AssociateTestsToTestCases.Manager.DevOps
         public List<TestCase> GetTestCases()
         {
             _outputManager.WriteToConsole(_messages.Stages.TestCase.Status, _messages.Types.Stage);
+
             var testCases = _devOpsAccess.GetTestCases();
+            ValidateTestCasesIsNullOrEmpty(testCases);
+            ValidateTestCasesHasDuplicates(_devOpsAccess.ListDuplicateTestCases(testCases));
+
+            _outputManager.WriteToConsole(string.Format(_messages.Stages.TestCase.Success, testCases.Count), _messages.Types.Success);
+            return testCases;
+        }
+
+        public void Associate(MethodInfo[] methods, List<TestCase> testCases)
+        {
+            _outputManager.WriteToConsole(_messages.Stages.Association.Status, _messages.Types.Stage);
+
+            var testMethods = MapTestMethods(methods);
+            ValidateTestMethodsNotAvailable(_devOpsAccess.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods));
+            ValidateAssociationErrors(_devOpsAccess.Associate(testMethods, testCases), methods, testCases);
+
+            _outputManager.WriteToConsole(string.Format(_messages.Stages.Association.Success, _counter.Success.Total), _messages.Types.Success);
+        }
+
+        private List<TestMethod> MapTestMethods(MethodInfo[] methods)
+        {
+            return methods.Select(x => new TestMethod(x.Name, x.Module.Name, x.DeclaringType.FullName, Guid.NewGuid())).ToList();
+        }
+
+        #region Validations
+
+        private void ValidateTestCasesIsNullOrEmpty(List<TestCase> testCases)
+        {
             if (testCases.IsNullOrEmpty())
             {
                 _outputManager.WriteToConsole(_messages.Stages.TestCase.Failure, _messages.Types.Error);
 
                 throw new InvalidOperationException(_messages.Stages.TestCase.Failure);
             }
+        }
 
-            var duplicateTestCases = _devOpsAccess.ListDuplicateTestCases(testCases);
+        private void ValidateTestCasesHasDuplicates(List<DuplicateTestCase> duplicateTestCases)
+        {
             if (duplicateTestCases.Count != 0)
             {
                 _outputManager.WriteToConsole(string.Format(_messages.Stages.TestCase.Duplicate, duplicateTestCases.Count), _messages.Types.Error);
@@ -48,33 +78,29 @@ namespace AssociateTestsToTestCases.Manager.DevOps
 
                 throw new InvalidOperationException(string.Format(_messages.Stages.TestCase.Duplicate, duplicateTestCases.Count));
             }
-
-            _outputManager.WriteToConsole(string.Format(_messages.Stages.TestCase.Success, testCases.Count), _messages.Types.Success);
-            return testCases;
         }
 
-        public void Associate(MethodInfo[] methods, List<TestCase> testCases, string testType)
+        private void ValidateTestMethodsNotAvailable(List<TestCase> testMethodsNotAvailable)
         {
-            _outputManager.WriteToConsole(_messages.Stages.Association.Status, _messages.Types.Stage);
-
-            var testMethods = methods.Select(x => new TestMethod(x.Name, x.Module.Name, x.DeclaringType.FullName, Guid.NewGuid())).ToList();
-
-            var testMethodsNotAvailable = _devOpsAccess.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
             if (testMethodsNotAvailable.Count != 0)
             {
                 testMethodsNotAvailable.ForEach(x => _outputManager.WriteToConsole(string.Format(_messages.Associations.TestCaseWithNotAvailableTestMethod, x.Title, x.Id, x.AutomatedTestName), _messages.Types.Warning, _messages.Reasons.AssociatedTestMethodNotAvailable));
+
+                _counter.Warning.TestMethodNotAvailable += testMethodsNotAvailable.Count;
             }
-
-            var testMethodsAssociationErrorCount = _devOpsAccess.Associate(testMethods, testCases, testType);
-            if (testMethodsAssociationErrorCount != 0)
-            {
-                _outputManager.WriteToConsole(string.Format(_messages.Stages.Association.Failure, testMethodsAssociationErrorCount), _messages.Types.Error);
-                _outputManager.OutputSummary(methods, testCases);
-
-                throw new InvalidOperationException(string.Format(_messages.Stages.Association.Failure, testMethodsAssociationErrorCount));
-            }
-
-            _outputManager.WriteToConsole(string.Format(_messages.Stages.Association.Success, _counter.Success.Total), _messages.Types.Success);
         }
+
+        private void ValidateAssociationErrors(int totalAssociationErrors, MethodInfo[] testMethods, List<TestCase> testCases)
+        {
+            if (totalAssociationErrors != 0)
+            {
+                _outputManager.WriteToConsole(string.Format(_messages.Stages.Association.Failure, totalAssociationErrors), _messages.Types.Error);
+                _outputManager.OutputSummary(testMethods, testCases);
+
+                throw new InvalidOperationException(string.Format(_messages.Stages.Association.Failure, totalAssociationErrors));
+            }
+        }
+
+        #endregion
     }
 }

@@ -59,7 +59,7 @@ namespace AssociateTestsToTestCases
 
                     _testMethods = _fileManager.GetTestMethods();
                     _testCases = _devOpsManager.GetTestCases();
-                    _devOpsManager.Associate(_testMethods, _testCases, _inputOptions.TestType);
+                    _devOpsManager.Associate(_testMethods, _testCases);
                 }
 
                 _outputManager.OutputSummary(_testMethods, _testCases);
@@ -94,7 +94,7 @@ namespace AssociateTestsToTestCases
         private static void InitAccesses(string[] args)
         {
             _commandLineAccess = new CommandLineAccess(_isLocal, _messages, new AzureDevOpsColors());
-            ParseArguments(args); // Caution: do not move this downwards: arguments parsing is neccessary before access/managers initialization (commandLineAccess excluded).
+            ParseArguments(args);
 
             _fileAccess = new FileAccess(new AssemblyHelper());
             _inputOptions.TestAssemblyPaths = _fileAccess.ListTestAssemblyPaths(_inputOptions.Directory, _inputOptions.MinimatchPatterns);
@@ -117,6 +117,7 @@ namespace AssociateTestsToTestCases
         private static void ParseArguments(string[] args)
         {
             _commandLineAccess.WriteToConsole(_messages.Stages.Argument.Status, _messages.Types.Stage);
+
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(o =>
                 {
@@ -126,18 +127,21 @@ namespace AssociateTestsToTestCases
                     _inputOptions.CollectionUri = o.CollectionUri;
                     _inputOptions.ValidationOnly = o.ValidationOnly;
                     _inputOptions.VerboseLogging = o.VerboseLogging;
-                    _inputOptions.Directory = o.Directory.ToLowerInvariant();
+                    _inputOptions.Directory = o.Directory;
                     _inputOptions.PersonalAccessToken = o.PersonalAccessToken;
                     _inputOptions.MinimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
                 });
+
             _commandLineAccess.WriteToConsole(_messages.Stages.Argument.Success, _messages.Types.Success);
         }
 
         private static (WorkItemTrackingHttpClient, TestManagementHttpClient) RetrieveHttpClients(VssConnection connection)
         {
             _commandLineAccess.WriteToConsole(_messages.Stages.HttpClient.Status, _messages.Types.Stage);
+
             WorkItemTrackingHttpClient workItemTrackingHttpClient;
             TestManagementHttpClient testManagementHttpClient;
+
             try
             {
                 testManagementHttpClient = connection.GetClient<TestManagementHttpClient>();
@@ -150,11 +154,13 @@ namespace AssociateTestsToTestCases
                 if (innerException.GetType().Equals(typeof(VssServiceResponseException)))
                 {
                     _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.HttpClient.FailureResourceNotFound, _inputOptions.CollectionUri), _messages.Types.Error);
+
                     throw new InvalidOperationException();
                 }
                 else if (innerException.GetType().Equals(typeof(VssServiceException)))
                 {
                     _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.HttpClient.FailureUserNotAuthorized, _inputOptions.CollectionUri), _messages.Types.Error);
+
                     throw new InvalidOperationException();
                 }
 
@@ -170,6 +176,7 @@ namespace AssociateTestsToTestCases
         private static void ValidateDevOpsCredentials(TestManagementHttpClient testManagementHttpClient)
         {
             _commandLineAccess.WriteToConsole(_messages.Stages.DevOpsCredentials.Status, _messages.Types.Stage);
+
             try
             {
                 testManagementHttpClient.GetPlansAsync(_inputOptions.ProjectName).Result
@@ -182,16 +189,19 @@ namespace AssociateTestsToTestCases
                 if (innerException.GetType().Equals(typeof(VssUnauthorizedException)))
                 {
                     _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.DevOpsCredentials.FailureUserNotAuthorized, _inputOptions.CollectionUri), _messages.Types.Error);
+
                     throw new InvalidOperationException();
                 }
                 else if (innerException.GetType().Equals(typeof(ProjectDoesNotExistWithNameException)))
                 {
                     _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.DevOpsCredentials.FailureNonExistingProject, _inputOptions.ProjectName), _messages.Types.Error);
+
                     throw new InvalidOperationException();
                 }
                 else if (innerException.GetType().Equals(typeof(InvalidOperationException)) && e.Message.Equals(SequenceContainsNoMatchingElementName))
                 {
                     _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.DevOpsCredentials.FailureNonExistingTestPlan, _inputOptions.TestPlanName), _messages.Types.Error);
+
                     throw new InvalidOperationException();
                 }
 

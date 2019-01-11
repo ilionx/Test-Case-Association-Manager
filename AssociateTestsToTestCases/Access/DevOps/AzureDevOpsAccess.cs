@@ -30,7 +30,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
         private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
         private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
         private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
-        
+
         public AzureDevOpsAccess(TestManagementHttpClient testManagementHttpClient, WorkItemTrackingHttpClient workItemTrackingHttpClient, Messages messages, IOutputAccess outputAccess, InputOptions options, Counter.Counter counter)
         {
             _testManagementHttpClient = testManagementHttpClient;
@@ -54,7 +54,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
             return CreateTestCaseList(testCases);
         }
 
-        public int Associate(List<TestMethod> testMethods, List<TestCase> testCases, string testType)
+        public int Associate(List<TestMethod> testMethods, List<TestCase> testCases) // todo: Dictionary<string, TestCase>
         {
             foreach (var testMethod in testMethods)
             {
@@ -68,13 +68,15 @@ namespace AssociateTestsToTestCases.Access.DevOps
                     continue;
                 }
 
-                if (testCase.AutomationStatus.Equals(AutomatedName) && testCase.Title.Equals(testMethod.Name) & testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
+                var testCaseHasAutomatedStatus = TestCaseHasAutomatedStatus(testCase, testMethod);
+                var testCaseIsAlreadyAutomated = testCaseHasAutomatedStatus && TestCaseIsAlreadyAutomated(testCase, testMethod);
+                var testCaseHasIncorrectAssociation = testCaseHasAutomatedStatus && !testCaseIsAlreadyAutomated;
+                if (testCaseIsAlreadyAutomated)
                 {
                     _counter.Unaffected.AlreadyAutomated += 1;
                     continue;
                 }
-
-                if (testCase.AutomationStatus.Equals(AutomatedName) && testCase.Title.Equals(testMethod.Name) & !testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
+                else if (testCaseHasIncorrectAssociation)
                 {
                     if (_inputOptions.VerboseLogging)
                     {
@@ -84,13 +86,19 @@ namespace AssociateTestsToTestCases.Access.DevOps
                     _counter.Success.FixedReference += 1;
                 }
 
-                var operationSuccess = AssociateTestCaseWithTestMethod(testCase.Id, $"{testMethod.FullClassName}.{testMethod.Name}", testMethod.AssemblyName, testMethod.TempId.ToString(), testType);
+                var operationSuccess = AssociateTestCaseWithTestMethod(testCase.Id, $"{testMethod.FullClassName}.{testMethod.Name}", testMethod.AssemblyName, testMethod.TempId.ToString(), _inputOptions.TestType);
 
                 if (!operationSuccess)
                 {
                     _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Failure, _messages.Reasons.Association);
 
                     _counter.Error.OperationFailed += 1;
+
+                    if (testCaseHasIncorrectAssociation)
+                    {
+                        _counter.Success.FixedReference -= 1;
+                    }
+
                     continue;
                 }
 
@@ -121,11 +129,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
         public List<TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase> testCases, List<TestMethod> testMethods)
         {
-            var testCasesWithNotAvailableTestMethods = testCases.Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToList();
-
-            _counter.Warning.TestMethodNotAvailable += testCasesWithNotAvailableTestMethods.Count;
-
-            return testCasesWithNotAvailableTestMethods;
+            return testCases.Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToList();
         }
 
         public int[] GetTestCasesId()
@@ -136,6 +140,8 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
             return testPoints.Select(x => int.Parse(x.TestCase.Id)).ToArray();
         }
+
+        #region GetTestCases
 
         private static int[][] ChunkTestCases(int[] testCasesId)
         {
@@ -160,6 +166,24 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
             return testCases;
         }
+
+        #endregion
+
+        #region Validations
+
+        private bool TestCaseHasAutomatedStatus(TestCase testCase, TestMethod testMethod)
+        {
+            return testCase.AutomationStatus.Equals(AutomatedName) && testCase.Title.Equals(testMethod.Name);
+        }
+
+        private bool TestCaseIsAlreadyAutomated(TestCase testCase, TestMethod testMethod)
+        {
+            return testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}");
+        }
+
+        #endregion
+
+        #region Assocation
 
         private bool AssociateTestCaseWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, string testType)
         {
@@ -204,5 +228,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
                    result.Fields[AutomatedTestStorageName].ToString() == assemblyName &&
                    result.Fields[AutomatedTestName].ToString() == methodName;
         }
+
+        #endregion
     }
 }

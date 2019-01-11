@@ -8,6 +8,6 @@ namespace AssociateTestsToTestCases.Manager.DevOps
     {
         bool TestPlanIsEmpty();
         List<TestCase> GetTestCases();
-        void Associate(MethodInfo[] methods, List<TestCase> testCases, string testType);
+        void Associate(MethodInfo[] methods, List<TestCase> testCases);
     }
 }

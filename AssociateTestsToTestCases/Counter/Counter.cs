@@ -1,4 +1,6 @@
-﻿namespace AssociateTestsToTestCases.Counter
+﻿using System.Linq;
+
+namespace AssociateTestsToTestCases.Counter
 {
     public sealed class Counter
     {
@@ -9,12 +11,20 @@
 
         public Counter()
         {
-            Error = new Error(this);
-            Warning = new Warning(this);
-            Success = new Success(this);
-            Unaffected = new Unaffected(this);
+            Error = new Error();
+            Warning = new Warning();
+            Success = new Success();
+            Unaffected = new Unaffected();
         }
 
-        public int Total { get; internal set; }
+        public int Total
+        {
+            get
+            {
+                var excludedCounters = new string[] { "Error" };
+
+                return GetType().GetFields().Where(x => !excludedCounters.Contains(x.Name)).Select(y => (int)y.GetValue(this).GetType().GetProperty("Total").GetValue(y.GetValue(this))).Sum();
+            }
+        }
     }
 }

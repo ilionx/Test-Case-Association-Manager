@@ -26,23 +26,64 @@ namespace AssociateTestsToTestCases.Access.Output
 
         public void WriteToConsole(string message, string messageType = "", string reason = "")
         {
-            Console.ForegroundColor = GetConsoleColor(_messages.Types, messageType);
+            var enumerationPointFormat = GetEnumerationPointFormat(message, messageType, reason);
+            var messageTypeFormat = GetMessageTypeFormat(messageType);
+            var spaceMessageTypeFormat = GetSpaceMessageTypeFormat(messageType);
+            var reasonOutputFormat = GetReasonOutputFormat(reason);
+            var spaceReasonFormat = GetSpaceReasonFormat(reason);
 
-            var indention = message.Equals(string.Empty) | (reason.Length.Equals(0) & new[] { _messages.Types.Stage, _messages.Types.Success, _messages.Types.Error }.Contains(messageType)) ? string.Empty : _messages.EnumerationPoint;
-            var messageTypeFormat = messageType.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, messageType);
-            var spaceMessageType = new string(SpaceChar, _messages.Types.LongestTypeCount - messageType.Count());
+            var messageOutput = GetMessageOutput(enumerationPointFormat, messageTypeFormat, spaceMessageTypeFormat, reasonOutputFormat, spaceReasonFormat, message, messageType);
 
-            var reasonOutputFormat = reason.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, reason);
-            var spaceReason = reason.Length.Equals(0) ? string.Empty : new string(SpaceChar, _messages.Reasons.LongestReasonCount - reason.Count() + 1);
-
-            var messageOutput = string.Format(_messages.Output, indention, messageTypeFormat, spaceMessageType, reasonOutputFormat, spaceReason, message);
-            if(!_isLocal)
+            if (_isLocal)
             {
-                messageOutput = messageOutput.Insert(0, GetAzureDevOpsConsoleColor(_messages.Types, messageType));
+                Console.ForegroundColor = GetConsoleColor(_messages.Types, messageType);
             }
 
             Console.WriteLine(messageOutput);
         }
+
+        #region Outputformatting
+
+        private string GetEnumerationPointFormat(string message, string messageType, string reason)
+        {
+            var messageTypesWithNoIndention = new[] { _messages.Types.Stage, _messages.Types.Success, _messages.Types.Error };
+            return message.Equals(string.Empty) || (reason.Length.Equals(0) && messageTypesWithNoIndention.Contains(messageType)) ? string.Empty : _messages.EnumerationPoint;
+        }
+
+        private string GetMessageTypeFormat(string messageType)
+        {
+            return messageType.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, messageType);
+        }
+
+        private string GetSpaceMessageTypeFormat(string messageType)
+        {
+            return new string(SpaceChar, _messages.Types.LongestTypeCount - messageType.Count());
+        }
+
+        private string GetReasonOutputFormat(string reason)
+        {
+            return reason.Length.Equals(0) ? string.Empty : string.Format(_messages.Stages.Format, reason);
+        }
+
+        private string GetSpaceReasonFormat(string reason)
+        {
+            return reason.Length.Equals(0) ? string.Empty : new string(SpaceChar, _messages.Reasons.LongestReasonCount - reason.Count() + 1);
+        }
+
+        private string GetMessageOutput(string enumerationPoint, string messageTypeFormat, string spaceMessageType, string reasonOutputFormat, string spaceReason, string message, string messageType)
+        {
+            var messageOutput = string.Format(_messages.Output, enumerationPoint, messageTypeFormat, spaceMessageType, reasonOutputFormat, spaceReason, message);
+            return PrependPipelineColor(messageOutput, messageType);
+        }
+
+        private string PrependPipelineColor(string message, string messageType)
+        {
+            return _isLocal ? message : message.Insert(0, GetAzureDevOpsConsoleColor(messageType));
+        }
+
+        #endregion
+
+        #region Outputcolors
 
         private ConsoleColor GetConsoleColor(TypeMessage types, string messageType)
         {
@@ -57,7 +98,7 @@ namespace AssociateTestsToTestCases.Access.Output
             } else if (messageType.Equals(types.Error) || messageType.Equals(types.Failure))
             {
                 consoleColor = ConsoleColor.DarkRed;
-            }  else if (messageType.Equals(types.Stage) || messageType.Equals(string.Empty))
+            } else if (messageType.Equals(types.Stage) || messageType.Equals(string.Empty))
             {
                 consoleColor = ConsoleColor.Gray;
             }
@@ -65,39 +106,46 @@ namespace AssociateTestsToTestCases.Access.Output
             return consoleColor;
         }
 
-        private string GetAzureDevOpsConsoleColor(TypeMessage types, string messageType)
+        private string GetAzureDevOpsConsoleColor(string messageType)
         {
             var spaceMessageType = string.Empty;
             var colorOutput = _azureDevOpsColors.DefaultColor;
             var azureDevOpsColors = _azureDevOpsColors.LongestTypeCount;
 
-            if (messageType.Equals(types.Success))
+            if (messageType.Equals(_messages.Types.Success))
             {
                 colorOutput = _azureDevOpsColors.SuccessColor;
-            } else if (messageType.Equals(types.Warning))
+            } else if (messageType.Equals(_messages.Types.Warning))
             {
                 colorOutput = WarningColorOutput;
-                spaceMessageType = new string(SpaceChar, SpaceCharLength + azureDevOpsColors - _azureDevOpsColors.WarningColor.Length);
-            } else if (messageType.Equals(types.Error))
+                spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColors, _azureDevOpsColors.WarningColor.Length);
+            } else if (messageType.Equals(_messages.Types.Error))
             {
                 colorOutput = ErrorColorOutput;
-                spaceMessageType = new string(SpaceChar, SpaceCharLength + azureDevOpsColors - _azureDevOpsColors.FailureColor.Length);
-            } else if (messageType.Equals(types.Failure))
+                spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColors, _azureDevOpsColors.FailureColor.Length);
+            } else if (messageType.Equals(_messages.Types.Failure))
             {
                 colorOutput = _azureDevOpsColors.FailureColor;
-            } else if (messageType.Equals(types.Stage) || messageType.Equals(string.Empty))
+            } else if (messageType.Equals(_messages.Types.Stage) || messageType.Equals(string.Empty))
             {
                 colorOutput = string.Empty;
             }
 
             if (colorOutput.Length <= _azureDevOpsColors.LongestTypeCount)
             {
-                spaceMessageType = new string(SpaceChar, SpaceCharLength + azureDevOpsColors - colorOutput.Length);
+                spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColors, colorOutput.Length);
             }
 
             colorOutput += spaceMessageType;
 
             return colorOutput;
         }
+
+        private string GetAzureDevOpsSpaceMessageTypeFormat(int longestAzureDevOpsColorLength, int azureDevOpsColorLength)
+        {
+            return new string(SpaceChar, SpaceCharLength + longestAzureDevOpsColorLength - azureDevOpsColorLength);
+        }
+
+        #endregion
     }
 }
