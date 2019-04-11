@@ -13,6 +13,5 @@
         public string PersonalAccessToken { get; set; }
 
         public string[] MinimatchPatterns { get; set; }
-        public string[] TestAssemblyPaths { get; set; }
     }
 }

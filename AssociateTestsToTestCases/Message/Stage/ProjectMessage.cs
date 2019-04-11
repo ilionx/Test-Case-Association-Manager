@@ -4,6 +4,6 @@
     {
         public readonly string Status = "Validating Project Test Methods and Test Cases...";
         public readonly string Success = "Project Test Methods and Test Cases have been validated.\n";
-        public readonly string Failure = "Project does not have any Test Methods or Test Cases.\n";
+        public readonly string Failure = "Project has neither any Test Methods nor Test Cases.\n";
     }
 }

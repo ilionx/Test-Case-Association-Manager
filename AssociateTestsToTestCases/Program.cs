@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using CommandLine;
 using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Parsing;
 using Microsoft.TeamFoundation.Core.WebApi;
 using AssociateTestsToTestCases.Access.File;
 using AssociateTestsToTestCases.Manager.File;
@@ -13,18 +13,18 @@ using AssociateTestsToTestCases.Manager.DevOps;
 using AssociateTestsToTestCases.Manager.Output;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
-
 using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
 
 namespace AssociateTestsToTestCases
 {
-    internal static class Program
+    internal static partial class Program
     {
         private const string SystemTeamProjectName = "SYSTEM_TeamProject";
         private const string PressAnyKeyToCloseWindowName = "\nPress any key to close the window...";
         private const string SequenceContainsNoMatchingElementName = "Sequence contains no matching element";
 
         private static InputOptions _inputOptions;
+        private static string[] _testAssemblyPaths;
 
         private static IFileAccess _fileAccess;
         private static IDevOpsAccess _devOpsAccess;
@@ -35,8 +35,8 @@ namespace AssociateTestsToTestCases
         private static IDevOpsManager _devOpsManager;
 
         private static Messages _messages;
-        private static TestMethod[] _testMethods;
         private static TestCase[] _testCases;
+        private static TestMethod[] _testMethods;
 
         private static bool _isLocal;
         private static Counter.Counter _counter;
@@ -45,11 +45,13 @@ namespace AssociateTestsToTestCases
         {
             try
             {
-                Init(args);
+                OutputInitMessage();
+                InitializeProgram(args);
 
                 _outputManager.WriteToConsole(_messages.Stages.Project.Status, _messages.Types.Stage);
 
-                if (_fileManager.TestMethodsPathIsEmpty() && _devOpsManager.TestPlanIsEmpty())
+                var projectHasNoTestSetup = _fileManager.TestMethodsPathIsEmpty(_testAssemblyPaths) && _devOpsManager.TestPlanIsEmpty();
+                if (projectHasNoTestSetup)
                 {
                     _outputManager.WriteToConsole(_messages.Stages.Project.Failure, _messages.Types.Warning);
                 }
@@ -57,7 +59,7 @@ namespace AssociateTestsToTestCases
                 {
                     _outputManager.WriteToConsole(_messages.Stages.Project.Success, _messages.Types.Success);
 
-                    _testMethods = _fileManager.GetTestMethods();
+                    _testMethods = _fileManager.GetTestMethods(_testAssemblyPaths);
                     _testCases = _devOpsManager.GetTestCases();
                     _devOpsManager.Associate(_testMethods, _testCases);
                 }
@@ -74,104 +76,107 @@ namespace AssociateTestsToTestCases
 
             if (_isLocal)
             {
-                Console.ResetColor();
-                Console.Write(PressAnyKeyToCloseWindowName);
-                Console.ReadKey();
+                PromptUserToCloseWindow();
             }
         }
 
-        private static void Init(string[] args)
+        private static void OutputInitMessage()
+        {
+            // Todo: logo is not correct yet!
+            Console.WriteLine(@"                                                                    
+                             ./sss+.                                
+                         `:smMMMMMMMmy/`                            
+                      .+hMMMMMh+/ohMMMMMdo-                         
+                  `/ymMMMMms:`     `:smMMMMNy/`                     
+               `odMMMMNh+.``           .+hNMMMMdo.                  
+              :NMMMms:    mm               :smMMMM/                 
+              mMMN.       Nm                  -MMMN                 
+              NMMN   oddddMMdmmmmmmmmh:        NMMM`                
+              NMMN   `....Mm`````````dM.       NMMM`                
+              NMMN        Md         yM.       NMMM`                
+              NMMN        Md         yM.       NMMM`                
+              NMMN       `Md         yM.       NMMM`                
+              NMMN        Nm:--------dM/---.   NMMM`                
+              NMMN        .oyyyyyyyyymMhyyyo   NMMM`                
+              dMMM+`                 yM.     .oMMMN                 
+              -mMMMMdo-              sN.  :sdMMMMm-                 
+              | :smMMMMNh+.           .+hNMMMMNy/ |                 
+              |    .+hNMMMMms:    `:smMMMMMdo-    |                 
+              |       `:smMMMMNhshMMMMMms:`       |                 
+              |           .+hNMMMMMNh+.           |                 
+              |               -/+/-`              |                 
+    ___       |                 _       __  _     |       ______    
+   /   |  ____|____ ____  _____(_)___ _/ /_(_)__  |____  / ____/  __
+  / /| | / ___/ ___/ __ \/ ___/ / __ `/ __/ / __ \/ __ \/ __/ | |/_/
+ / ___ |(__  |__  ) /_/ / /__/ / /_/ / /_/ / /_/ / / / / /____>  <  
+/_/  |_/____/____/\____/\___/_/\__,_/\__/_/\____/_/ /_/_____/_/|_|  
+    |     |    |    |    |   |   |    |  |   |     |    |     |      ");
+            Console.WriteLine("===================================================================\n");
+        }
+
+        private static void InitializeProgram(string[] args)
         {
             _messages = new Messages();
             _counter = new Counter.Counter();
-            _inputOptions = new InputOptions();
             _isLocal = Environment.GetEnvironmentVariable(SystemTeamProjectName) == null;
+            _inputOptions = new CommandLineArgumentsParser(CreateCommandLineAccess(_isLocal, _messages, new AzureDevOpsColors()), _messages).Parse(args);
+            _testAssemblyPaths = CreateFileAccess().ListTestAssemblyPaths(_inputOptions.Directory, _inputOptions.MinimatchPatterns);
 
-            InitAccesses(args);
-            InitManagers();
+            InitializeAccesses();
+            InitializeManagers();
         }
 
-        private static void InitAccesses(string[] args)
+        private static void InitializeAccesses()
         {
-            _commandLineAccess = new CommandLineAccess(_isLocal, _messages, new AzureDevOpsColors());
-            ParseArguments(args);
+            _commandLineAccess = CreateCommandLineAccess(_isLocal, _messages, new AzureDevOpsColors());
+            _fileAccess = CreateFileAccess();
 
-            _fileAccess = new FileAccess(new AssemblyHelper());
-            _inputOptions.TestAssemblyPaths = _fileAccess.ListTestAssemblyPaths(_inputOptions.Directory, _inputOptions.MinimatchPatterns);
-
-            var httpClients = RetrieveHttpClients(new VssConnection(new Uri(_inputOptions.CollectionUri), new VssBasicCredential(string.Empty, _inputOptions.PersonalAccessToken)));
-            var workItemTrackingHttpClient = httpClients.Item1;
-            var testManagementHttpClient = httpClients.Item2;
-
-            ValidateDevOpsCredentials(testManagementHttpClient);
-            _devOpsAccess = new AzureDevOpsAccess(testManagementHttpClient, workItemTrackingHttpClient, _messages, _commandLineAccess, _inputOptions, _counter);
+            var httpClients = RetrieveHttpClients(CreateVssConnection());
+            ValidateDevOpsCredentials(httpClients.TestManagementHttpClient);
+            _devOpsAccess = new AzureDevOpsAccess(httpClients, _messages, _commandLineAccess, _inputOptions, _counter);
         }
 
-        private static void InitManagers()
+        private static void InitializeManagers()
         {
             _outputManager = new OutputManager(_messages, _commandLineAccess, _counter);
-            _fileManager = new FileManager(_messages, _fileAccess, _commandLineAccess, _inputOptions);
+            _fileManager = new FileManager(_messages, _fileAccess, _commandLineAccess);
             _devOpsManager = new AzureDevOpsManager(_messages, _outputManager, _devOpsAccess, _counter);
         }
 
-        private static void ParseArguments(string[] args)
-        {
-            _commandLineAccess.WriteToConsole(_messages.Stages.Argument.Status, _messages.Types.Stage);
-
-            Parser.Default.ParseArguments<Options>(args)
-                .WithParsed(o =>
-                {
-                    _inputOptions.TestType = o.TestType;
-                    _inputOptions.ProjectName = o.ProjectName;
-                    _inputOptions.TestPlanName = o.TestPlanName;
-                    _inputOptions.CollectionUri = o.CollectionUri;
-                    _inputOptions.ValidationOnly = o.ValidationOnly;
-                    _inputOptions.VerboseLogging = o.VerboseLogging;
-                    _inputOptions.Directory = o.Directory;
-                    _inputOptions.PersonalAccessToken = o.PersonalAccessToken;
-                    _inputOptions.MinimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
-                });
-
-            _commandLineAccess.WriteToConsole(_messages.Stages.Argument.Success, _messages.Types.Success);
-        }
-
-        private static (WorkItemTrackingHttpClient, TestManagementHttpClient) RetrieveHttpClients(VssConnection connection)
+        private static AzureDevOpsHttpClients RetrieveHttpClients(VssConnection connection)
         {
             _commandLineAccess.WriteToConsole(_messages.Stages.HttpClient.Status, _messages.Types.Stage);
 
-            WorkItemTrackingHttpClient workItemTrackingHttpClient;
-            TestManagementHttpClient testManagementHttpClient;
+            var httpClients = new AzureDevOpsHttpClients();
 
             try
             {
-                testManagementHttpClient = connection.GetClient<TestManagementHttpClient>();
-                workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
+                httpClients.TestManagementHttpClient = connection.GetClient<TestManagementHttpClient>();
+                httpClients.WorkItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
             }
             catch (Exception e)
             {
                 var innerException = e.InnerException ?? e;
+                var innerExceptionType = innerException.GetType();
+                var message = innerException.Message;
 
-                if (innerException.GetType().Equals(typeof(VssServiceResponseException)))
+                if (innerExceptionType == typeof(VssServiceResponseException))
                 {
-                    _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.HttpClient.FailureResourceNotFound, _inputOptions.CollectionUri), _messages.Types.Error);
-
-                    throw new InvalidOperationException();
+                    message = string.Format(_messages.Stages.HttpClient.FailureResourceNotFound, _inputOptions.CollectionUri);
                 }
-                else if (innerException.GetType().Equals(typeof(VssServiceException)))
+                else if (innerExceptionType == typeof(VssServiceException))
                 {
-                    _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.HttpClient.FailureUserNotAuthorized, _inputOptions.CollectionUri), _messages.Types.Error);
-
-                    throw new InvalidOperationException();
+                    message = string.Format(_messages.Stages.HttpClient.FailureUserNotAuthorized, _inputOptions.CollectionUri);
                 }
 
-                // Unknown error - output debug message
-                _commandLineAccess.WriteToConsole(innerException.Message, _messages.Types.Error);
-                throw e;
+                _commandLineAccess.WriteToConsole(message, _messages.Types.Error);
+
+                throw innerException;
             }
 
             _commandLineAccess.WriteToConsole(_messages.Stages.HttpClient.Success, _messages.Types.Success);
 
-            return (workItemTrackingHttpClient, testManagementHttpClient);
+            return httpClients;
         }
 
         private static void ValidateDevOpsCredentials(TestManagementHttpClient testManagementHttpClient)
@@ -180,68 +185,55 @@ namespace AssociateTestsToTestCases
 
             try
             {
-                testManagementHttpClient.GetPlansAsync(_inputOptions.ProjectName).Result
-                .Single(x => x.Name.Equals(_inputOptions.TestPlanName));
+                testManagementHttpClient.GetPlansAsync(_inputOptions.ProjectName).Result.Single(x => x.Name.Equals(_inputOptions.TestPlanName));
             }
             catch (Exception e)
             {
                 var innerException = e.InnerException ?? e;
+                var innerExceptionType = innerException.GetType();
+                var message = innerException.Message;
 
-                if (innerException.GetType().Equals(typeof(VssUnauthorizedException)))
+                if (innerExceptionType == typeof(VssUnauthorizedException))
                 {
-                    _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.DevOpsCredentials.FailureUserNotAuthorized, _inputOptions.CollectionUri), _messages.Types.Error);
-
-                    throw new InvalidOperationException();
+                    message = string.Format(_messages.Stages.DevOpsCredentials.FailureUserNotAuthorized, _inputOptions.CollectionUri);
                 }
-                else if (innerException.GetType().Equals(typeof(ProjectDoesNotExistWithNameException)))
+                else if (innerExceptionType == typeof(ProjectDoesNotExistWithNameException))
                 {
-                    _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.DevOpsCredentials.FailureNonExistingProject, _inputOptions.ProjectName), _messages.Types.Error);
-
-                    throw new InvalidOperationException();
+                    message = string.Format(_messages.Stages.DevOpsCredentials.FailureNonExistingProject, _inputOptions.ProjectName);
                 }
-                else if (innerException.GetType().Equals(typeof(InvalidOperationException)) && e.Message.Equals(SequenceContainsNoMatchingElementName))
+                else if (innerExceptionType == typeof(InvalidOperationException) && e.Message.Equals(SequenceContainsNoMatchingElementName))
                 {
-                    _commandLineAccess.WriteToConsole(string.Format(_messages.Stages.DevOpsCredentials.FailureNonExistingTestPlan, _inputOptions.TestPlanName), _messages.Types.Error);
-
-                    throw new InvalidOperationException();
+                    message = string.Format(_messages.Stages.DevOpsCredentials.FailureNonExistingTestPlan, _inputOptions.TestPlanName);
                 }
 
-                // Unknown error - output debug message
-                _commandLineAccess.WriteToConsole(innerException.Message, _messages.Types.Error);
+                _commandLineAccess.WriteToConsole(message, _messages.Types.Error);
+
                 throw innerException;
             }
 
             _commandLineAccess.WriteToConsole(_messages.Stages.DevOpsCredentials.Success, _messages.Types.Success);
         }
 
-        private class Options
+        private static CommandLineAccess CreateCommandLineAccess(bool isLocal, Messages messages, AzureDevOpsColors azureDevOpsColors)
         {
-            [Option('d', "directory", Required = true, HelpText = "The root directory to search in.")]
-            public string Directory { get; set; }
+            return new CommandLineAccess(isLocal, messages, azureDevOpsColors);
+        }
 
-            [Option('m', "minimatchpatterns", Required = true, HelpText = "Minimatch patterns to search for within the directory, separated by a semicolon.")]
-            public string MinimatchPatterns { get; set; }
+        private static FileAccess CreateFileAccess()
+        {
+            return new FileAccess(new AssemblyHelper());
+        }
 
-            [Option('p', "personalaccesstoken", Required = true, HelpText = "The personal access token used for accessing the Azure DevOps project.")]
-            public string PersonalAccessToken { get; set; }
+        private static VssConnection CreateVssConnection()
+        {
+            return new VssConnection(new Uri(_inputOptions.CollectionUri), new VssBasicCredential(string.Empty, _inputOptions.PersonalAccessToken));
+        }
 
-            [Option('u', "collectionuri", Required = true, HelpText = "The Azure DevOps collection Uri used for accessing the project test cases.")]
-            public string CollectionUri { get; set; }
-
-            [Option('n', "projectname", Required = true, HelpText = "The project name containing the test plan.")]
-            public string ProjectName { get; set; }
-
-            [Option('e', "testplanname", Required = true, HelpText = "The name of the test plan containing the test cases.")]
-            public string TestPlanName { get; set; }
-
-            [Option('t', "testtype", Required = false, Default = "", HelpText = "The automation test type.")]
-            public string TestType { get; set; }
-
-            [Option('v', "validationonly", Required = false, HelpText = "Indicates if you only want to validate the changes without saving the test cases.")]
-            public bool ValidationOnly { get; set; }
-
-            [Option('l', "verboselogging", Required = false, HelpText = "When Verbose logging is turned on it also outputs the successful matchings and the fixes next to the warnings/errors.")]
-            public bool VerboseLogging { get; set; }
+        private static void PromptUserToCloseWindow()
+        {
+            Console.ResetColor();
+            Console.Write(PressAnyKeyToCloseWindowName);
+            Console.ReadKey();
         }
     }
 }

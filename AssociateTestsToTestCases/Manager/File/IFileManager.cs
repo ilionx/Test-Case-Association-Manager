@@ -5,7 +5,7 @@ namespace AssociateTestsToTestCases.Manager.File
 {
     public interface IFileManager
     {
-        bool TestMethodsPathIsEmpty();
-        TestMethod[] GetTestMethods();
+        bool TestMethodsPathIsEmpty(string[] testAssemblyPaths);
+        TestMethod[] GetTestMethods(string[] testAssemblyPaths);
     }
 }

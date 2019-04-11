@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using Microsoft.TeamFoundation.Common;
 using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Extensions;
 using AssociateTestsToTestCases.Access.File;
 using AssociateTestsToTestCases.Access.Output;
 
@@ -14,59 +14,67 @@ namespace AssociateTestsToTestCases.Manager.File
         private readonly Messages _messages;
         private readonly IFileAccess _fileAccess;
         private readonly IOutputAccess _outputAccess;
-        private readonly InputOptions _options;
 
-        public FileManager(Messages messages, IFileAccess fileAccess, IOutputAccess outputAccess, InputOptions options)
+        public FileManager(Messages messages, IFileAccess fileAccess, IOutputAccess outputAccess)
         {
             _messages = messages;
             _fileAccess = fileAccess;
             _outputAccess = outputAccess;
-            _options = options;
         }
 
-        public bool TestMethodsPathIsEmpty()
+        public bool TestMethodsPathIsEmpty(string[] testAssemblyPaths)
         {
-            return _fileAccess.ListTestMethods(_options.TestAssemblyPaths).IsNullOrEmpty();
+            return _fileAccess.ListTestMethods(testAssemblyPaths).IsNullOrEmpty();
         }
 
-        public TestMethod[] GetTestMethods()
+        public TestMethod[] GetTestMethods(string[] testAssemblyPaths)
         {
             _outputAccess.WriteToConsole(_messages.Stages.TestMethod.Status, _messages.Types.Stage);
 
-            var testMethods = _fileAccess.ListTestMethods(_options.TestAssemblyPaths);
-            ValidateTestMethodsIsNullOrEmpty(testMethods);
-            ValidateTestMethodsHasDuplicates(_fileAccess.ListDuplicateTestMethods(testMethods));
+            var rawTestMethods = _fileAccess.ListTestMethods(testAssemblyPaths);
+            ValidateTestMethodsIsNullOrEmpty(rawTestMethods);
 
-            _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestMethod.Success, testMethods.Length), _messages.Types.Success);
+            var duplicateTestMethods = _fileAccess.ListDuplicateTestMethods(rawTestMethods);
+            ValidateTestMethodsHasDuplicates(duplicateTestMethods);
 
-            return MapTestMethods(testMethods);
-        }
+            _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestMethod.Success, rawTestMethods.Length), _messages.Types.Success);
 
-        private TestMethod[] MapTestMethods(MethodInfo[] methods)
-        {
-            return methods.Select(x => new TestMethod(x.Name, x.Module.Name, x.DeclaringType.FullName, Guid.NewGuid())).ToArray();
+            return rawTestMethods.ToTestMethodArray();
         }
 
         #region Validations
 
         private void ValidateTestMethodsIsNullOrEmpty(MethodInfo[] testMethods)
         {
-            if (testMethods.IsNullOrEmpty())
+            if (!testMethods.IsNullOrEmpty())
             {
-                _outputAccess.WriteToConsole(_messages.Stages.TestMethod.Failure, _messages.Types.Error);
-                throw new InvalidOperationException(_messages.Stages.TestMethod.Failure);
+                return;
             }
+
+            _outputAccess.WriteToConsole(_messages.Stages.TestMethod.Failure, _messages.Types.Error);
+
+            throw new InvalidOperationException(_messages.Stages.TestMethod.Failure);
         }
 
         private void ValidateTestMethodsHasDuplicates(List<DuplicateTestMethod> duplicateTestMethods)
         {
-            if (duplicateTestMethods.Count != 0)
+            if (duplicateTestMethods.Count == 0)
             {
-                _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestMethod.Duplicate, duplicateTestMethods.Count), _messages.Types.Error);
-                duplicateTestMethods.ForEach(x => _outputAccess.WriteToConsole(string.Format(_messages.TestMethods.Duplicate, x.Name, _messages.TestMethods.GetDuplicateTestMethodNamesString(x.TestMethods)), _messages.Types.Info));
-
-                throw new InvalidOperationException(string.Format(_messages.Stages.TestMethod.Duplicate, duplicateTestMethods.Count));
+                return;
             }
+
+            _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestMethod.Duplicate, duplicateTestMethods.Count), _messages.Types.Error);
+
+            foreach (var duplicateTestMethod in duplicateTestMethods)
+            {
+                var testMethodName = duplicateTestMethod.Name;
+                var duplicateTestMethodNames =_messages.TestMethods.GetDuplicateTestMethodNamesString(duplicateTestMethod.TestMethods);
+                var message = string.Format(_messages.TestMethods.Duplicate, testMethodName, duplicateTestMethodNames);
+
+                _outputAccess.WriteToConsole(message, _messages.Types.Info);
+            }
+
+            throw new InvalidOperationException(string.Format(_messages.Stages.TestMethod.Duplicate, duplicateTestMethods.Count));
         }
 
         #endregion

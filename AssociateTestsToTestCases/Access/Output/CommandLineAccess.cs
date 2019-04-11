@@ -8,7 +8,6 @@ namespace AssociateTestsToTestCases.Access.Output
     {
         private const char SpaceChar = ' ';
         private const int SpaceCharLength = 1;
-
         private const string ErrorColorOutput = "##vso[task.logissue type=error;]";
         private const string WarningColorOutput = "##vso[task.logissue type=warning;]";
 
@@ -74,7 +73,7 @@ namespace AssociateTestsToTestCases.Access.Output
 
         private string GetMessageOutput(OutputMessage outputMessage, string message, string messageType)
         {
-            var messageOutput = string.Format(_messages.Output, outputMessage.EnumerationPoint, outputMessage.MessageType, outputMessage.SpaceMessageType, outputMessage.ReasonOutput, outputMessage.SpaceReason, message);
+            var messageOutput = $"{outputMessage.EnumerationPoint}{outputMessage.MessageType}{outputMessage.SpaceMessageType} {outputMessage.ReasonOutput}{outputMessage.SpaceReason}{message}";
             return PrependPipelineColor(messageOutput, messageType);
         }
 
@@ -110,9 +109,10 @@ namespace AssociateTestsToTestCases.Access.Output
 
         private string GetAzureDevOpsConsoleColor(string messageType)
         {
-            var spaceMessageType = string.Empty;
             var colorOutput = _azureDevOpsColors.DefaultColor;
-            var azureDevOpsColors = _azureDevOpsColors.LongestTypeCount;
+
+            var spaceMessageType = string.Empty;
+            var azureDevOpsColorsLongestTypeCount = _azureDevOpsColors.LongestTypeCount;
 
             if (messageType.Equals(_messages.Types.Success))
             {
@@ -120,11 +120,11 @@ namespace AssociateTestsToTestCases.Access.Output
             } else if (messageType.Equals(_messages.Types.Warning))
             {
                 colorOutput = WarningColorOutput;
-                spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColors, _azureDevOpsColors.WarningColor.Length);
+                spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColorsLongestTypeCount, _azureDevOpsColors.WarningColor.Length);
             } else if (messageType.Equals(_messages.Types.Error))
             {
                 colorOutput = ErrorColorOutput;
-                spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColors, _azureDevOpsColors.FailureColor.Length);
+                spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColorsLongestTypeCount, _azureDevOpsColors.FailureColor.Length);
             } else if (messageType.Equals(_messages.Types.Failure))
             {
                 colorOutput = _azureDevOpsColors.FailureColor;
@@ -135,7 +135,7 @@ namespace AssociateTestsToTestCases.Access.Output
 
             if (colorOutput.Length <= _azureDevOpsColors.LongestTypeCount)
             {
-                spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColors, colorOutput.Length);
+                spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColorsLongestTypeCount, colorOutput.Length);
             }
 
             colorOutput += spaceMessageType;

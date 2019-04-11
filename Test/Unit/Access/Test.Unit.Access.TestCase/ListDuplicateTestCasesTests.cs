@@ -38,7 +38,13 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
             var actual = target.ListDuplicateTestCases(testCases);
@@ -70,7 +76,13 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
             var actual = target.ListDuplicateTestCases(testCases.ToArray());

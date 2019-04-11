@@ -1,5 +1,6 @@
 ﻿using Moq;
 using System;
+using AutoFixture;
 using FluentAssertions;
 using System.Reflection;
 using AssociateTestsToTestCases.Access.File;
@@ -18,12 +19,15 @@ namespace Test.Unit.Manager.File
             var fileAccessMock = new Mock<IFileAccess>();
             var outputAccess = new Mock<IOutputAccess>();
 
+            var fixture = new Fixture();
+            var testAssemblyPaths = fixture.Create<string[]>();
+
             fileAccessMock.Setup(x => x.ListTestMethods(It.IsAny<string[]>())).Returns(new MethodInfo[2]);
 
             var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object).Create();
 
             // Act
-            Action actual = () => target.TestMethodsPathIsEmpty();
+            Action actual = () => target.TestMethodsPathIsEmpty(testAssemblyPaths);
 
             // Assert
             actual.Should().NotThrow<InvalidOperationException>();
@@ -37,12 +41,15 @@ namespace Test.Unit.Manager.File
             var fileAccessMock = new Mock<IFileAccess>();
             var outputAccess = new Mock<IOutputAccess>();
 
+            var fixture = new Fixture();
+            var testAssemblyPaths = fixture.Create<string[]>();
+
             fileAccessMock.Setup(x => x.ListTestMethods(It.IsAny<string[]>())).Returns(new MethodInfo[0]);
 
             var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object).Create();
 
             // Act
-            Action actual = () => target.TestMethodsPathIsEmpty();
+            Action actual = () => target.TestMethodsPathIsEmpty(testAssemblyPaths);
 
             // Assert
             actual.Should().NotThrow<InvalidOperationException>();

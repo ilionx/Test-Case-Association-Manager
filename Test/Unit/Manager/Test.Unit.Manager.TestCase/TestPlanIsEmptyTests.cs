@@ -29,7 +29,7 @@ namespace Test.Unit.Manager.DevOps
             Action actual = () => target.TestPlanIsEmpty();
 
             // Assert
-            actual.Should().NotThrow<InvalidOperationException>();
+            actual.Should().NotThrow();
             actual.Should().Equals(false);
         }
 
@@ -48,7 +48,7 @@ namespace Test.Unit.Manager.DevOps
             Action actual = () => target.TestPlanIsEmpty();
 
             // Assert
-            actual.Should().NotThrow<InvalidOperationException>();
+            actual.Should().NotThrow();
             actual.Should().Equals(true);
         }
     }

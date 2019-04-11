@@ -55,7 +55,13 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             testManagementHttpClient.Setup(x => x.GetPlansAsync(It.IsAny<string>(),null, null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testPlans);
             testManagementHttpClient.Setup(x => x.GetTestSuitesForPlanAsync(It.IsAny<string>(), It.IsAny<int>(), null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testSuites);
@@ -110,7 +116,13 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             testManagementHttpClient.Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testPlans);
             testManagementHttpClient.Setup(x => x.GetTestSuitesForPlanAsync(It.IsAny<string>(), It.IsAny<int>(), null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testSuites);

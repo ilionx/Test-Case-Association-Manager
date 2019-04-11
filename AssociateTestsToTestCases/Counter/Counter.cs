@@ -27,7 +27,9 @@ namespace AssociateTestsToTestCases.Counter
         {
             get
             {
-                return GetType().GetFields().Where(x => !_excludedCounters.Contains(x.Name)).Select(y => (int)y.GetValue(this).GetType().GetProperty(TotalName).GetValue(y.GetValue(this))).Sum();
+                return GetType().GetFields().Where(x => !_excludedCounters.Contains(x.Name))
+                    .Select(y => (int)y.GetValue(this).GetType().GetProperty(TotalName).GetValue(y.GetValue(this)))
+                    .Sum();
             }
         }
     }

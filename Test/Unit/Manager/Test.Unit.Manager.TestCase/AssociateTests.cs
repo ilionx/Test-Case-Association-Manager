@@ -39,7 +39,7 @@ namespace Test.Unit.Manager.DevOps
             Action actual = () => target.Associate(methods, testCases);
 
             // Assert
-            actual.Should().NotThrow<InvalidOperationException>();
+            actual.Should().NotThrow();
             outputManagerMock.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(DefaultWriteCount + testMethodsNotAvailable.Count));
         }
 
@@ -91,7 +91,7 @@ namespace Test.Unit.Manager.DevOps
             Action actual = () => target.Associate(methods, testCases);
 
             // Assert
-            actual.Should().NotThrow<InvalidOperationException>();
+            actual.Should().NotThrow();
             outputManagerMock.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
         }
     }

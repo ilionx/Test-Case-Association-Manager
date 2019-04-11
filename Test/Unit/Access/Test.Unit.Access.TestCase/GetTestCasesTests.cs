@@ -48,10 +48,16 @@ namespace Test.Unit.Access.DevOps
 
             testManagementHttpClient.Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default(CancellationToken))).ReturnsAsync(new List<TestPlan>());
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            Action act = () => target.GetTestCases();
+            Action act = () => target.GetTestCaseWorkItems();
 
             // Assert
             act.Should().Throw<InvalidOperationException>();
@@ -89,10 +95,16 @@ namespace Test.Unit.Access.DevOps
 
             testManagementHttpClient.Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testPlans);
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            Action act = () => target.GetTestCases();
+            Action act = () => target.GetTestCaseWorkItems();
 
             // Assert
             act.Should().Throw<InvalidOperationException>();
@@ -151,10 +163,16 @@ namespace Test.Unit.Access.DevOps
             testManagementHttpClient.Setup(x => x.GetPointsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null, null, null, null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testPoints);
             workItemTrackingHttpClient.Setup(x => x.GetWorkItemsAsync(It.IsAny<int[]>(), null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testCases);
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var actual = target.GetTestCases();
+            var actual = target.GetTestCaseWorkItems();
 
             // Assert
             actual.Length.Should().Be(3);
