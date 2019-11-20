@@ -62,7 +62,7 @@ namespace AssociateTestsToTestCases
             }
             catch
             {
-                if (!_isLocal)  
+                if (!_isLocal)
                 {
                     Environment.ExitCode = -1;
                 }
@@ -78,25 +78,29 @@ namespace AssociateTestsToTestCases
         {
             _outputManager.WriteToConsole(_messages.Stages.Project.Status, _messages.Types.Stage);
 
+            var message = _messages.Stages.Project.Success;
+            var messageType = _messages.Types.Success;
+
             var projectHasNoTestSetup = _fileManager.TestMethodAssembliesContainNoTestMethods(_testAssemblyPaths) && _devOpsManager.TestPlanIsEmpty();
-            if (!projectHasNoTestSetup)
+            if (projectHasNoTestSetup)
             {
-                _outputManager.WriteToConsole(_messages.Stages.Project.Success, _messages.Types.Success);
-                return !projectHasNoTestSetup;
+                message = _messages.Stages.Project.Failure;
+                messageType = _messages.Types.Warning;
             }
 
-            _outputManager.WriteToConsole(_messages.Stages.Project.Failure, _messages.Types.Warning);
+            _outputManager.WriteToConsole(message, messageType);
+
             return projectHasNoTestSetup;
         }
 
         private static void OutputInitMessage()
         {
             Console.WriteLine(@"
-    ___                         _       __  _             ______    
+    ___                         _       __  _             ______
    /   |  ____ ____ ____  _____(_)___ _/ /_(_)__   ____  / ____/  __
   / /| | / ___/ ___/ __ \/ ___/ / __ `/ __/ / __ \/ __ \/ __/ | |/_/
- / ___ |(__  |__  ) /_/ / /__/ / /_/ / /_/ / /_/ / / / / /____>  <  
-/_/  |_/____/____/\____/\___/_/\__,_/\__/_/\____/_/ /_/_____/_/|_|  
+ / ___ |(__  |__  ) /_/ / /__/ / /_/ / /_/ / /_/ / / / / /____>  <
+/_/  |_/____/____/\____/\___/_/\__,_/\__/_/\____/_/ /_/_____/_/|_|
                                                                      ");
             Console.WriteLine("==============================================================================\n");
         }
