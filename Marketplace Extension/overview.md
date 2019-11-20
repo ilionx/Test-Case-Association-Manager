@@ -1,21 +1,21 @@
-# Test Case Association Manager
+﻿# Test Case Association Manager
 Azure DevOps extension for managing the associations between Test Methods (code) and Test Cases (Azure DevOps). It uses the [Azure DevOps Services REST API] to achieve this. The Test Method loading happens through its assemblies. These assemblies will be detected by using minimatch patterns which are provided by the user.
 
 # 1. Features
-* **Associations**: associates Test Methods (code) with Test Cases (Azure DevOps) by ***name***.
+* **Association**: associates Test Methods (code) with Test Cases (Azure DevOps) by ***matching names***.
 * **Validation only**: if this option is selected the Association manager will only validate the associations without persisting the changes. It is advised to use this option in a pull request build definition. 
 * **Fixing broken associations**: outdated associations will be fixed.
   Scenario: 
-  1. Run Association manager: associates Test Method 'Test29' with Test Case 'Test29'.
+  1. 1st run Association Manager: associates Test Method 'Test29' with Test Case 'Test29'.
   2. User removes Test Method 'Test29' and creates Test Method 'Test30', renames Test Case 'Test29' to 'Test30'. (Test Case 'Test30' is now still associated to the missing Test Method 'Test29'). 
-  3. Run Association manager: fixes the association by removing/overwriting the outdated association.
+  3. 2nd run Association Manager: fixes the association by removing/overwriting the outdated association.
   4. Test Case 'Test30' is now associated with Test Method 'Test30'.
 * **Pipeline reporting & flow handling**: outputs every status to the console in real-time. **Any error** (reading/loading/associating) will cause the *pipeline job* to fail.
 * **Verbose logging**: once enabled, the manager will also output the successful matchings next to the warnings/errors/fixes.
-* **Missing Test cases (warning)**: detects missing Test Cases.
-* **Duplicate Test Methods (warning)**: detects duplicate Test Methods.
-* **Duplicate Test Cases (warning)**: detects duplicate Test Cases.
-* **Deprecated Test Methods (warning)**: detects deprecated Test Methods (outdated).
+* **Missing Test Case detection**: detects missing Test Cases.
+* **Duplicate Test Method detection**: detects duplicate Test Methods.
+* **Duplicate Test Case detection**: detects duplicate Test Cases.
+* **Deprecated Test Method detection**: detects deprecated (outdated) Test Methods.
 * **Association overview**: outputs an overview of the association process at the end.
 
 # 2. Prerequisite
@@ -27,7 +27,7 @@ The Azure DevOps Services REST API requires user authentication. For security re
 To create a Personal Access Token please read chapter 'Create personal access tokens to authenticate access' of [this guide]. When you're creating the PAT it is important to select **'All accessible organizations'** under **Organization** and set the correct **Custom defined** scopes:
 * **Work items**: Read & write; 
 * **Test Management**: Read & write.
-![PAT settings](https://image.frl/i/s3blya3zo18bvzyh.png)
+![PAT settings](https://associationex.blob.core.windows.net/documentation/BvJkre6.png)
 
 # 4. Setup
 ## 4.1 Variables
@@ -44,15 +44,14 @@ To create a Personal Access Token please read chapter 'Create personal access to
 | VerboseLogging |  | When Verbose logging is turned on it also outputs the successful matchings and the fixes next to the warnings/errors. |  |
 
 ## 4.2 Usage
-There are two ways to create a pipeline definition: the old fashioned way or through YAML. Within this chapter the usage of this task will be explained for both methods.
-
-**Caution!** The position of the task is very important. It should **always** be placed ***after*** the **Build Task**, but ***before*** the **Test Run Task**.
+There are two ways to create a pipeline definition: the old fashioned way or through YAML. Within this chapter the usage of this task will be shown for both methods. This will be done through **examples**.
 
 ### 4.2.1 Non-YAML
-![](https://image.frl/i/kkd7f6foylr083sz.png)
+![](https://associationex.blob.core.windows.net/documentation/50AcCSY.png)
+**Caution!** The position of the task is very important. It should **always** be placed ***after*** the **Build Task**, but ***before*** the **Test Run Task**.
 
 When you're setting up the **Run test task**, it is important to select **Test plan** under **Select tests using**. This makes it possible to link the outcome of the Test Run to the Test plan.
-![](https://image.frl/i/voqc1wcd384ef810.png)
+![](https://associationex.blob.core.windows.net/documentation/testpl.png)
 
 ### 4.2.2 YAML
 ```
@@ -77,6 +76,7 @@ When you're setting up the **Run test task**, it is important to select **Test p
 
     verboseLogging: true
 ```
+**Caution!** The position of the task is very important. It should **always** be placed ***after*** the **Build Task**, but ***before*** the **Test Run Task**.
 
 When you're setting up the **Run Test task**, it is important to set the **testSelector**-property to  **'testPlan'**. This makes it possible to link the outcome of the Test Run to the Test plan.
 ```
