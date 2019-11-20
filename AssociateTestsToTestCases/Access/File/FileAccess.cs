@@ -57,6 +57,12 @@ namespace AssociateTestsToTestCases.Access.File
                 matchingFilesToBeIncluded.AddRange(mm.Filter(files));
             }
 
+            var noMatchingFilesFound = matchingFilesToBeIncluded.Count == 0;
+            if (noMatchingFilesFound)
+            {
+                return null;
+            }
+
             var matchingFilesToBeExcluded = new List<string>();
             foreach (var minimatchPattern in minimatchPatterns.Where(minimatchPattern => minimatchPattern.StartsWith("!")))
             {

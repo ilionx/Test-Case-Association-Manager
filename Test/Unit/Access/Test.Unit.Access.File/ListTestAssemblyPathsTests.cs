@@ -76,7 +76,7 @@ namespace Test.Unit.Access.File
             var actual = target.ListTestAssemblyPaths(directory, minimatchPatterns.Select(x => x.ToLowerInvariant()).ToArray());
 
             // Assert
-            actual.Length.Should().Be(0);
+            actual.Should().BeNull();
         }
 
         [TestMethod]

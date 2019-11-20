@@ -11,6 +11,7 @@
         public readonly TestMethodMessage TestMethod = new TestMethodMessage();
         public readonly HttpClientsMessage HttpClient = new HttpClientsMessage();
         public readonly AssociationMessage Association = new AssociationMessage();
+        public readonly TestAssemblyPathMessage TestAssemblyPath = new TestAssemblyPathMessage();
         public readonly DevOpsCredentialsMessage DevOpsCredentials = new DevOpsCredentialsMessage();
     }
 }

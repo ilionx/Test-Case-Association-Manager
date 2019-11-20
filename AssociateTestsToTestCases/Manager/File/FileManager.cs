@@ -22,7 +22,7 @@ namespace AssociateTestsToTestCases.Manager.File
             _outputAccess = outputAccess;
         }
 
-        public bool TestMethodsPathIsEmpty(string[] testAssemblyPaths)
+        public bool TestMethodAssembliesContainNoTestMethods(string[] testAssemblyPaths)
         {
             return _fileAccess.ListTestMethods(testAssemblyPaths).IsNullOrEmpty();
         }
@@ -40,6 +40,16 @@ namespace AssociateTestsToTestCases.Manager.File
             _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestMethod.Success, rawTestMethods.Length), _messages.Types.Success);
 
             return rawTestMethods.ToTestMethodArray();
+        }
+
+        public string[] GetTestAssemblyPaths(string directory, string[] minimatchPatterns)
+        {
+            _outputAccess.WriteToConsole(_messages.Stages.TestAssemblyPath.Status, _messages.Types.Stage);
+
+            var testAssemblyPaths = _fileAccess.ListTestAssemblyPaths(directory, minimatchPatterns);
+            ValidateTestAssemblyPathsNotFound(testAssemblyPaths);
+
+            return testAssemblyPaths;
         }
 
         #region Validations
@@ -75,6 +85,17 @@ namespace AssociateTestsToTestCases.Manager.File
             }
 
             throw new InvalidOperationException(string.Format(_messages.Stages.TestMethod.Duplicate, duplicateTestMethods.Count));
+        }
+
+        private void ValidateTestAssemblyPathsNotFound(string[] testAssemblyPaths)
+        {
+            if (testAssemblyPaths != null)
+            {
+                _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestAssemblyPath.Success, testAssemblyPaths.Length), _messages.Types.Success);
+                return;
+            }
+
+            _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestAssemblyPath.Failure), _messages.Types.Failure);
         }
 
         #endregion

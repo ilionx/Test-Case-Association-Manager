@@ -40,6 +40,7 @@ namespace AssociateTestsToTestCases
 
         private static bool _isLocal;
         private static Counter.Counter _counter;
+        private static AzureDevOpsColors _azureDevOpsColors;
 
         private static void Main(string[] args)
         {
@@ -47,18 +48,11 @@ namespace AssociateTestsToTestCases
             {
                 OutputInitMessage();
                 InitializeProgram(args);
+                InitializeTestAssemblyPaths();
 
-                _outputManager.WriteToConsole(_messages.Stages.Project.Status, _messages.Types.Stage);
-
-                var projectHasNoTestSetup = _fileManager.TestMethodsPathIsEmpty(_testAssemblyPaths) && _devOpsManager.TestPlanIsEmpty();
-                if (projectHasNoTestSetup)
+                var noTestSetup = ProjectHasNoTestSetup();
+                if (!noTestSetup)
                 {
-                    _outputManager.WriteToConsole(_messages.Stages.Project.Failure, _messages.Types.Warning);
-                }
-                else
-                {
-                    _outputManager.WriteToConsole(_messages.Stages.Project.Success, _messages.Types.Success);
-
                     _testMethods = _fileManager.GetTestMethods(_testAssemblyPaths);
                     _testCases = _devOpsManager.GetTestCases();
                     _devOpsManager.Associate(_testMethods, _testCases);
@@ -68,7 +62,7 @@ namespace AssociateTestsToTestCases
             }
             catch
             {
-                if (!_isLocal)
+                if (!_isLocal)  
                 {
                     Environment.ExitCode = -1;
                 }
@@ -80,55 +74,53 @@ namespace AssociateTestsToTestCases
             }
         }
 
+        private static bool ProjectHasNoTestSetup()
+        {
+            _outputManager.WriteToConsole(_messages.Stages.Project.Status, _messages.Types.Stage);
+
+            var projectHasNoTestSetup = _fileManager.TestMethodAssembliesContainNoTestMethods(_testAssemblyPaths) && _devOpsManager.TestPlanIsEmpty();
+            if (!projectHasNoTestSetup)
+            {
+                _outputManager.WriteToConsole(_messages.Stages.Project.Success, _messages.Types.Success);
+                return !projectHasNoTestSetup;
+            }
+
+            _outputManager.WriteToConsole(_messages.Stages.Project.Failure, _messages.Types.Warning);
+            return projectHasNoTestSetup;
+        }
+
         private static void OutputInitMessage()
         {
-            // Todo: logo is not correct yet!
-            Console.WriteLine(@"                                                                    
-                             ./sss+.                                
-                         `:smMMMMMMMmy/`                            
-                      .+hMMMMMh+/ohMMMMMdo-                         
-                  `/ymMMMMms:`     `:smMMMMNy/`                     
-               `odMMMMNh+.``           .+hNMMMMdo.                  
-              :NMMMms:    mm               :smMMMM/                 
-              mMMN.       Nm                  -MMMN                 
-              NMMN   oddddMMdmmmmmmmmh:        NMMM`                
-              NMMN   `....Mm`````````dM.       NMMM`                
-              NMMN        Md         yM.       NMMM`                
-              NMMN        Md         yM.       NMMM`                
-              NMMN       `Md         yM.       NMMM`                
-              NMMN        Nm:--------dM/---.   NMMM`                
-              NMMN        .oyyyyyyyyymMhyyyo   NMMM`                
-              dMMM+`                 yM.     .oMMMN                 
-              -mMMMMdo-              sN.  :sdMMMMm-                 
-              | :smMMMMNh+.           .+hNMMMMNy/ |                 
-              |    .+hNMMMMms:    `:smMMMMMdo-    |                 
-              |       `:smMMMMNhshMMMMMms:`       |                 
-              |           .+hNMMMMMNh+.           |                 
-              |               -/+/-`              |                 
-    ___       |                 _       __  _     |       ______    
-   /   |  ____|____ ____  _____(_)___ _/ /_(_)__  |____  / ____/  __
+            Console.WriteLine(@"
+    ___                         _       __  _             ______    
+   /   |  ____ ____ ____  _____(_)___ _/ /_(_)__   ____  / ____/  __
   / /| | / ___/ ___/ __ \/ ___/ / __ `/ __/ / __ \/ __ \/ __/ | |/_/
  / ___ |(__  |__  ) /_/ / /__/ / /_/ / /_/ / /_/ / / / / /____>  <  
 /_/  |_/____/____/\____/\___/_/\__,_/\__/_/\____/_/ /_/_____/_/|_|  
-    |     |    |    |    |   |   |    |  |   |     |    |     |      ");
-            Console.WriteLine("===================================================================\n");
+                                                                     ");
+            Console.WriteLine("==============================================================================\n");
         }
 
         private static void InitializeProgram(string[] args)
         {
             _messages = new Messages();
             _counter = new Counter.Counter();
+            _azureDevOpsColors = new AzureDevOpsColors();
             _isLocal = Environment.GetEnvironmentVariable(SystemTeamProjectName) == null;
-            _inputOptions = new CommandLineArgumentsParser(CreateCommandLineAccess(_isLocal, _messages, new AzureDevOpsColors()), _messages).Parse(args);
-            _testAssemblyPaths = CreateFileAccess().ListTestAssemblyPaths(_inputOptions.Directory, _inputOptions.MinimatchPatterns);
+            _inputOptions = new CommandLineArgumentsParser(CreateCommandLineAccess(_isLocal, _messages, _azureDevOpsColors), _messages).Parse(args);
 
             InitializeAccesses();
             InitializeManagers();
         }
 
+        private static void InitializeTestAssemblyPaths()
+        {
+            _testAssemblyPaths = _fileManager.GetTestAssemblyPaths(_inputOptions.Directory, _inputOptions.MinimatchPatterns);
+        }
+
         private static void InitializeAccesses()
         {
-            _commandLineAccess = CreateCommandLineAccess(_isLocal, _messages, new AzureDevOpsColors());
+            _commandLineAccess = CreateCommandLineAccess(_isLocal, _messages, _azureDevOpsColors);
             _fileAccess = CreateFileAccess();
 
             var httpClients = RetrieveHttpClients(CreateVssConnection());
@@ -175,7 +167,6 @@ namespace AssociateTestsToTestCases
             }
 
             _commandLineAccess.WriteToConsole(_messages.Stages.HttpClient.Success, _messages.Types.Success);
-
             return httpClients;
         }
 
