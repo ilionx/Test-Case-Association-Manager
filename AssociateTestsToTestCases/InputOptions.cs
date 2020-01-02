@@ -2,6 +2,8 @@
 {
     public class InputOptions
     {
+        public bool DebugMode { get; set; }
+
         public bool ValidationOnly { get; set; }
         public bool VerboseLogging { get; set; }
 

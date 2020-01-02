@@ -29,6 +29,7 @@ namespace AssociateTestsToTestCases.Parsing
                     .WithParsed(o =>
                     {
                         _inputOptions.TestType = o.TestType;
+                        _inputOptions.DebugMode = o.DebugMode;
                         _inputOptions.Directory = o.Directory;
                         _inputOptions.ProjectName = o.ProjectName;
                         _inputOptions.TestPlanName = o.TestPlanName;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Diagnostics;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Parsing;
 using Microsoft.TeamFoundation.Core.WebApi;
@@ -60,8 +61,16 @@ namespace AssociateTestsToTestCases
 
                 _outputManager.OutputSummary(_testMethods, _testCases);
             }
-            catch
+            catch (Exception e)
             {
+                if (_inputOptions.DebugMode)
+                {
+                    Console.WriteLine("\n STACKTRACE: ");
+                    Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+                    Trace.TraceError(e.ToString());
+                    Trace.Close();
+                }
+
                 if (!_isLocal)
                 {
                     Environment.ExitCode = -1;

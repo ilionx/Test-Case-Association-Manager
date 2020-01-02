@@ -106,7 +106,7 @@ We would like to thank [Flaticon] for their beautiful icons created by [Freepik]
    [Azure DevOps Services REST API]: <https://docs.microsoft.com/en-us/rest/api/azure/devops/>
    [this guide]: <https://docs.microsoft.com/nl-nl/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts>
    [minimatch patterns]: <https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/file-matching-patterns?view=vsts>
-   [email]: <mailto:visualstudio@qnh.nl>
+   [email]: <mailto:visualstudio@ilionx.com>
    [Freepik]: <https://www.freepik.com/>
    [Flaticon]: <https://www.flaticon.com>
    [CC BY 3.0]: <http://creativecommons.org/licenses/by/3.0/>
