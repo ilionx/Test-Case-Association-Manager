@@ -14,6 +14,7 @@ function ExecuteAssociationTool
   $TestType = Get-VstsInput -Name testType
   $ValidateOnly = Get-VstsInput -Name validateOnly -AsBool
   $VerboseLogging = Get-VstsInput -Name verboseLogging -AsBool
+  $DebugMode = Get-VstsInput -Name debugMode -AsBool
   
   # Arguments
   $arguments = New-Object System.Collections.ArrayList;
@@ -27,6 +28,7 @@ function ExecuteAssociationTool
   
   if ($ValidateOnly) { $arguments.Add("-v") > $null }
   if ($VerboseLogging) { $arguments.Add("-l") > $null }
+  if ($DebugMode) { $arguments.Add("-x") > $null }
    
   # Process creation & execution
   $process = Start-Process -FilePath $ToolExePath -ArgumentList $arguments -NoNewWindow -PassThru -Wait
