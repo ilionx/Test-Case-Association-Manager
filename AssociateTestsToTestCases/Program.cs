@@ -65,10 +65,7 @@ namespace AssociateTestsToTestCases
             {
                 if (_inputOptions.DebugMode)
                 {
-                    Console.WriteLine("\n STACKTRACE: ");
-                    Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
-                    Trace.TraceError(e.ToString());
-                    Trace.Close();
+                    WriteTraceToConsole(e);
                 }
 
                 if (!_isLocal)
@@ -231,6 +228,15 @@ namespace AssociateTestsToTestCases
         private static VssConnection CreateVssConnection()
         {
             return new VssConnection(new Uri(_inputOptions.CollectionUri), new VssBasicCredential(string.Empty, _inputOptions.PersonalAccessToken));
+        }
+
+        private static void WriteTraceToConsole(Exception e)
+        {
+            Console.ResetColor();
+            Console.WriteLine("\n STACKTRACE: ");
+            Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+            Trace.TraceError(e.ToString());
+            Trace.Close();
         }
 
         private static void PromptUserToCloseWindow()

@@ -1,6 +1,13 @@
 ﻿# Test Case Association Manager
 Azure DevOps extension for managing the associations between Test Methods (code) and Test Cases (Azure DevOps). It uses the [Azure DevOps Services REST API] to achieve this. The Test Method loading happens through its assemblies. These assemblies will be detected by using minimatch patterns which are provided by the user.
 
+# 0. Changelog
+* **Version 2.0**
+  - **.NET Core support**
+  - Better and more output messages.
+* **Version 1.0**
+  - First stable version.
+
 # 1. Features
 * **Association**: associates Test Methods (code) with Test Cases (Azure DevOps) by ***matching names***.
 * **Validation only**: if this option is selected the Association manager will only validate the associations without persisting the changes. It is advised to use this option in a pull request build definition. 
