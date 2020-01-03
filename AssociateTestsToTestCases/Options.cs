@@ -31,7 +31,7 @@ namespace AssociateTestsToTestCases
         [Option('l', "verboselogging", Required = false, Default = false, HelpText = "When Verbose logging is turned on it also outputs the successful matchings and the fixes next to the warnings/errors.")]
         public bool VerboseLogging { get; set; }
 
-        [Option('x', "debug", Required = false, Default = false, HelpText = "When Debug mode is turned on any exception thrown by the tool will be printed to the console. Use this only in case of issues.")]
+        [Option('x', "debugmode", Required = false, Default = false, HelpText = "When Debug mode is turned on any exception thrown by the tool will be printed to the console. Use this only in case of issues.")]
         public bool DebugMode { get; set; }
     }
 }
