@@ -15,6 +15,13 @@
         "Minor": #{VersionNumberMinor}#,
         "Patch": #{VersionNumberPatch}#
     },
+	"groups": [
+	    {
+		    "name": "advanced",
+			"displayName": "Advanced",
+			"isExpanded": false
+		}
+	],
     "instanceNameFormat": "Manage Test Case Associations",
     "inputs": [
         {
@@ -47,7 +54,7 @@
             "label": "Personal Access token",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "The personal access token used for accessing the Azure DevOps project."
+            "helpMarkDown": "The personal access token used for accessing the Azure DevOps project. <br>It can accept variable defined in build or release pipelines as `$(passwordVariable)`. <br>You may mark a variable as 'secret' to secure it."
 		},
 		{
             "name": "ProjectName",
@@ -95,7 +102,8 @@
             "label": "Debug mode",
             "defaultValue": false,
             "required": false,
-            "helpMarkDown": "When Debug mode is turned on any exception thrown by the tool will be printed to the console. Use this only in case of issues."
+            "helpMarkDown": "When Debug mode is turned on any exception thrown by the tool will be printed to the console. <b>Use this only in case of unsolvable issues.</b>",
+			"groupName": "advanced"
 		}
 	],
 	"outputVariables": [],
