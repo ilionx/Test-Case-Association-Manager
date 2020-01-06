@@ -1,7 +1,6 @@
 ﻿using Moq;
 using System;
 using AutoFixture;
-using System.Threading;
 using FluentAssertions;
 using AssociateTestsToTestCases;
 using System.Collections.Generic;
@@ -46,7 +45,9 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            testManagementHttpClient.Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default(CancellationToken))).ReturnsAsync(new List<TestPlan>());
+            testManagementHttpClient
+                .Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default))
+                .ReturnsAsync(new List<TestPlan>());
 
             var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
             {
@@ -80,8 +81,16 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var testPlans = new List<TestPlan>()
             {
-                fixture.Build<TestPlan>().With(x => x.Name, notTestPlanName).Create(),
-                fixture.Build<TestPlan>().With(x => x.Name, notTestPlanName).Create()
+                fixture.Build<TestPlan>()
+                       .Without(x => x.UpdatedBy)
+                       .Without(x => x.Owner)
+                       .With(x => x.Name, notTestPlanName)
+                       .Create(),
+                fixture.Build<TestPlan>()
+                       .Without(x => x.UpdatedBy)
+                       .Without(x => x.Owner)
+                       .With(x => x.Name, notTestPlanName)
+                       .Create()
             };
 
             var options = new InputOptions()
@@ -93,7 +102,9 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            testManagementHttpClient.Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testPlans);
+            testManagementHttpClient
+                .Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default))
+                .ReturnsAsync(testPlans);
 
             var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
             {
@@ -127,26 +138,66 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
             var testPlans = new List<TestPlan>()
             {
-                fixture.Build<TestPlan>().With(x => x.Name, testPlanName).Create(),
-                fixture.Build<TestPlan>().With(x => x.Name, notTestPlanName).Create()
+                fixture.Build<TestPlan>()
+                       .Without(x => x.UpdatedBy)
+                       .Without(x => x.Owner)
+                       .With(x => x.Name, testPlanName)
+                       .Create(),
+                fixture.Build<TestPlan>()
+                       .Without(x => x.UpdatedBy)
+                       .Without(x => x.Owner)
+                       .With(x => x.Name, notTestPlanName)
+                       .Create()
             };
             var testSuites = new List<TestSuite>()
             {
-                fixture.Build<TestSuite>().With(x => x.Children, null).Create(),
-                fixture.Build<TestSuite>().With(x => x.Children, null).Create(),
-                fixture.Build<TestSuite>().With(x => x.Children, null).Create()
+                fixture.Build<TestSuite>()
+                       .Without(x => x.LastUpdatedBy)
+                       .Without(x => x.Children)
+                       .Create(),
+                fixture.Build<TestSuite>()
+                       .Without(x => x.LastUpdatedBy)
+                       .Without(x => x.Children)
+                       .Create(),
+                fixture.Build<TestSuite>()
+                       .Without(x => x.LastUpdatedBy)
+                       .Without(x => x.Children)
+                       .Create()
             };
             var testPoints = new List<TestPoint>()
             {
-                fixture.Build<TestPoint>().With(x => x.TestCase, fixture.Build<WorkItemReference>().With(y => y.Id, fixture.Create<int>().ToString()).Create()).Create(),
-                fixture.Build<TestPoint>().With(x => x.TestCase, fixture.Build<WorkItemReference>().With(y => y.Id, fixture.Create<int>().ToString()).Create()).Create(),
-                fixture.Build<TestPoint>().With(x => x.TestCase, fixture.Build<WorkItemReference>().With(y => y.Id, fixture.Create<int>().ToString()).Create()).Create()
+                fixture.Build<TestPoint>()
+                       .Without(x => x.LastUpdatedBy)
+                       .Without(x => x.AssignedTo)
+                       .Without(x=> x.LastResultDetails)
+                       .With(x => x.TestCase, fixture.Build<WorkItemReference>().With(y => y.Id, fixture.Create<int>().ToString()).Create())
+                       .Create(),
+                fixture.Build<TestPoint>()
+                       .Without(x => x.LastUpdatedBy)
+                       .Without(x => x.AssignedTo)
+                       .Without(x=> x.LastResultDetails)
+                       .With(x => x.TestCase, fixture.Build<WorkItemReference>().With(y => y.Id, fixture.Create<int>().ToString()).Create())
+                       .Create(),
+                fixture.Build<TestPoint>()
+                       .Without(x => x.LastUpdatedBy)
+                       .Without(x => x.AssignedTo)
+                       .Without(x=> x.LastResultDetails)
+                       .With(x => x.TestCase, fixture.Build<WorkItemReference>().With(y => y.Id, fixture.Create<int>().ToString()).Create())
+                       .Create()
             };
             var testCases = new List<WorkItem>()
             {
-                fixture.Build<WorkItem>().With(x => x.Id, fixture.Create<int>()).With(y => y.Fields, new Dictionary<string, object>(){ { SystemTitle , fixture.Create<string>() }, { AutomationStatusName, fixture.Create<string>() }, { AutomatedTestName, fixture.Create<string>() } }).Create(),
-                fixture.Build<WorkItem>().With(x => x.Id, fixture.Create<int>()).With(y => y.Fields, new Dictionary<string, object>(){ { SystemTitle , fixture.Create<string>() }, { AutomationStatusName, fixture.Create<string>() }, { AutomatedTestName, fixture.Create<string>() } }).Create(),
-                fixture.Build<WorkItem>().With(x => x.Id, fixture.Create<int>()).With(y => y.Fields, new Dictionary<string, object>(){ { SystemTitle , fixture.Create<string>() }, { AutomationStatusName, fixture.Create<string>() }, { AutomatedTestName, fixture.Create<string>() } }).Create(),
+                fixture.Build<WorkItem>().With(x => x.Id, fixture.Create<int>())
+                       .With(y => y.Fields, new Dictionary<string, object>(){ { SystemTitle , fixture.Create<string>() }, { AutomationStatusName, fixture.Create<string>() }, { AutomatedTestName, fixture.Create<string>() } })
+                       .Create(),
+                fixture.Build<WorkItem>()
+                       .With(x => x.Id, fixture.Create<int>())
+                       .With(y => y.Fields, new Dictionary<string, object>(){ { SystemTitle , fixture.Create<string>() }, { AutomationStatusName, fixture.Create<string>() }, { AutomatedTestName, fixture.Create<string>() } })
+                       .Create(),
+                fixture.Build<WorkItem>()
+                       .With(x => x.Id, fixture.Create<int>())
+                       .With(y => y.Fields, new Dictionary<string, object>(){ { SystemTitle , fixture.Create<string>() }, { AutomationStatusName, fixture.Create<string>() }, { AutomatedTestName, fixture.Create<string>() } })
+                       .Create(),
             };
 
             var options = new InputOptions()
@@ -158,10 +209,18 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            testManagementHttpClient.Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testPlans);
-            testManagementHttpClient.Setup(x => x.GetTestSuitesForPlanAsync(It.IsAny<string>(), It.IsAny<int>(), null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testSuites);
-            testManagementHttpClient.Setup(x => x.GetPointsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null, null, null, null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testPoints);
-            workItemTrackingHttpClient.Setup(x => x.GetWorkItemsAsync(It.IsAny<int[]>(), null, null, null, null, null, default(CancellationToken))).ReturnsAsync(testCases);
+            testManagementHttpClient
+                .Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default))
+                .ReturnsAsync(testPlans);
+            testManagementHttpClient
+                .Setup(x => x.GetTestSuitesForPlanAsync(It.IsAny<string>(), It.IsAny<int>(), (int?)null, null, null, null, null, default))
+                .ReturnsAsync(testSuites);
+            testManagementHttpClient
+                .Setup(x => x.GetPointsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null, null, null, null, null, null, null, null, default))
+                .ReturnsAsync(testPoints);
+            workItemTrackingHttpClient
+                .Setup(x => x.GetWorkItemsAsync(It.IsAny<int[]>(), null, null, null, null, null, default))
+                .ReturnsAsync(testCases);
 
             var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
             {

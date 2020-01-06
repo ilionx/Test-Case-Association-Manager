@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using AutoFixture;
 using FluentAssertions;
-using System.Threading;
 using AssociateTestsToTestCases;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Counter;
@@ -51,7 +50,8 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var azureDevOpsHttpClients = new AzureDevOpsHttpClients() {
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
                 TestManagementHttpClient = testManagementHttpClient.Object,
                 WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
             };
@@ -134,7 +134,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -190,7 +192,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -242,7 +246,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -295,7 +301,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -351,7 +359,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -405,7 +415,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -459,7 +471,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
