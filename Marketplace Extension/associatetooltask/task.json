@@ -44,9 +44,10 @@
             "name": "CollectionUri",
             "type": "string",
             "label": "Collection Uri",
-            "defaultValue": "",
+            "defaultValue": "$(System.TeamFoundationCollectionUri)",
             "required": true,
-            "helpMarkDown": "The Azure DevOps collection Uri used for accessing the project work items."
+            "helpMarkDown": "The Azure DevOps collection Uri used for accessing the project work items.",
+            "visibleRule": "false"
 		},
 		{
             "name": "PersonalAccesstoken",
@@ -60,9 +61,10 @@
             "name": "ProjectName",
             "type": "string",
             "label": "Project Name",
-            "defaultValue": "",
+            "defaultValue": "$(System.TeamProject)",
             "required": true,
-            "helpMarkDown": "The project name containing the test plan."
+            "helpMarkDown": "The project name containing the test plan.",
+            "visibleRule": "false"
 		},
 		{
             "name": "TestPlanId",
