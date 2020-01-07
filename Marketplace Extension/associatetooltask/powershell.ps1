@@ -13,6 +13,7 @@ function ExecuteAssociationTool
   $TestPlanId = Get-VstsInput -Name testPlanId
   $TestSuiteId = Get-VstsInput -Name testSuiteId
   $TestType = Get-VstsInput -Name testType
+  $TestTypeCustom = Get-VstsInput -Name testTypeCustom
   $ValidateOnly = Get-VstsInput -Name validateOnly -AsBool
   $VerboseLogging = Get-VstsInput -Name verboseLogging -AsBool
   $DebugMode = Get-VstsInput -Name debugMode -AsBool
@@ -26,7 +27,14 @@ function ExecuteAssociationTool
   $arguments.Add("-n ""$ProjectName""") > $null
   $arguments.Add("-e ""$TestPlanId""") > $null
   $arguments.Add("-s ""$TestSuiteId""") > $null
-  $arguments.Add("-t ""$TestType""") > $null
+  
+  if ($TestType -eq "custom") 
+  {
+    $arguments.Add("-t ""$TestTypeCustom""") > $null 
+  }
+  else {
+    $arguments.Add("-t ""$TestType""") > $null 
+  }
   
   if ($ValidateOnly) { $arguments.Add("-v") > $null }
   if ($VerboseLogging) { $arguments.Add("-l") > $null }

@@ -89,11 +89,25 @@
 		},
 		{
             "name": "TestType",
-            "type": "string",
+            "type": "radio",
             "label": "Test Type",
+            "defaultValue": "unit",
+            "required": false,
+            "options": {
+                "unit": "Unit",
+                "integration": "Integration",
+                "custom": "Custom"
+            },
+            "helpMarkDown": "The automation test type."
+		},
+		{
+            "name": "TestTypeCustom",
+            "type": "string",
+            "label": "Custom Test Type",
             "defaultValue": "",
             "required": false,
-            "helpMarkDown": "The automation test type."
+            "helpMarkDown": "The custom automation test type.",
+            "visibleRule": "TestType=custom"
 		},
 		{
             "name": "ValidateOnly",
