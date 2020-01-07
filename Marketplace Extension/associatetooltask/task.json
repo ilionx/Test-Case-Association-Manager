@@ -3,7 +3,7 @@
     "name": "AssociateTestMethodsWithTestCases",
     "friendlyName": "Test Case Association Manager",
     "description": "Azure DevOps task for managing the associations between Test Methods and Test Cases.",
-    "helpMarkDown": "Test Case Association Manager",
+    "helpMarkDown": "[Learn more about this task](https://marketplace.visualstudio.com/items?itemName=QNH-Consulting-BV.AssociateToolTask)",
     "category": "Deploy",
     "visibility": [
         "Release",
@@ -153,7 +153,11 @@
 		    "parameters": {
                 "testPlan": "$(TestPlanId)"
             },
-		    "resultSelector": "jsonpath:$.value[*]"
+		    "resultSelector": "jsonpath:$.value[*]",
+		    "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\" : \"{{{id}}} - {{{name}}} ({{{testCaseCount}}})\" }",
+		    "callbackContextTemplate": "{\"skip\": \"{{add skip 1000}}\"}",
+		    "callbackRequiredTemplate": "{{isEqualNumber result.count 1000}}",
+		    "initialContextTemplate": "{\"skip\": \"0\"}"
 		}
 	],
 	"outputVariables": [],
