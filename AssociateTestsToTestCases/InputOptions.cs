@@ -9,8 +9,9 @@
 
         public string TestType { get; set; }
         public string Directory { get; set; }
+        public int TestPlanId { get; set; }
+        public int TestSuiteId { get; set; }
         public string ProjectName { get; set; }
-        public string TestPlanName { get; set; }
         public string CollectionUri { get; set; }
         public string PersonalAccessToken { get; set; }
 

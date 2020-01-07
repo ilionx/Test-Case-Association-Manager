@@ -19,8 +19,11 @@ namespace AssociateTestsToTestCases
         [Option('n', "projectname", Required = true, HelpText = "The project name containing the test plan.")]
         public string ProjectName { get; set; }
 
-        [Option('e', "testplanname", Required = true, HelpText = "The name of the test plan containing the test cases.")]
-        public string TestPlanName { get; set; }
+        [Option('e', "testplanid", Required = true, HelpText = "The id of the test plan containing the test suites.")]
+        public string TestPlanId { get; set; }
+
+        [Option('s', "testsuiteid", Required = true, HelpText = "The suite within the test plan containing the test cases.")]
+        public string TestSuiteId { get; set; }
 
         [Option('t', "testtype", Required = false, Default = "", HelpText = "The automation test type.")]
         public string TestType { get; set; }

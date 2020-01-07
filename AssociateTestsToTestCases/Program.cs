@@ -184,9 +184,10 @@ namespace AssociateTestsToTestCases
         {
             _commandLineAccess.WriteToConsole(_messages.Stages.DevOpsCredentials.Status, _messages.Types.Stage);
 
+            TestPlan testPlan;
             try
             {
-                testManagementHttpClient.GetPlansAsync(_inputOptions.ProjectName).Result.Single(x => x.Name.Equals(_inputOptions.TestPlanName));
+                testPlan = testManagementHttpClient.GetPlansAsync(_inputOptions.ProjectName).Result.Single(x => x.Id.Equals(_inputOptions.TestPlanId));
             }
             catch (Exception e)
             {
@@ -204,7 +205,31 @@ namespace AssociateTestsToTestCases
                 }
                 else if (innerExceptionType == typeof(InvalidOperationException) && e.Message.Equals(SequenceContainsNoMatchingElementName))
                 {
-                    message = string.Format(_messages.Stages.DevOpsCredentials.FailureNonExistingTestPlan, _inputOptions.TestPlanName);
+                    message = string.Format(_messages.Stages.DevOpsCredentials.FailureNonExistingTestPlan, _inputOptions.TestPlanId);
+                }
+
+                _commandLineAccess.WriteToConsole(message, _messages.Types.Error);
+
+                throw innerException;
+            }
+
+            try
+            {
+                _ = testManagementHttpClient.GetTestSuitesForPlanAsync(_inputOptions.ProjectName, testPlan.Id).Result.Single(x => x.Id.Equals(_inputOptions.TestSuiteId));
+            }
+            catch (Exception e)
+            {
+                var innerException = e.InnerException ?? e;
+                var innerExceptionType = innerException.GetType();
+                var message = innerException.Message;
+
+                if (innerExceptionType == typeof(VssUnauthorizedException))
+                {
+                    message = string.Format(_messages.Stages.DevOpsCredentials.FailureUserNotAuthorized, _inputOptions.CollectionUri);
+                }
+                else if (innerExceptionType == typeof(InvalidOperationException) && e.Message.Equals(SequenceContainsNoMatchingElementName))
+                {
+                    message = string.Format(_messages.Stages.DevOpsCredentials.FailureNonExistingTestSuite, _inputOptions.TestSuiteId);
                 }
 
                 _commandLineAccess.WriteToConsole(message, _messages.Types.Error);

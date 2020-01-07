@@ -10,7 +10,8 @@ function ExecuteAssociationTool
   $CollectionUri = Get-VstsInput -Name collectionUri
   $PersonalAccesstoken = Get-VstsInput -Name personalAccesstoken
   $ProjectName = Get-VstsInput -Name projectName
-  $TestPlanName = Get-VstsInput -Name testPlanName
+  $TestPlanId = Get-VstsInput -Name testPlanId
+  $TestSuiteId = Get-VstsInput -Name testSuiteId
   $TestType = Get-VstsInput -Name testType
   $ValidateOnly = Get-VstsInput -Name validateOnly -AsBool
   $VerboseLogging = Get-VstsInput -Name verboseLogging -AsBool
@@ -23,7 +24,8 @@ function ExecuteAssociationTool
   $arguments.Add("-p ""$PersonalAccesstoken""") > $null
   $arguments.Add("-u ""$CollectionUri""") > $null
   $arguments.Add("-n ""$ProjectName""") > $null
-  $arguments.Add("-e ""$TestPlanName""") > $null
+  $arguments.Add("-e ""$TestPlanId""") > $null
+  $arguments.Add("-s ""$TestSuiteId""") > $null
   $arguments.Add("-t ""$TestType""") > $null
   
   if ($ValidateOnly) { $arguments.Add("-v") > $null }

@@ -17,14 +17,14 @@ using WorkItemReference = Microsoft.TeamFoundation.TestManagement.WebApi.WorkIte
 namespace Test.Unit.Access.DevOps
 {
     [TestClass]
-    public class GetTestCasesTests
+    public class GetTestCasesWorkItemsTests
     {
         private const string SystemTitle = "System.Title";
         private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
         private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
 
         [TestMethod]
-        public void DevOpsAccess_GetTestCases_EmptyTestCases()
+        public void DevOpsAccess_GetTestCasesWorkItems_EmptyWorkItems()
         {
             // Arrange
             var testManagementHttpClient = new Mock<TestManagementHttpClient>(new Uri("http://dummy.url"), new VssCredentials());
@@ -33,7 +33,7 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
             var messages = new Messages();
 
-            const string testPlanName = "testPlanName";
+            const int testPlanId = 51;
             const string projectName = "projectNameWithNoTestPlans";
 
             var options = new InputOptions()
@@ -41,13 +41,13 @@ namespace Test.Unit.Access.DevOps
                 ValidationOnly = true,
                 VerboseLogging = true,
                 ProjectName = projectName,
-                TestPlanName = testPlanName
+                TestPlanId = testPlanId
             };
             var counter = new Counter();
 
             testManagementHttpClient
-                .Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default))
-                .ReturnsAsync(new List<TestPlan>());
+                .Setup(x => x.GetPointsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null, null, null, null, null, null, null, null, default))
+                .ReturnsAsync(new List<TestPoint>());
 
             var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
             {
@@ -58,14 +58,14 @@ namespace Test.Unit.Access.DevOps
             var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            Action act = () => target.GetTestCaseWorkItems();
+            var actual = target.GetTestCaseWorkItems();
 
             // Assert
-            act.Should().Throw<InvalidOperationException>();
+            actual.Length.Should().Be(0);
         }
 
         [TestMethod]
-        public void DevOpsAccess_GetTestCases_EmptyTestCasesNoMatchTestPlans()
+        public void DevOpsAccess_GetTestCaseWorkItems_NotEmptyTestCaseWorkItems()
         {
             // Arrange
             var testManagementHttpClient = new Mock<TestManagementHttpClient>(new Uri("http://dummy.url"), new VssCredentials());
@@ -74,96 +74,7 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
             var messages = new Messages();
 
-            const string testPlanName = "testPlanName";
-            const string notTestPlanName = "NotTestPlanName";
-            const string projectName = "projectNameWithTestPlans";
-
             var fixture = new Fixture();
-            var testPlans = new List<TestPlan>()
-            {
-                fixture.Build<TestPlan>()
-                       .Without(x => x.UpdatedBy)
-                       .Without(x => x.Owner)
-                       .With(x => x.Name, notTestPlanName)
-                       .Create(),
-                fixture.Build<TestPlan>()
-                       .Without(x => x.UpdatedBy)
-                       .Without(x => x.Owner)
-                       .With(x => x.Name, notTestPlanName)
-                       .Create()
-            };
-
-            var options = new InputOptions()
-            {
-                ValidationOnly = true,
-                VerboseLogging = true,
-                ProjectName = projectName,
-                TestPlanName = testPlanName
-            };
-            var counter = new Counter();
-
-            testManagementHttpClient
-                .Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default))
-                .ReturnsAsync(testPlans);
-
-            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
-            {
-                TestManagementHttpClient = testManagementHttpClient.Object,
-                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
-            };
-
-            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
-
-            // Act
-            Action act = () => target.GetTestCaseWorkItems();
-
-            // Assert
-            act.Should().Throw<InvalidOperationException>();
-        }
-
-        [TestMethod]
-        public void DevOpsAccess_GetTestCases_NotEmptyTestCases()
-        {
-            // Arrange
-            var testManagementHttpClient = new Mock<TestManagementHttpClient>(new Uri("http://dummy.url"), new VssCredentials());
-            var workItemTrackingHttpClient = new Mock<WorkItemTrackingHttpClient>(new Uri("http://dummy.url"), new VssCredentials());
-
-            var outputAccess = new Mock<IOutputAccess>();
-            var messages = new Messages();
-
-            const string testPlanName = "TestPlanName";
-            const string notTestPlanName = "NotTestPlanName";
-            const string projectName = "projectNameWithTestPlans";
-
-            var fixture = new Fixture();
-            var testPlans = new List<TestPlan>()
-            {
-                fixture.Build<TestPlan>()
-                       .Without(x => x.UpdatedBy)
-                       .Without(x => x.Owner)
-                       .With(x => x.Name, testPlanName)
-                       .Create(),
-                fixture.Build<TestPlan>()
-                       .Without(x => x.UpdatedBy)
-                       .Without(x => x.Owner)
-                       .With(x => x.Name, notTestPlanName)
-                       .Create()
-            };
-            var testSuites = new List<TestSuite>()
-            {
-                fixture.Build<TestSuite>()
-                       .Without(x => x.LastUpdatedBy)
-                       .Without(x => x.Children)
-                       .Create(),
-                fixture.Build<TestSuite>()
-                       .Without(x => x.LastUpdatedBy)
-                       .Without(x => x.Children)
-                       .Create(),
-                fixture.Build<TestSuite>()
-                       .Without(x => x.LastUpdatedBy)
-                       .Without(x => x.Children)
-                       .Create()
-            };
             var testPoints = new List<TestPoint>()
             {
                 fixture.Build<TestPoint>()
@@ -185,7 +96,7 @@ namespace Test.Unit.Access.DevOps
                        .With(x => x.TestCase, fixture.Build<WorkItemReference>().With(y => y.Id, fixture.Create<int>().ToString()).Create())
                        .Create()
             };
-            var testCases = new List<WorkItem>()
+            var workItems = new List<WorkItem>()
             {
                 fixture.Build<WorkItem>().With(x => x.Id, fixture.Create<int>())
                        .With(y => y.Fields, new Dictionary<string, object>(){ { SystemTitle , fixture.Create<string>() }, { AutomationStatusName, fixture.Create<string>() }, { AutomatedTestName, fixture.Create<string>() } })
@@ -203,24 +114,16 @@ namespace Test.Unit.Access.DevOps
             var options = new InputOptions()
             {
                 ValidationOnly = true,
-                VerboseLogging = true,
-                ProjectName = projectName,
-                TestPlanName = testPlanName
+                VerboseLogging = true
             };
             var counter = new Counter();
 
-            testManagementHttpClient
-                .Setup(x => x.GetPlansAsync(It.IsAny<string>(), null, null, null, null, null, null, default))
-                .ReturnsAsync(testPlans);
-            testManagementHttpClient
-                .Setup(x => x.GetTestSuitesForPlanAsync(It.IsAny<string>(), It.IsAny<int>(), (int?)null, null, null, null, null, default))
-                .ReturnsAsync(testSuites);
             testManagementHttpClient
                 .Setup(x => x.GetPointsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null, null, null, null, null, null, null, null, default))
                 .ReturnsAsync(testPoints);
             workItemTrackingHttpClient
                 .Setup(x => x.GetWorkItemsAsync(It.IsAny<int[]>(), null, null, null, null, null, default))
-                .ReturnsAsync(testCases);
+                .ReturnsAsync(workItems);
 
             var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
             {

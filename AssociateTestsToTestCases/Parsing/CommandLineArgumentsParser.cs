@@ -32,7 +32,8 @@ namespace AssociateTestsToTestCases.Parsing
                         _inputOptions.DebugMode = o.DebugMode;
                         _inputOptions.Directory = o.Directory;
                         _inputOptions.ProjectName = o.ProjectName;
-                        _inputOptions.TestPlanName = o.TestPlanName;
+                        _inputOptions.TestPlanId = int.Parse(o.TestPlanId);
+                        _inputOptions.TestSuiteId = int.Parse(o.TestSuiteId);
                         _inputOptions.CollectionUri = o.CollectionUri;
                         _inputOptions.ValidationOnly = o.ValidationOnly;
                         _inputOptions.VerboseLogging = o.VerboseLogging;

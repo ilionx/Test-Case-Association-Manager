@@ -27,7 +27,7 @@
         {
             "name": "SourceFolder",
             "type": "string",
-            "label": "Source folder",
+            "label": "Source Folder",
             "defaultValue": "$(System.DefaultWorkingDirectory)",
             "required": true,
             "helpMarkDown": "The source folder used to execute the tool on."
@@ -35,7 +35,7 @@
 		{
             "name": "MinimatchPatterns",
             "type": "string",
-            "label": "Minimatch patterns",
+            "label": "Minimatch Patterns",
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "Minimatch patterns to search for within the source folder, separated by a semicolon."
@@ -51,7 +51,7 @@
 		{
             "name": "PersonalAccesstoken",
             "type": "string",
-            "label": "Personal Access token",
+            "label": "Personal Access Token",
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "The personal access token used for accessing the Azure DevOps project. <br>It can accept variable defined in build or release pipelines as `$(passwordVariable)`. <br>You may mark a variable as 'secret' to secure it."
@@ -59,18 +59,31 @@
 		{
             "name": "ProjectName",
             "type": "string",
-            "label": "Project name",
+            "label": "Project Name",
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "The project name containing the test plan."
 		},
 		{
-            "name": "TestPlanName",
-            "type": "string",
-            "label": "Test plan name",
+            "name": "TestPlanId",
+            "type": "pickList",
+            "label": "Test Plan",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "The name of the test plan containing the test cases."
+            "helpMarkDown": "Select a test plan containing the test suites with test cases."
+		},
+		{
+            "name": "TestSuiteId",
+            "type": "pickList",
+            "label":  "Test Suite",
+            "defaultValue":  "",
+            "required":  true,
+            "helpMarkDown": "Select a test suite containing the test cases.",
+            "properties": {
+                "MultiSelect": "False",
+                "DisableManageLink": "True",
+                "EditableOptions": "True"
+            }
 		},
 		{
             "name": "TestType",
@@ -83,7 +96,7 @@
 		{
             "name": "ValidateOnly",
             "type": "boolean",
-            "label": "Validate only",
+            "label": "Validate Only",
             "defaultValue": true,
             "required": false,
             "helpMarkDown": "Indicate if you only want to validate the changes without saving the work item."
@@ -91,7 +104,7 @@
 		{
             "name": "VerboseLogging",
             "type": "boolean",
-            "label": "Verbose logging",
+            "label": "Verbose Logging",
             "defaultValue": true,
             "required": false,
             "helpMarkDown": "When turned on it also outputs the successful matchings and the fixes next to the warnings/errors."
@@ -99,11 +112,32 @@
 		{
             "name": "DebugMode",
             "type": "boolean",
-            "label": "Debug mode",
+            "label": "Debug Mode",
             "defaultValue": false,
             "required": false,
-            "helpMarkDown": "When Debug mode is turned on any exception thrown by the tool will be printed to the console. <b>Use this only in case of unsolvable issues.</b>",
-			"groupName": "advanced"
+            "helpMarkDown": "When debug mode is turned on any exception thrown by the tool will be printed to the console. <b>Use this only in case of unsolvable issues.</b>",
+            "groupName": "advanced"
+		}
+	],
+	"dataSourceBindings": [
+		{
+		    "target": "TestPlanId",
+		    "endpointId": "tfs:teamfoundation",
+		    "endpointUrl": "{{endpoint.url}}/{{system.teamProject}}/_apis/test/plans?filterActivePlans=true&api-version=3.0-preview.2&$skip={{skip}}&$top=1000",
+		    "resultSelector": "jsonpath:$.value[*]",
+		    "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\" : \"{{{id}}} - {{{name}}}\" }",
+		    "callbackContextTemplate": "{\"skip\": \"{{add skip 1000}}\"}",
+		    "callbackRequiredTemplate": "{{isEqualNumber result.count 1000}}",
+		    "initialContextTemplate": "{\"skip\": \"0\"}"
+		},
+		{
+		    "target": "TestSuiteId",
+		    "endpointId": "tfs:teamfoundation",
+		    "endpointUrl": "{{endpoint.url}}/{{system.teamProject}}/_apis/test/plans/{{testPlan}}/suites?$asTreeView=true&api-version=3.0-preview.2",
+		    "parameters": {
+                "testPlan": "$(TestPlanId)"
+            },
+		    "resultSelector": "jsonpath:$.value[*]"
 		}
 	],
 	"outputVariables": [],

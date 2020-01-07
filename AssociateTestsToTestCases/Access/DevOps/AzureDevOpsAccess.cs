@@ -42,6 +42,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
         public WorkItem[] GetTestCaseWorkItems()
         {
             var chunkedTestCases = ChunkTestCases(GetTestCasesId());
+
             return chunkedTestCases
                 .SelectMany(chunkedTestgroupCases => _azureDevOpsHttpClients.WorkItemTrackingHttpClient.GetWorkItemsAsync(chunkedTestgroupCases).Result)
                 .ToArray();
@@ -122,9 +123,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
 
         public int[] GetTestCasesId()
         {
-            var testPlan = _azureDevOpsHttpClients.TestManagementHttpClient.GetPlansAsync(_inputOptions.ProjectName).Result.Single(x => x.Name.Equals(_inputOptions.TestPlanName));
-            var testSuites = _azureDevOpsHttpClients.TestManagementHttpClient.GetTestSuitesForPlanAsync(_inputOptions.ProjectName, testPlan.Id).Result;
-            var testPoints = _azureDevOpsHttpClients.TestManagementHttpClient.GetPointsAsync(_inputOptions.ProjectName, testPlan.Id, testSuites[0].Id).Result;
+            var testPoints = _azureDevOpsHttpClients.TestManagementHttpClient.GetPointsAsync(_inputOptions.ProjectName, _inputOptions.TestPlanId, _inputOptions.TestSuiteId).Result;
 
             return testPoints.Select(x => int.Parse(x.TestCase.Id)).ToArray();
         }
@@ -136,12 +135,14 @@ namespace AssociateTestsToTestCases.Access.DevOps
                 .GroupBy(s => i++ / ChunkSize)
                 .Select(g => g.ToArray())
                 .ToArray();
+
             return chunkedTestCases;
         }
 
         private TestCase GetTestCase(Dictionary<string, TestCase> testCases, TestMethod testMethod)
         {
             testCases.TryGetValue(testMethod.Name, out var testCase);
+
             return testCase;
         }
 
@@ -149,6 +150,7 @@ namespace AssociateTestsToTestCases.Access.DevOps
         {
             var patchDocument = CreatePatchDocument(methodName, assemblyName, automatedTestId, testType);
             var result = _azureDevOpsHttpClients.WorkItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, _inputOptions.ValidationOnly).Result;
+
             return OperationIsSuccess(methodName, assemblyName, automatedTestId, result);
         }
 
