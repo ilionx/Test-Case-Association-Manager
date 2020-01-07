@@ -31,7 +31,7 @@
             "defaultValue": "$(System.TeamFoundationCollectionUri)",
             "required": true,
             "helpMarkDown": "The Azure DevOps collection Uri used for accessing the project work items.",
-            "visibleRule": "false"
+            "visibleRule": "1=2"
 		},
 		{
             "name": "ProjectName",
@@ -40,7 +40,7 @@
             "defaultValue": "$(System.TeamProject)",
             "required": true,
             "helpMarkDown": "The project name containing the test plan.",
-            "visibleRule": "false"
+            "visibleRule": "1=2"
 		},
 		{
             "name": "SourceFolder",
