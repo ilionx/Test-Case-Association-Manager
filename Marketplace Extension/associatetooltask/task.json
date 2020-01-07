@@ -24,7 +24,25 @@
 	],
     "instanceNameFormat": "Manage Test Case Associations",
     "inputs": [
-        {
+		{
+            "name": "CollectionUri",
+            "type": "string",
+            "label": "Collection Uri",
+            "defaultValue": "$(System.TeamFoundationCollectionUri)",
+            "required": true,
+            "helpMarkDown": "The Azure DevOps collection Uri used for accessing the project work items.",
+            "visibleRule": "false"
+		},
+		{
+            "name": "ProjectName",
+            "type": "string",
+            "label": "Project Name",
+            "defaultValue": "$(System.TeamProject)",
+            "required": true,
+            "helpMarkDown": "The project name containing the test plan.",
+            "visibleRule": "false"
+		},
+		{
             "name": "SourceFolder",
             "type": "filePath",
             "label": "Source Folder",
@@ -41,30 +59,12 @@
             "helpMarkDown": "Minimatch patterns to search for within the source folder, separated by a semicolon."
 		},
 		{
-            "name": "CollectionUri",
-            "type": "string",
-            "label": "Collection Uri",
-            "defaultValue": "$(System.TeamFoundationCollectionUri)",
-            "required": true,
-            "helpMarkDown": "The Azure DevOps collection Uri used for accessing the project work items.",
-            "visibleRule": "false"
-		},
-		{
             "name": "PersonalAccesstoken",
             "type": "string",
             "label": "Personal Access Token",
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "The personal access token used for accessing the Azure DevOps project. <br>It can accept variable defined in build or release pipelines as `$(passwordVariable)`. <br>You may mark a variable as 'secret' to secure it."
-		},
-		{
-            "name": "ProjectName",
-            "type": "string",
-            "label": "Project Name",
-            "defaultValue": "$(System.TeamProject)",
-            "required": true,
-            "helpMarkDown": "The project name containing the test plan.",
-            "visibleRule": "false"
 		},
 		{
             "name": "TestPlanId",
