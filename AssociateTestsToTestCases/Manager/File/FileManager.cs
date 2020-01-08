@@ -78,7 +78,7 @@ namespace AssociateTestsToTestCases.Manager.File
             foreach (var duplicateTestMethod in duplicateTestMethods)
             {
                 var testMethodName = duplicateTestMethod.Name;
-                var duplicateTestMethodNames =_messages.TestMethods.GetDuplicateTestMethodNamesString(duplicateTestMethod.TestMethods);
+                var duplicateTestMethodNames = _messages.TestMethods.GetDuplicateTestMethodNamesString(duplicateTestMethod.TestMethods);
                 var message = string.Format(_messages.TestMethods.Duplicate, testMethodName, duplicateTestMethodNames);
 
                 _outputAccess.WriteToConsole(message, _messages.Types.Info);
@@ -95,9 +95,11 @@ namespace AssociateTestsToTestCases.Manager.File
                 return;
             }
 
-            _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestAssemblyPath.Failure), _messages.Types.Failure);
+            _outputAccess.WriteToConsole(string.Format(_messages.Stages.TestAssemblyPath.Failure), _messages.Types.Error);
+
+            throw new InvalidOperationException(_messages.Stages.TestAssemblyPath.Failure);
         }
 
-        #endregion
+        #endregion Validations
     }
 }
