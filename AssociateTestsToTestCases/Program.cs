@@ -108,7 +108,8 @@ namespace AssociateTestsToTestCases
  / ___ |(__  |__  ) /_/ / /__/ / /_/ / /_/ / /_/ / / / / /____>  <
 /_/  |_/____/____/\____/\___/_/\__,_/\__/_/\____/_/ /_/_____/_/|_|
                                                                      ");
-            Console.WriteLine("==============================================================================\n");
+            Console.WriteLine("==============================================================================");
+            Console.WriteLine();
         }
 
         private static void InitializeProgram(string[] args)
@@ -258,7 +259,8 @@ namespace AssociateTestsToTestCases
         private static void WriteTraceToConsole(Exception e)
         {
             Console.ResetColor();
-            Console.WriteLine("\n STACKTRACE: ");
+            Console.WriteLine();
+            Console.WriteLine("STACKTRACE: ");
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
             Trace.TraceError(e.ToString());
             Trace.Close();

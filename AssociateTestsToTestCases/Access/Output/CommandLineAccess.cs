@@ -41,6 +41,16 @@ namespace AssociateTestsToTestCases.Access.Output
             }
 
             Console.WriteLine(messageOutput);
+
+            if (IsInNeedOfNewline(messageType))
+            {
+                Console.WriteLine();
+            }
+        }
+
+        private bool IsInNeedOfNewline(string messageType)
+        {
+            return new string[] { _messages.Types.Success, _messages.Types.Error, _messages.Types.Failure }.Contains(messageType);
         }
 
         #region Outputformatting
@@ -82,7 +92,7 @@ namespace AssociateTestsToTestCases.Access.Output
             return _isLocal ? message : message.Insert(0, GetAzureDevOpsConsoleColor(messageType));
         }
 
-        #endregion
+        #endregion Outputformatting
 
         #region Outputcolors
 
@@ -93,13 +103,16 @@ namespace AssociateTestsToTestCases.Access.Output
             if (messageType.Equals(_messages.Types.Success))
             {
                 consoleColor = ConsoleColor.DarkGreen;
-            } else if (messageType.Equals(_messages.Types.Warning))
+            }
+            else if (messageType.Equals(_messages.Types.Warning))
             {
                 consoleColor = ConsoleColor.DarkYellow;
-            } else if (messageType.Equals(_messages.Types.Error) || messageType.Equals(_messages.Types.Failure))
+            }
+            else if (messageType.Equals(_messages.Types.Error) || messageType.Equals(_messages.Types.Failure))
             {
                 consoleColor = ConsoleColor.DarkRed;
-            } else if (messageType.Equals(_messages.Types.Stage) || messageType.Equals(string.Empty))
+            }
+            else if (messageType.Equals(_messages.Types.Stage) || messageType.Equals(string.Empty))
             {
                 consoleColor = ConsoleColor.Gray;
             }
@@ -117,20 +130,24 @@ namespace AssociateTestsToTestCases.Access.Output
             if (messageType.Equals(_messages.Types.Success))
             {
                 colorOutput = _azureDevOpsColors.SuccessColor;
-            } else if (messageType.Equals(_messages.Types.Warning))
+            }
+            else if (messageType.Equals(_messages.Types.Warning))
             {
                 colorOutput = WarningColorOutput;
                 spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColorsLongestTypeCount, _azureDevOpsColors.WarningColor.Length);
-            } else if (messageType.Equals(_messages.Types.Error))
+            }
+            else if (messageType.Equals(_messages.Types.Error))
             {
                 colorOutput = ErrorColorOutput;
                 spaceMessageType = GetAzureDevOpsSpaceMessageTypeFormat(azureDevOpsColorsLongestTypeCount, _azureDevOpsColors.FailureColor.Length);
-            } else if (messageType.Equals(_messages.Types.Failure))
+            }
+            else if (messageType.Equals(_messages.Types.Failure))
             {
                 colorOutput = _azureDevOpsColors.FailureColor;
-            } else if (messageType.Equals(_messages.Types.Stage) || messageType.Equals(string.Empty))
+            }
+            else if (messageType.Equals(_messages.Types.Stage) || messageType.Equals(string.Empty))
             {
-                colorOutput = string.Empty;
+                colorOutput = _azureDevOpsColors.StageColor;
             }
 
             if (colorOutput.Length <= _azureDevOpsColors.LongestTypeCount)
@@ -148,6 +165,6 @@ namespace AssociateTestsToTestCases.Access.Output
             return new string(SpaceChar, SpaceCharLength + longestAzureDevOpsColorLength - azureDevOpsColorLength);
         }
 
-        #endregion
+        #endregion Outputcolors
     }
 }
