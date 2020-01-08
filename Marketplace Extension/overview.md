@@ -4,7 +4,8 @@ Azure DevOps extension for managing the associations between Test Methods (code)
 # 0. Changelog
 * **Version 2.0**
   - **.NET Core support**
-  - Better and more output messages.
+  - Better task input options
+  - Better and more output messages
 * **Version 1.0**
   - First stable version.
 
@@ -112,7 +113,7 @@ We would like to thank [Flaticon] for their beautiful icons created by [Freepik]
 [//]: # (Reference links placement)
    [Azure DevOps Services REST API]: <https://docs.microsoft.com/en-us/rest/api/azure/devops/>
    [this guide]: <https://docs.microsoft.com/nl-nl/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts>
-   [minimatch patterns]: <https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/file-matching-patterns?view=vsts>
+   [minimatch patterns]: <https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/file-matching-patterns?view=azure-devops>
    [email]: <mailto:visualstudio@ilionx.com>
    [Freepik]: <https://www.freepik.com/>
    [Flaticon]: <https://www.flaticon.com>
