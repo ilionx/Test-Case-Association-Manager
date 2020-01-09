@@ -39,6 +39,7 @@ To create a Personal Access Token please read chapter 'Create personal access to
 
 # 4. Setup
 ## 4.1 Variables
+### 4.1.1 Version 1
 | Name | Required | Explanation | Example |
 | :--- | :---: | :--- | :--- |
 | SourceFolder | **X**  | The root directory to search in. | ``` $(System.DefaultWorkingDirectory) ``` |
@@ -46,46 +47,78 @@ To create a Personal Access Token please read chapter 'Create personal access to
 | CollectionUri | **X** | The Azure DevOps collection Uri used for accessing the project Test Cases. | ``` https://testorganization.visualstudio.com/DefaultCollection ``` |
 | PersonalAccesstoken | **X** | The Personal Access Token used for accessing the Azure DevOps project. | ``` d55d2f8e-f210-45a0-b09e-be55aeb835ea ``` |
 | ProjectName | **X** | The Project name containing the Test Plan. | ``` HelloProject ``` |
-| TestPlanName | **X** | The name of the Test Plan containing the Test Cases. | ``` System Test Plan ``` |
-| TestType |  | Specifies the Test Type. You could leave this field *empty*. As far as we know it does nothing other than filling its field in a Test Case. |  |
+| TestPlanName | **X** | The **name** of the Test Plan containing the Test Suites. | ``` System Test Plan ``` |
+| TestPlanSuite | **X** | The **name** of the Test Suite containing the Test Cases. | ``` System Test Plan ``` |
+| TestType |  | Specifies the Test Type. You could leave this field *empty*. As far as we know it does nothing other than filling its corresponding field within a Azure DevOps Test Case. | ``` unit ``` |
+| ValidateOnly |  | Indicates if you only want to validate the associations without persisting the changes. This makes it possible to insert this task within your pull request definition. |  |
+| VerboseLogging |  | When Verbose logging is turned on it also outputs the successful matchings and the fixes next to the warnings/errors. |  |
+
+### 4.1.2 Version 2
+| Name | Required | Explanation | Example |
+| :--- | :---: | :--- | :--- |
+| SourceFolder | **X**  | The root directory to search in. | ``` $(System.DefaultWorkingDirectory) ``` |
+| MinimatchPatterns | **X** | The [minimatch patterns] to search for within the directory, separated by a semicolon. | ``` **\$(BuildConfiguration)\**\*Test.Integration*.dll;**\$(BuildConfiguration)\**\*Test.Unit*.dll;!**\obj\** ``` |
+| PersonalAccesstoken | **X** | The Personal Access Token used for accessing the Azure DevOps project. | ``` d55d2f8e-f210-45a0-b09e-be55aeb835ea ``` |
+| TestPlanId | **X** | The **id** of the Test Plan containing the Test Suites. | ``` 51 ``` |
+| TestPlanSuiteId | **X** | The **id** of the Test Suite containing the Test Cases. | ``` 52 ``` |
+| TestType |  | Specifies the Test Type. You could leave this field *empty*. As far as we know it does nothing other than filling its corresponding field within a Azure DevOps Test Case. | ``` integration ``` |
 | ValidateOnly |  | Indicates if you only want to validate the associations without persisting the changes. This makes it possible to insert this task within your pull request definition. |  |
 | VerboseLogging |  | When Verbose logging is turned on it also outputs the successful matchings and the fixes next to the warnings/errors. |  |
 
 ## 4.2 Usage
-There are two ways to create a pipeline definition: the old fashioned way or through YAML. Within this chapter the usage of this task will be shown for both methods. This will be done through **examples**.
+There are two ways to create a pipeline definition: the old fashioned way or through the new YAML definition. Within this chapter the usage of this task will be shown for both methods. This will be done through **examples**.
 
 ### 4.2.1 Non-YAML
+#### 4.2.1.1 Version 1
 ![](https://associationex.blob.core.windows.net/documentation/50AcCSY.png)
 **Caution!** The position of the task is very important. It should **always** be placed ***after*** the **Build Task**, but ***before*** the **Test Run Task**.
 
 When you're setting up the **Run test task**, it is important to select **Test plan** under **Select tests using**. This makes it possible to link the outcome of the Test Run to the Test plan.
 ![](https://associationex.blob.core.windows.net/documentation/testpl.png)
 
+#### 4.2.1.2 Version 2
+TODO
+
 ### 4.2.2 YAML
+Although you can create your YAML definition with any preferred texteditor, it is highly advised to use the **Azure DevOps pipeline editor**. This editor comes with a task assistant which makes configuring a pipeline very easy by creating the task for you within your YAML definition.
+
+If you can't find the assistant on your view, you should press the **Show assistant** button.
+![](https://associationex.blob.core.windows.net/documentation/ShowAssistant.png)
+
+When you select the extension, the following task configuration menu will show up. Some fields are filled in, some are not. You are free to change any value within this screen to your liking.
+![](https://associationex.blob.core.windows.net/documentation/Assistant.png)
+
+#### 4.2.2.1 Version 1
 ```
 - task: QNH-Consulting-BV.AssociateToolTask.AssociateToolTask.AssociateTestMethodsWithTestCases@1
   displayName: 'Test Case Association Manager'
   inputs:
     sourceFolder: '$(System.DefaultWorkingDirectory)'
-
     minimatchPatterns: '**\$(BuildConfiguration)\**\*Test.Integration*.dll;**\$(BuildConfiguration)\**\*Test.Unit*.dll;!**\obj\**'
-
     collectionUri: 'https://testorganization.visualstudio.com/DefaultCollection'
-
     personalAccesstoken: 'd55d2f8e-f210-45a0-b09e-be55aeb835ea'
-
     projectName: 'HelloProject'
-
     testPlanName: 'System Test Plan'
-
     testType: ''
-
     validateOnly: true
-
     verboseLogging: true
 ```
 **Caution!** The position of the task is very important. It should **always** be placed ***after*** the **Build Task**, but ***before*** the **Test Run Task**.
 
+#### 4.2.2.2 Version 2
+```
+- task: AssociateTestMethodsWithTestCases@1
+  inputs:
+    SourceFolder: '$(System.DefaultWorkingDirectory)'
+    MinimatchPatterns: '**\$(BuildConfiguration)\**\*Test.Integration*.dll;**\$(BuildConfiguration)\**\*Test.Unit*.dll;!**\obj\**'
+    PersonalAccesstoken: '$(PersonalAccessToken)'
+    TestPlanId: '51'
+    TestSuiteId: '52'
+    TestType: 'unit'
+```
+**Caution!** The position of the task is very important. It should **always** be placed ***after*** the **Build Task**, but ***before*** the **Test Run Task**.
+
+#### 4.2.2.3 Run Test Task
 When you're setting up the **Run Test task**, it is important to set the **testSelector**-property to  **'testPlan'**. This makes it possible to link the outcome of the Test Run to the Test plan.
 ```
 - task: VSTest@2
@@ -104,17 +137,11 @@ When you're setting up the **Run Test task**, it is important to set the **testS
 ```
 
 # 5. Contribute, Feedback, Issues
-If you want to contribute, have some feedback, or report any issues, don't hesitate sending us an [email]. 
-
-# 6. Contributers
-We would like to thank [Flaticon] for their beautiful icons created by [Freepik] which are used in the creation of this extension logo ([CC BY 3.0]).
+If you want to contribute, have some feedback, or report an issue, don't hesitate sending us an [email]. 
 
 
 [//]: # (Reference links placement)
    [Azure DevOps Services REST API]: <https://docs.microsoft.com/en-us/rest/api/azure/devops/>
-   [this guide]: <https://docs.microsoft.com/nl-nl/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts>
+   [this guide]: <https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops>
    [minimatch patterns]: <https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/file-matching-patterns?view=azure-devops>
    [email]: <mailto:visualstudio@ilionx.com>
-   [Freepik]: <https://www.freepik.com/>
-   [Flaticon]: <https://www.flaticon.com>
-   [CC BY 3.0]: <http://creativecommons.org/licenses/by/3.0/>
