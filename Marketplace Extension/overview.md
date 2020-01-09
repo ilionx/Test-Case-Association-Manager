@@ -73,11 +73,13 @@ There are two ways to create a pipeline definition: the old fashioned way or thr
 ![](https://associationex.blob.core.windows.net/documentation/50AcCSY.png)
 **Caution!** The position of the task is very important. It should **always** be placed ***after*** the **Build Task**, but ***before*** the **Test Run Task**.
 
+#### 4.2.1.2 Version 2
+![](https://associationex.blob.core.windows.net/documentation/taskuiv2.PNG)
+**Caution!** The position of the task is very important. It should **always** be placed ***after*** the **Build Task**, but ***before*** the **Test Run Task**.
+
+#### 4.2.1.3 Run Test Task
 When you're setting up the **Run test task**, it is important to select **Test plan** under **Select tests using**. This makes it possible to link the outcome of the Test Run to the Test plan.
 ![](https://associationex.blob.core.windows.net/documentation/testpl.png)
-
-#### 4.2.1.2 Version 2
-TODO
 
 ### 4.2.2 YAML
 Although you can create your YAML definition with any preferred texteditor, it is highly advised to use the **Azure DevOps pipeline editor**. This editor comes with a task assistant which makes configuring a pipeline very easy by creating the task for you within your YAML definition.
@@ -115,6 +117,8 @@ When you select the extension, the following task configuration menu will show u
     TestPlanId: '51'
     TestSuiteId: '52'
     TestType: 'unit'
+    ValidateOnly: true
+    VerboseLogging: true
 ```
 **Caution!** The position of the task is very important. It should **always** be placed ***after*** the **Build Task**, but ***before*** the **Test Run Task**.
 
