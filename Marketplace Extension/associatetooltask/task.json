@@ -87,25 +87,18 @@
 		},
 		{
             "name": "TestType",
-            "type": "radio",
+            "type": "pickList",
             "label": "Test Type",
-            "defaultValue": "unit",
-            "required": true,
-            "options": {
-                "unit": "Unit",
-                "integration": "Integration",
-                "custom": "Custom"
-            },
-            "helpMarkDown": "The automation test type."
-		},
-		{
-            "name": "TestTypeCustom",
-            "type": "string",
-            "label": "Custom Test Type",
             "defaultValue": "",
             "required": false,
-            "helpMarkDown": "The custom automation test type.",
-            "visibleRule": "TestType=custom"
+            "options": {
+                "unit": "Unit",
+                "integration": "Integration"
+            },
+            "helpMarkDown": "The automation test type. For custom test types, just write the type within the input field.",
+            "properties": {
+              "EditableOptions": "True"
+            }
 		},
 		{
             "name": "ValidateOnly",
