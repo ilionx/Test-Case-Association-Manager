@@ -1,0 +1,15 @@
+name: PR
+
+on: pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Trigger Azure Pipeline PR'
+      uses: Azure/pipelines@v1
+      with:
+        azure-devops-project-url: '${{ secrets.AZURE_DEVOPS_PROJECTURL }}'
+        azure-pipeline-name: '${{ secrets.AZURE_DEVOPS_PIPELINENAME }}'
+        azure-devops-token: '${{ secrets.AZURE_DEVOPS_TOKEN }}'
