@@ -1,5 +1,5 @@
 {
-    "id": "7f969383-0ffb-4641-95ce-778b0d0510d8",
+    "id": "#{ExtensionId}#",
     "name": "AssociateTestMethodsWithTestCases",
     "friendlyName": "Test Case Association Manager",
     "description": "Azure DevOps task for managing the associations between Test Methods and Test Cases.",
@@ -9,7 +9,7 @@
         "Release",
         "Build"
 	],
-    "author": "QNH-Consulting-BV",
+    "author": "#{ExtensionPublisher}#",
     "version": {
         "Major": #{VersionNumberMajor}#,
         "Minor": #{VersionNumberMinor}#,
