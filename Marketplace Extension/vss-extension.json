@@ -1,6 +1,6 @@
 {
     "manifestVersion": 1,
-    "id": "AssociateToolTask",
+    "id": "#{ExtensionId}#",
     "version": "#{VersionNumberFull}#",
     "name": "Test Case Association Manager",
     "description": "Azure DevOps task for managing the associations between Test Methods and Test Cases.",
@@ -47,7 +47,7 @@
 	],
     "contributions": [
         {
-            "id": "AssociateToolTask",
+            "id": "#{ExtensionId}#",
             "type": "ms.vss-distributed-task.task",
             "targets": [
                 "ms.vss-distributed-task.tasks"
