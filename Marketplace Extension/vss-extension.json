@@ -1,10 +1,10 @@
 {
     "manifestVersion": 1,
-    "id": "__ExtensionId__",
+    "id": "#{ExtensionId}#",
     "version": "#{VersionNumberFull}#",
     "name": "Test Case Association Manager",
     "description": "Azure DevOps task for managing the associations between Test Methods and Test Cases.",
-    "publisher": "__ExtensionPublisher__",
+    "publisher": "#{ExtensionPublisher}#",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
