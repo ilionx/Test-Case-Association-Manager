@@ -1,10 +1,10 @@
 {
     "manifestVersion": 1,
-    "id": "AssociateToolTask",
+    "id": "#{ExtensionId}#",
     "version": "#{VersionNumberFull}#",
     "name": "Test Case Association Manager",
     "description": "Azure DevOps task for managing the associations between Test Methods and Test Cases.",
-    "publisher": "QNH-Consulting-BV",
+    "publisher": "#{ExtensionPublisher}#",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
@@ -45,16 +45,9 @@
         "Test case association",
         "Test method association"
 	],
-	"badges": [
-	    {
-		    "href": "#",
-			"uri": "https://qnh.visualstudio.com/Copper/_apis/build/status/AssociateTestsToTestCases/AssociateTestsToTestCases",
-			"description": "Build"
-		}
-	],
     "contributions": [
         {
-            "id": "AssociateToolTask",
+            "id": "#{ExtensionId}#",
             "type": "ms.vss-distributed-task.task",
             "targets": [
                 "ms.vss-distributed-task.tasks"
