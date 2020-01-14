@@ -1,5 +1,4 @@
 ﻿Write-Host "Retrieving build variables..."
-$Env:BUILD_BUILDNUMBER
 [String]$versionNumberMajor = $Env:VersionNumberMajor
 [String]$versionNumberMinor = $Env:VersionNumberMinor
 [String]$buildNumber = $Env:BUILD_BUILDNUMBER
