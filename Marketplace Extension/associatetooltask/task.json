@@ -3,7 +3,7 @@
     "name": "AssociateTestMethodsWithTestCases",
     "friendlyName": "Test Case Association Manager",
     "description": "Azure DevOps task for managing the associations between Test Methods and Test Cases.",
-    "helpMarkDown": "[Learn more about this task](https://marketplace.visualstudio.com/items?itemName=QNH-Consulting-BV.AssociateToolTask)",
+    "helpMarkDown": "[Learn more about this task](https://marketplace.visualstudio.com/items?itemName=#{ExtensionPublisher}#.#{ExtensionId}#)",
     "category": "Deploy",
     "visibility": [
         "Release",
@@ -44,7 +44,7 @@
 		},
 		{
             "name": "SourceFolder",
-            "type": "filePath",
+            "type": "string",
             "label": "Source Folder",
             "defaultValue": "$(System.DefaultWorkingDirectory)",
             "required": true,
