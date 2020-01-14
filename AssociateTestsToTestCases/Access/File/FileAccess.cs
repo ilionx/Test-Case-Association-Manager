@@ -10,11 +10,11 @@ namespace AssociateTestsToTestCases.Access.File
 {
     public class FileAccess : IFileAccess
     {
-        private readonly AssemblyHelper _assemblyAccess;
+        private readonly AssemblyHelper _assemblyHelper;
 
-        public FileAccess(AssemblyHelper assemblyAccess)
+        public FileAccess(AssemblyHelper assemblyHelper)
         {
-            _assemblyAccess = assemblyAccess;
+            _assemblyHelper = assemblyHelper;
         }
 
         public MethodInfo[] ListTestMethods(string[] testAssemblyPaths)
@@ -23,22 +23,44 @@ namespace AssociateTestsToTestCases.Access.File
 
             foreach (var testAssemblyPath in testAssemblyPaths)
             {
-                var testAssembly = _assemblyAccess.LoadFrom(testAssemblyPath);
-                testMethods.AddRange(testAssembly.GetTypes().Where(type => type.GetCustomAttribute<TestClassAttribute>() != null).SelectMany(type => type.GetMethods().Where(method => method.GetCustomAttribute<TestMethodAttribute>() != null)));
+                var testAssembly = _assemblyHelper.LoadFrom(testAssemblyPath);
+                testMethods.AddRange(testAssembly.GetTypes()
+                    .Where(type => type.GetCustomAttribute<TestClassAttribute>() != null)
+                    .SelectMany(type => type.GetMethods()
+                        .Where(method => method.GetCustomAttribute<TestMethodAttribute>() != null)));
             }
 
             return testMethods.ToArray();
         }
 
+        public List<DuplicateTestMethod> ListDuplicateTestMethods(MethodInfo[] testMethods)
+        {
+            var duplicateTestMethods = new List<DuplicateTestMethod>();
+
+            var duplicates = testMethods.Select(x => x.Name).GroupBy(x => x).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+            foreach (var duplicate in duplicates)
+            {
+                duplicateTestMethods.Add(new DuplicateTestMethod(duplicate, testMethods.Where(y => y.Name.Equals(duplicate)).ToArray()));
+            }
+
+            return duplicateTestMethods;
+        }
+
         public string[] ListTestAssemblyPaths(string directory, string[] minimatchPatterns)
         {
             var files = ListAllAccessibleFilesInDirectory(directory);
-            var matchingFilesToBeIncluded = new List<string>();
 
+            var matchingFilesToBeIncluded = new List<string>();
             foreach (var minimatchPattern in minimatchPatterns.Where(minimatchPattern => !minimatchPattern.StartsWith("!")))
             {
                 var mm = new Minimatcher(minimatchPattern, new Minimatch.Options() { AllowWindowsPaths = true, IgnoreCase = true });
                 matchingFilesToBeIncluded.AddRange(mm.Filter(files));
+            }
+
+            var noMatchingFilesFound = matchingFilesToBeIncluded.Count == 0;
+            if (noMatchingFilesFound)
+            {
+                return null;
             }
 
             var matchingFilesToBeExcluded = new List<string>();
@@ -54,22 +76,10 @@ namespace AssociateTestsToTestCases.Access.File
             return matchingFilesToBeIncluded.ToArray();
         }
 
-        public List<DuplicateTestMethod> ListDuplicateTestMethods(MethodInfo[] testMethods)
-        {
-            var duplicateTestMethods = new List<DuplicateTestMethod>();
-            var duplicates = testMethods.Select(x => x.Name).GroupBy(x => x).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
-
-            foreach (var duplicate in duplicates)
-            {
-                duplicateTestMethods.Add(new DuplicateTestMethod(duplicate, testMethods.Where(y => y.Name.Equals(duplicate)).ToArray()));
-            }
-
-            return duplicateTestMethods;
-        }
-
-        private static string[] ListAllAccessibleFilesInDirectory(string directory)
+        private string[] ListAllAccessibleFilesInDirectory(string directory)
         {
             var files = new List<string>(Directory.GetFiles(directory, "*.*", SearchOption.TopDirectoryOnly));
+
             foreach (var subDir in Directory.GetDirectories(directory))
             {
                 try

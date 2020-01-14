@@ -1,34 +1,16 @@
-﻿namespace AssociateTestsToTestCases.Counter
+﻿using System.Linq;
+
+namespace AssociateTestsToTestCases.Counter
 {
     public class Unaffected
     {
-        private readonly Counter _counter;
+        public int AlreadyAutomated { get; set; }
 
-        public Unaffected(Counter counter)
-        {
-            _counter = counter;
-        }
-
-        private int _alreadyAutomated;
-
-        public int Total { get; internal set; }
-
-        public int AlreadyAutomated
+        public int Total
         {
             get
             {
-                return _alreadyAutomated;
-            }
-            set
-            {
-                if (value != 0)
-                {
-                    var difference = value - _alreadyAutomated;
-
-                    this.Total += difference;
-                    _counter.Total += difference;
-                }
-                _alreadyAutomated = value;
+                return GetType().GetProperties().Where(x => x.Name != "Total").Select(x => (int)x.GetValue(this)).Sum();
             }
         }
     }

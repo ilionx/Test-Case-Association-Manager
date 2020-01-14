@@ -52,7 +52,7 @@ namespace Test.Unit.Access.File
             var target = new FileAccessFactory().Create();
 
             // Act
-            Action actual = () => target.ListTestAssemblyPaths(directory, minimatchPatterns.ToList().Select(x => x.ToLowerInvariant()).ToArray());
+            Action actual = () => target.ListTestAssemblyPaths(directory, minimatchPatterns.Select(x => x.ToLowerInvariant()).ToArray());
 
             // Assert
             actual.Should().Throw<ArgumentException>();
@@ -73,10 +73,10 @@ namespace Test.Unit.Access.File
             var target = new FileAccessFactory().Create();
 
             // Act
-            var actual = target.ListTestAssemblyPaths(directory, minimatchPatterns.ToList().Select(x => x.ToLowerInvariant()).ToArray());
+            var actual = target.ListTestAssemblyPaths(directory, minimatchPatterns.Select(x => x.ToLowerInvariant()).ToArray());
 
             // Assert
-            actual.Length.Should().Be(0);
+            actual.Should().BeNull();
         }
 
         [TestMethod]
@@ -99,7 +99,7 @@ namespace Test.Unit.Access.File
             var target = new FileAccessFactory().Create();
 
             // Act
-            var actual = target.ListTestAssemblyPaths(directory, minimatchPatterns.ToList().Select(x => x.ToLowerInvariant()).ToArray());
+            var actual = target.ListTestAssemblyPaths(directory, minimatchPatterns.Select(x => x.ToLowerInvariant()).ToArray());
 
             // Assert
             actual.Length.Should().Be(0);
@@ -125,7 +125,7 @@ namespace Test.Unit.Access.File
             var target = new FileAccessFactory().Create();
 
             // Act
-            var actual = target.ListTestAssemblyPaths(directory, minimatchPatterns.ToList().Select(x => x.ToLowerInvariant()).ToArray());
+            var actual = target.ListTestAssemblyPaths(directory, minimatchPatterns.Select(x => x.ToLowerInvariant()).ToArray());
 
             // Assert
             actual.Length.Should().Be(2);

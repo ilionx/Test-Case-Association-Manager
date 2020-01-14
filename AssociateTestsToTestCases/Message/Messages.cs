@@ -7,7 +7,6 @@ namespace AssociateTestsToTestCases.Message
     public class Messages
     {
         public readonly string EnumerationPoint = "  * ";
-        public readonly string Output = "{0}{1}{2} {3}{4}{5}";
 
         public readonly TypeMessage Types;
         public readonly StageMessages Stages;
@@ -16,14 +15,14 @@ namespace AssociateTestsToTestCases.Message
         public readonly TestMethod.TestMethodMessage TestMethods;
         public readonly Association.AssociationMessage Associations;
 
-        public Messages(TestCase.TestCaseMessage testCaseMessage = null, TestMethod.TestMethodMessage testMethodMessage = null)
+        public Messages()
         {
             Types = new TypeMessage();
             Stages = new StageMessages();
             Reasons = new ReasonMessage();
             Associations = new Association.AssociationMessage();
-            TestCases = testCaseMessage ?? new TestCase.TestCaseMessage();
-            TestMethods = testMethodMessage ?? new TestMethod.TestMethodMessage();
+            TestCases =  new TestCase.TestCaseMessage();
+            TestMethods = new TestMethod.TestMethodMessage();
         }
     }
 }

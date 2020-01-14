@@ -3,17 +3,24 @@ using System.Collections.Generic;
 using AssociateTestsToTestCases.Message;
 using AssociateTestsToTestCases.Access.Output;
 using Microsoft.VisualStudio.Services.WebApi.Patch;
-using Microsoft.TeamFoundation.TestManagement.WebApi;
-using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
 
 namespace AssociateTestsToTestCases.Access.DevOps
 {
     public class AzureDevOpsAccess : IDevOpsAccess
     {
-        private readonly TestManagementHttpClient _testManagementHttpClient;
-        private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
+        private const int ChunkSize = 200;
+        private const string FieldProperty = "fields";
+        private const string AutomatedName = "Automated";
+        private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
+        private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
+        private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
+        private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
+        private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
+
+        private readonly AzureDevOpsHttpClients _azureDevOpsHttpClients;
 
         private readonly Messages _messages;
         private readonly IOutputAccess _outputAccess;
@@ -21,20 +28,9 @@ namespace AssociateTestsToTestCases.Access.DevOps
         private readonly InputOptions _inputOptions;
         private readonly Counter.Counter _counter;
 
-        private const int ChunkSize = 200;
-        private const string FieldProperty = "fields";
-        private const string AutomatedName = "Automated";
-        private const string SystemTitle = "System.Title";
-        private const string AutomatedTestName = "Microsoft.VSTS.TCM.AutomatedTestName";
-        private const string AutomatedTestIdName = "Microsoft.VSTS.TCM.AutomatedTestId";
-        private const string AutomationStatusName = "Microsoft.VSTS.TCM.AutomationStatus";
-        private const string AutomatedTestTypePatchName = "Microsoft.VSTS.TCM.AutomatedTestType";
-        private const string AutomatedTestStorageName = "Microsoft.VSTS.TCM.AutomatedTestStorage";
-        
-        public AzureDevOpsAccess(TestManagementHttpClient testManagementHttpClient, WorkItemTrackingHttpClient workItemTrackingHttpClient, Messages messages, IOutputAccess outputAccess, InputOptions options, Counter.Counter counter)
+        public AzureDevOpsAccess(AzureDevOpsHttpClients azureDevOpsHttpClients, Messages messages, IOutputAccess outputAccess, InputOptions options, Counter.Counter counter)
         {
-            _testManagementHttpClient = testManagementHttpClient;
-            _workItemTrackingHttpClient = workItemTrackingHttpClient;
+            _azureDevOpsHttpClients = azureDevOpsHttpClients;
 
             _messages = messages;
             _outputAccess = outputAccess;
@@ -43,54 +39,51 @@ namespace AssociateTestsToTestCases.Access.DevOps
             _counter = counter;
         }
 
-        public List<TestCase> GetTestCases()
+        public WorkItem[] GetTestCaseWorkItems()
         {
-            var testCasesId = GetTestCasesId();
+            var chunkedTestCases = ChunkTestCases(GetTestCasesId());
 
-            var chunkedTestCases = ChunkTestCases(testCasesId);
-
-            var testCases = chunkedTestCases.SelectMany(chunkedTestgroupCases => _workItemTrackingHttpClient.GetWorkItemsAsync(chunkedTestgroupCases).Result).ToList();
-
-            return CreateTestCaseList(testCases);
+            return chunkedTestCases
+                .SelectMany(chunkedTestgroupCases => _azureDevOpsHttpClients.WorkItemTrackingHttpClient.GetWorkItemsAsync(chunkedTestgroupCases).Result)
+                .ToArray();
         }
 
-        public int Associate(List<TestMethod> testMethods, List<TestCase> testCases, string testType)
+        public int Associate(TestMethod[] testMethods, Dictionary<string, TestCase> testCases)
         {
             foreach (var testMethod in testMethods)
             {
-                var testCase = testCases.SingleOrDefault(x => x.Title.Equals(testMethod.Name));
-
-                if (testCase == null)
+                var testCase = GetTestCase(testCases, testMethod);
+                var testCaseNotFound = testCase == null;
+                if (testCaseNotFound)
                 {
                     _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestMethodInfo, testMethod.Name, $"{testMethod.FullClassName}.{testMethod.Name}"), _messages.Types.Error, _messages.Reasons.MissingTestCase);
-
                     _counter.Error.TestCaseNotFound++;
                     continue;
                 }
 
-                if (testCase.AutomationStatus.Equals(AutomatedName) && testCase.Title.Equals(testMethod.Name) & testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
+                bool? testCaseHasIncorrectAssociation = null;
+                var testCaseHasAutomatedStatus = testCase.AutomationStatus.Equals(AutomatedName);
+                if (testCaseHasAutomatedStatus)
                 {
-                    _counter.Unaffected.AlreadyAutomated += 1;
-                    continue;
-                }
+                    var testCaseIsAlreadyAutomated = testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}");
+                    if (testCaseIsAlreadyAutomated)
+                    {
+                        _counter.Unaffected.AlreadyAutomated++;
+                        continue;
+                    }
 
-                if (testCase.AutomationStatus.Equals(AutomatedName) && testCase.Title.Equals(testMethod.Name) & !testCase.AutomatedTestName.Equals($"{testMethod.FullClassName}.{testMethod.Name}"))
-                {
-                    if (_inputOptions.VerboseLogging)
+                    testCaseHasIncorrectAssociation = !testCaseIsAlreadyAutomated;
+                    if (testCaseHasIncorrectAssociation.Value && _inputOptions.VerboseLogging)
                     {
                         _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Info, _messages.Reasons.FixedAssociationTestCase);
                     }
-
-                    _counter.Success.FixedReference += 1;
                 }
 
-                var operationSuccess = AssociateTestCaseWithTestMethod(testCase.Id, $"{testMethod.FullClassName}.{testMethod.Name}", testMethod.AssemblyName, testMethod.TempId.ToString(), testType);
-
+                var operationSuccess = AssociateTestCaseWithTestMethod(testCase.Id, $"{testMethod.FullClassName}.{testMethod.Name}", testMethod.AssemblyName, testMethod.TempId.ToString(), _inputOptions.TestType);
                 if (!operationSuccess)
                 {
                     _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestCaseInfo, testCase.Title, testCase.Id), _messages.Types.Failure, _messages.Reasons.Association);
-
-                    _counter.Error.OperationFailed += 1;
+                    _counter.Error.OperationFailed++;
                     continue;
                 }
 
@@ -99,40 +92,38 @@ namespace AssociateTestsToTestCases.Access.DevOps
                     _outputAccess.WriteToConsole(string.Format(_messages.Associations.TestMethodMapped, testMethod.Name, testCase.Id), _messages.Types.Success, _messages.Reasons.Association);
                 }
 
-                _counter.Success.Total += 1;
+                if (testCaseHasIncorrectAssociation.HasValue && testCaseHasIncorrectAssociation.Value)
+                {
+                    _counter.Success.FixedReference++;
+                }
+                _counter.Success.Total++;
             }
 
             return _counter.Error.Total;
         }
 
-        public List<DuplicateTestCase> ListDuplicateTestCases(List<TestCase> testCases)
+        public List<DuplicateTestCase> ListDuplicateTestCases(TestCase[] testCases)
         {
-            var duplicateTestCases = new List<DuplicateTestCase>();
+            var duplicates = testCases.Select(x => x.Title).GroupBy(x => x).Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
 
-            var duplicates = testCases.Select(x => x.Title).GroupBy(x => x).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
-
-            foreach (var duplicate in duplicates)
-            {
-                duplicateTestCases.Add(new DuplicateTestCase(duplicate, testCases.Where(y => y.Title.Equals(duplicate)).ToArray()));
-            }
-
-            return duplicateTestCases;
+            return duplicates
+                .Select(x => new DuplicateTestCase(x, testCases
+                .Where(y => y.Title.Equals(x)).ToArray()))
+                .ToList();
         }
 
-        public List<TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase> testCases, List<TestMethod> testMethods)
+        public List<TestCase> ListTestCasesWithNotAvailableTestMethods(TestMethod[] testMethods, TestCase[] testCases)
         {
-            var testCasesWithNotAvailableTestMethods = testCases.Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null).ToList();
-
-            _counter.Warning.TestMethodNotAvailable += testCasesWithNotAvailableTestMethods.Count;
-
-            return testCasesWithNotAvailableTestMethods;
+            return testCases
+                .Where(x => x.AutomationStatus == AutomatedName & testMethods.SingleOrDefault(y => y.Name.Equals(x.Title)) == null)
+                .ToList();
         }
 
         public int[] GetTestCasesId()
         {
-            var testPlan = _testManagementHttpClient.GetPlansAsync(_inputOptions.ProjectName).Result.Single(x => x.Name.Equals(_inputOptions.TestPlanName));
-            var testSuites = _testManagementHttpClient.GetTestSuitesForPlanAsync(_inputOptions.ProjectName, testPlan.Id).Result;
-            var testPoints = _testManagementHttpClient.GetPointsAsync(_inputOptions.ProjectName, testPlan.Id, testSuites[0].Id).Result;
+            var testPoints = _azureDevOpsHttpClients.TestManagementHttpClient.GetPointsAsync(_inputOptions.ProjectName, _inputOptions.TestPlanId, _inputOptions.TestSuiteId).Result;
 
             return testPoints.Select(x => int.Parse(x.TestCase.Id)).ToArray();
         }
@@ -140,30 +131,32 @@ namespace AssociateTestsToTestCases.Access.DevOps
         private static int[][] ChunkTestCases(int[] testCasesId)
         {
             var i = 0;
-            var chunkedTestCases = testCasesId.GroupBy(s => i++ / ChunkSize).Select(g => g.ToArray()).ToArray();
+            var chunkedTestCases = testCasesId
+                .GroupBy(s => i++ / ChunkSize)
+                .Select(g => g.ToArray())
+                .ToArray();
+
             return chunkedTestCases;
         }
 
-        private List<TestCase> CreateTestCaseList(List<WorkItem> workItems)
+        private TestCase GetTestCase(Dictionary<string, TestCase> testCases, TestMethod testMethod)
         {
-            var testCases = new List<TestCase>();
+            testCases.TryGetValue(testMethod.Name, out var testCase);
 
-            foreach (var workItem in workItems)
-            {
-                testCases.Add(new TestCase(
-                    id: (int)workItem.Id,
-                    title: workItem.Fields[SystemTitle].ToString(),
-                    automationStatus: workItem.Fields[AutomationStatusName].ToString(),
-                    automatedTestName: workItem.Fields.ContainsKey(AutomatedTestName) ? workItem.Fields[AutomatedTestName].ToString() : null)
-                );
-            }
-
-            return testCases;
+            return testCase;
         }
 
         private bool AssociateTestCaseWithTestMethod(int workItemId, string methodName, string assemblyName, string automatedTestId, string testType)
         {
-            var patchDocument = new JsonPatchDocument
+            var patchDocument = CreatePatchDocument(methodName, assemblyName, automatedTestId, testType);
+            var result = _azureDevOpsHttpClients.WorkItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, _inputOptions.ValidationOnly).Result;
+
+            return OperationIsSuccess(methodName, assemblyName, automatedTestId, result);
+        }
+
+        private JsonPatchDocument CreatePatchDocument(string methodName, string assemblyName, string automatedTestId, string testType)
+        {
+            return new JsonPatchDocument
             {
                 new JsonPatchOperation()
                 {
@@ -196,9 +189,10 @@ namespace AssociateTestsToTestCases.Access.DevOps
                     Value = AutomatedName
                 }
             };
+        }
 
-            var result = _workItemTrackingHttpClient.UpdateWorkItemAsync(patchDocument, workItemId, _inputOptions.ValidationOnly).Result;
-
+        private bool OperationIsSuccess(string methodName, string assemblyName, string automatedTestId, WorkItem result)
+        {
             return result.Fields[AutomationStatusName].ToString() == AutomatedName &&
                    result.Fields[AutomatedTestIdName].ToString() == automatedTestId &&
                    result.Fields[AutomatedTestStorageName].ToString() == assemblyName &&

@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using AutoFixture;
 using FluentAssertions;
-using System.Threading;
 using AssociateTestsToTestCases;
 using System.Collections.Generic;
 using AssociateTestsToTestCases.Counter;
@@ -15,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
-using TestMethod = AssociateTestsToTestCases.Access.DevOps.TestMethod;
+using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
 
 namespace Test.Unit.Access.DevOps
 {
@@ -40,10 +39,9 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
-            var testCases = fixture.Create<List<TestCase>>();
-            var testMethods = fixture.Create<List<TestMethod>>();
+            var testCases = fixture.Create<TestCase[]>();
+            var testMethods = fixture.Create<TestMethod[]>();
 
             var options = new InputOptions()
             {
@@ -52,16 +50,22 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
-            errorCount.Should().Be(testMethods.Count);
-            counter.Error.Total.Should().Be(testMethods.Count);
-            counter.Error.TestCaseNotFound.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+            errorCount.Should().Be(testMethods.Length);
+            counter.Error.Total.Should().Be(testMethods.Length);
+            counter.Error.TestCaseNotFound.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length));
         }
 
         [TestMethod]
@@ -74,10 +78,9 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, $"{x.FullClassName}.{x.Name}")).ToList();
+            var testMethods = fixture.Create<TestMethod[]>();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, $"{x.FullClassName}.{x.Name}")).ToArray();
 
             var options = new InputOptions()
             {
@@ -86,14 +89,20 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);
-            counter.Total.Should().Be(testMethods.Count);
+            counter.Total.Should().Be(testMethods.Length);
             outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -107,10 +116,9 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+            var testMethods = fixture.Create<TestMethod[]>();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToArray();
 
             var methodName = fixture.Create<string>();
             var assemblyName = fixture.Create<string>();
@@ -126,7 +134,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -135,17 +145,23 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
-            errorCount.Should().Be(testMethods.Count);
+            errorCount.Should().Be(testMethods.Length);
             counter.Total.Should().Be(0);
-            counter.Success.FixedReference.Should().Be(testMethods.Count);
-            counter.Error.OperationFailed.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+            counter.Success.FixedReference.Should().Be(0);
+            counter.Error.OperationFailed.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length));
         }
 
         [TestMethod]
@@ -158,10 +174,9 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+            var testMethods = fixture.Create<TestMethod[]>();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToArray();
 
             var methodName = fixture.Create<string>();
             var assemblyName = fixture.Create<string>();
@@ -177,7 +192,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -186,17 +203,23 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
-            errorCount.Should().Be(testMethods.Count);
+            errorCount.Should().Be(testMethods.Length);
             counter.Total.Should().Be(0);
-            counter.Success.FixedReference.Should().Be(testMethods.Count);
-            counter.Error.OperationFailed.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count * 2));
+            counter.Success.FixedReference.Should().Be(0);
+            counter.Error.OperationFailed.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length * 2));
         }
 
         [TestMethod]
@@ -209,10 +232,9 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
-            var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+            var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToArray();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
                 Fields = new Dictionary<string, object>()
@@ -224,7 +246,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -233,10 +257,16 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);
@@ -257,10 +287,9 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
-            var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToList();
+            var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, AutomatedName, string.Empty)).ToArray();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
                 Fields = new Dictionary<string, object>()
@@ -272,7 +301,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -281,17 +312,23 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);
             counter.Error.OperationFailed.Should().Be(0);
-            counter.Total.Should().Be(testMethods.Count);
-            counter.Success.FixedReference.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count * 2));
+            counter.Total.Should().Be(testMethods.Length);
+            counter.Success.FixedReference.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length * 2));
         }
 
         [TestMethod]
@@ -304,10 +341,9 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
-            var testMethods = fixture.Create<List<TestMethod>>();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+            var testMethods = fixture.Create<TestMethod[]>();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToArray();
 
             var methodName = fixture.Create<string>();
             var assemblyName = fixture.Create<string>();
@@ -323,7 +359,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -332,18 +370,24 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
-            errorCount.Should().Be(testMethods.Count);
+            errorCount.Should().Be(testMethods.Length);
             counter.Total.Should().Be(0);
             counter.Success.FixedReference.Should().Be(0);
             counter.Error.TestCaseNotFound.Should().Be(0);
-            counter.Error.OperationFailed.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+            counter.Error.OperationFailed.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length));
         }
 
         [TestMethod]
@@ -356,11 +400,10 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
 
-            var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+            var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToArray();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
                 Fields = new Dictionary<string, object>()
@@ -372,7 +415,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -381,14 +426,20 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);
-            counter.Total.Should().Be(testMethods.Count);
+            counter.Total.Should().Be(testMethods.Length);
             counter.Success.FixedReference.Should().Be(0);
             counter.Error.OperationFailed.Should().Be(0);
             counter.Error.TestCaseNotFound.Should().Be(0);
@@ -405,11 +456,10 @@ namespace Test.Unit.Access.DevOps
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testType = string.Empty;
             var messages = new Messages();
 
-            var testMethods = fixture.CreateMany<TestMethod>(1).ToList();
-            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToList();
+            var testMethods = fixture.CreateMany<TestMethod>(1).ToArray();
+            var testCases = testMethods.Select(x => new TestCase(fixture.Create<int>(), x.Name, NotAutomatedName, string.Empty)).ToArray();
             var result = new Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models.WorkItem
             {
                 Fields = new Dictionary<string, object>()
@@ -421,7 +471,9 @@ namespace Test.Unit.Access.DevOps
                             }
             };
 
-            workItemTrackingHttpClient.Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, default(CancellationToken))).ReturnsAsync(result);
+            workItemTrackingHttpClient
+                .Setup(x => x.UpdateWorkItemAsync(It.IsAny<JsonPatchDocument>(), It.IsAny<int>(), It.IsAny<bool?>(), null, null, null, null, default))
+                .ReturnsAsync(result);
 
             var options = new InputOptions()
             {
@@ -430,18 +482,24 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var errorCount = target.Associate(testMethods, testCases, testType);
+            var errorCount = target.Associate(testMethods, testCases.ToDictionary(v => v.Title, t => t));
 
             // Assert
             errorCount.Should().Be(0);
             counter.Success.FixedReference.Should().Be(0);
             counter.Error.OperationFailed.Should().Be(0);
             counter.Error.TestCaseNotFound.Should().Be(0);
-            counter.Total.Should().Be(testMethods.Count);
-            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Count));
+            counter.Total.Should().Be(testMethods.Length);
+            outputAccess.Verify(x => x.WriteToConsole(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(testMethods.Length));
         }
     }
 }

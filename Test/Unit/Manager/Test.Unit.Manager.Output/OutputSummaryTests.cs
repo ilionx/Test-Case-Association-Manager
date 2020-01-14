@@ -2,10 +2,9 @@
 using System;
 using AutoFixture;
 using FluentAssertions;
-using System.Reflection;
-using System.Collections.Generic;
 using AssociateTestsToTestCases.Counter;
 using AssociateTestsToTestCases.Message;
+using AssociateTestsToTestCases.Manager.File;
 using AssociateTestsToTestCases.Access.Output;
 using AssociateTestsToTestCases.Access.DevOps;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,14 +22,9 @@ namespace Test.Unit.Manager.Output
             var outputAccess = new Mock<IOutputAccess>();
 
             var fixture = new Fixture();
-            var testCases = fixture.Create<List<TestCase>>();
-            var methods = new MethodInfo[]
-            {
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name),
-                GetType().GetMethod(MethodBase.GetCurrentMethod().Name)
-            };
+            var testCases = fixture.Create<TestCase[]>();
 
+            var methods = fixture.Create<TestMethod[]>();
             var counter = new Counter();
 
             var target = new OutputManagerFactory(messages, outputAccess.Object, counter).Create();

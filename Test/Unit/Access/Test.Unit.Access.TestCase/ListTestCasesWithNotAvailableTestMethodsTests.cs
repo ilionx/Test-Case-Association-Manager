@@ -4,7 +4,6 @@ using AutoFixture;
 using System.Linq;
 using FluentAssertions;
 using AssociateTestsToTestCases;
-using System.Collections.Generic;
 using AssociateTestsToTestCases.Counter;
 using AssociateTestsToTestCases.Message;
 using Microsoft.VisualStudio.Services.Common;
@@ -13,6 +12,7 @@ using AssociateTestsToTestCases.Access.DevOps;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
+using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
 
 namespace Test.Unit.Access.DevOps
 {
@@ -35,8 +35,8 @@ namespace Test.Unit.Access.DevOps
             var messages = new Messages();
 
             fixture.Customize<TestCase>(c => c.With(x => x.AutomationStatus, AutomatedName));
-            var testCases =  fixture.Create<List<TestCase>>();
-            var testMethods = testCases.Select(x => new AssociateTestsToTestCases.Access.DevOps.TestMethod(x.Title, string.Empty, string.Empty, Guid.NewGuid())).ToList();
+            var testCases =  fixture.Create<TestCase[]>();
+            var testMethods = testCases.Select(x => new TestMethod(x.Title, string.Empty, string.Empty, Guid.NewGuid())).ToArray();
 
             var options = new InputOptions()
             {
@@ -45,10 +45,16 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
+            var actual = target.ListTestCasesWithNotAvailableTestMethods(testMethods, testCases);
 
             // Assert
             actual.Count.Should().Be(0);
@@ -67,8 +73,8 @@ namespace Test.Unit.Access.DevOps
             var messages = new Messages();
 
             fixture.Customize<TestCase>(c => c.With(x => x.AutomationStatus, NotAutomatedName));
-            var testCases = fixture.Create<List<TestCase>>();
-            var testMethods = fixture.Create<List<AssociateTestsToTestCases.Access.DevOps.TestMethod>>();
+            var testCases = fixture.Create<TestCase[]>();
+            var testMethods = fixture.Create<TestMethod[]>();
 
             var options = new InputOptions()
             {
@@ -77,10 +83,16 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
+            var actual = target.ListTestCasesWithNotAvailableTestMethods(testMethods, testCases);
 
             // Assert
             actual.Count.Should().Be(0);
@@ -99,8 +111,8 @@ namespace Test.Unit.Access.DevOps
             var fixture = new Fixture();
 
             fixture.Customize<TestCase>(c => c.With(x => x.AutomationStatus, AutomatedName));
-            var testCases = fixture.Create<List<TestCase>>();
-            var testMethods = testCases.Select(x => new AssociateTestsToTestCases.Access.DevOps.TestMethod(string.Empty, string.Empty, string.Empty, Guid.NewGuid())).ToList();
+            var testCases = fixture.Create<TestCase[]>();
+            var testMethods = testCases.Select(x => new TestMethod(string.Empty, string.Empty, string.Empty, Guid.NewGuid())).ToArray();
 
             var options = new InputOptions()
             {
@@ -109,10 +121,16 @@ namespace Test.Unit.Access.DevOps
             };
             var counter = new Counter();
 
-            var target = new DevOpsAccessFactory(testManagementHttpClient.Object, workItemTrackingHttpClient.Object, messages, outputAccess.Object, options, counter).Create();
+            var azureDevOpsHttpClients = new AzureDevOpsHttpClients()
+            {
+                TestManagementHttpClient = testManagementHttpClient.Object,
+                WorkItemTrackingHttpClient = workItemTrackingHttpClient.Object
+            };
+
+            var target = new DevOpsAccessFactory(azureDevOpsHttpClients, messages, outputAccess.Object, options, counter).Create();
 
             // Act
-            var actual = target.ListTestCasesWithNotAvailableTestMethods(testCases, testMethods);
+            var actual = target.ListTestCasesWithNotAvailableTestMethods(testMethods, testCases);
 
             // Assert
             actual.Count.Should().Be(3);

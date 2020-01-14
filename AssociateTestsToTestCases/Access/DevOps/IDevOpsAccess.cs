@@ -1,13 +1,15 @@
 ﻿using System.Collections.Generic;
+using AssociateTestsToTestCases.Manager.File;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
 namespace AssociateTestsToTestCases.Access.DevOps
 {
     public interface IDevOpsAccess
     {
         int[] GetTestCasesId();
-        List<TestCase> GetTestCases();
-        int Associate(List<TestMethod> testMethods, List<TestCase> testCases, string testType);
-        List<DuplicateTestCase> ListDuplicateTestCases(List<TestCase> testCases);
-        List<TestCase> ListTestCasesWithNotAvailableTestMethods(List<TestCase> testCases, List<TestMethod> testMethods);
+        WorkItem[] GetTestCaseWorkItems();
+        int Associate(TestMethod[] testMethods, Dictionary<string, TestCase> testCases);
+        List<DuplicateTestCase> ListDuplicateTestCases(TestCase[] testCases);
+        List<TestCase> ListTestCasesWithNotAvailableTestMethods(TestMethod[] testMethods, TestCase[] testCases);
     }
 }
