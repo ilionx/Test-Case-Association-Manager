@@ -44,7 +44,7 @@
 		},
 		{
             "name": "SourceFolder",
-            "type": "string",
+            "type": "filePath",
             "label": "Source Folder",
             "defaultValue": "$(System.DefaultWorkingDirectory)",
             "required": true,
