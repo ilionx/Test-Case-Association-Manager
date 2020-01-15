@@ -2,7 +2,7 @@
 [String]$versionNumberMajor = $Env:VersionNumberMajor
 [String]$versionNumberMinor = $Env:VersionNumberMinor
 [String]$buildNumber = $Env:BUILD_BUILDNUMBER
-[String]$versionNumberPatch = $buildNumber.Substring($buildNumber.LastIndexOf('.') + 1)
+[String]$versionNumberPatch = $buildNumber.Substring($buildNumber.LastIndexOf('_') + 1) -replace "[.]"
 [String]$versionNumberFull =  "$($versionNumberMajor).$($versionNumberMinor).$($versionNumberPatch)"
 Write-Host "Success! Build variables have been retrieved."
 
