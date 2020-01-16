@@ -20,7 +20,7 @@ namespace AssociateTestsToTestCases
 {
     internal static partial class Program
     {
-        private const string SystemTeamProjectName = "SYSTEM_TeamProject";
+        private const string SystemTeamProjectName = "SYSTEM_TeamProject ";
         private const string PressAnyKeyToCloseWindowName = "\nPress any key to close the window...";
         private const string SequenceContainsNoMatchingElementName = "Sequence contains no matching element";
 
