@@ -9,6 +9,7 @@ variables:
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
+name: pr$(rev:rrr)
 steps:
 - task: NuGetToolInstaller@1
 
