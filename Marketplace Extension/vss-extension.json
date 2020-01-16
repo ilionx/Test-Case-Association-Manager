@@ -1,51 +1,64 @@
 {
-    "manifestVersion": 1,
-    "id": "#{ExtensionId}#",
-    "version": "#{VersionNumberFull}#",
-    "name": "Test Case Association Manager",
-    "description": "Azure DevOps task for managing the associations between Test Methods and Test Cases.",
-    "publisher": "#{ExtensionPublisher}#",
-    "targets": [
+	"manifestVersion": 1,
+	"id": "#{ExtensionId}#",
+	"version": "#{VersionNumberFull}#",
+	"name": "Test Case Association Manager",
+	"description": "Azure DevOps task for managing the associations between Test Methods and Test Cases.",
+	"publisher": "#{ExtensionPublisher}#",
+	"targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
         }
-    ],
-    "icons": {
+	],
+	"icons": {
         "default": "icon.png"
-    },
+	},
 	"categories": [
         "Azure Pipelines"
-    ],
+	],
 	"content": {
-	    "details": {
-		    "path": "overview.md"
-		}
+        "details": {
+            "path": "overview.md"
+        },
+        "license": {
+            "path": "license.md"
+        }
 	},
 	"links": {
+        "repository": {
+            "uri": "https://github.com/ilionx/Test-Case-Association-Manager"
+        },
+        "issues": {
+            "uri": "https://github.com/ilionx/Test-Case-Association-Manager/issues"
+        },
         "support": {
             "uri": "mailto:visualstudio@ilionx.com"
         }
 	},
 	"tags": [
-        "Test",
+		"Test",
 		"Testing",
 		"Test hub",
 		"Associate",
 		"Test plan",
-        "Test case",
+		"Test case",
 		"Automation", 
-        "Test method",
-        "Association",
+		"Test method",
+		"Association",
 		"Test manager",
 		"Traceability",
 		"Automated test",
 		"Associate test",
 		"Azure Test Plan",
-        "Association manager",
-        "Test case association",
-        "Test method association"
+		"Association manager",
+		"Test case association",
+		"Test method association"
 	],
-    "contributions": [
+	"repository": {
+        "type": "git",
+        "uri": "https://github.com/ilionx/Test-Case-Association-Manager"
+	},
+	"contributions": [
         {
             "id": "#{ExtensionId}#",
             "type": "ms.vss-distributed-task.task",
@@ -56,10 +69,10 @@
                 "name": "associatetooltask"
             }
         }
-    ],
-    "files": [
+	],
+	"files": [
         {
             "path": "associatetooltask"
         }
-    ]
+	]
 }
