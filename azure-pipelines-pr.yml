@@ -1,8 +1,3 @@
-pr:
-  branches:
-    include:
-    - master
-
 pool:
   vmImage: 'windows-latest'
 
@@ -10,6 +5,11 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+
+trigger: none
+
+pr:
+- master
 
 name: pr$(rev:rrr)
 steps:
