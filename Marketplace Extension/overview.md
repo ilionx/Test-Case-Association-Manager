@@ -143,9 +143,13 @@ When you're setting up the **Run Test task**, it is important to set the **testS
 # 5. Contribute, Feedback, Issues
 If you want to contribute, have some feedback, or report an issue, don't hesitate sending us an [email]. 
 
+# 6. Github
+Good news! This is an FOSS project. The source code can be found on [Github].
+
 
 [//]: # (Reference links placement)
    [Azure DevOps Services REST API]: <https://docs.microsoft.com/en-us/rest/api/azure/devops/>
    [this guide]: <https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops>
    [minimatch patterns]: <https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/file-matching-patterns?view=azure-devops>
    [email]: <mailto:visualstudio@ilionx.com>
+   [Github]: <https://github.com/ilionx/Test-Case-Association-Manager>
