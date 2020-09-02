@@ -39,6 +39,7 @@ namespace AssociateTestsToTestCases.Parsing
                         _inputOptions.VerboseLogging = o.VerboseLogging;
                         _inputOptions.PersonalAccessToken = o.PersonalAccessToken;
                         _inputOptions.MinimatchPatterns = o.MinimatchPatterns.Split(';').Select(s => s.ToLowerInvariant()).ToArray();
+                        _inputOptions.TestFrameworkType = o.TestFrameworkType;
                     });
             }
 
