@@ -4,17 +4,19 @@ using Minimatch;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using AssociateTestsToTestCases.Access.File.Strategy;
 
 namespace AssociateTestsToTestCases.Access.File
 {
     public class FileAccess : IFileAccess
     {
         private readonly AssemblyHelper _assemblyHelper;
+        private readonly ITestFrameworkStrategy _testFrameWorkStrategy;
 
-        public FileAccess(AssemblyHelper assemblyHelper)
+        public FileAccess(AssemblyHelper assemblyHelper, ITestFrameworkStrategy testFrameWorkStrategy)
         {
             _assemblyHelper = assemblyHelper;
+            _testFrameWorkStrategy = testFrameWorkStrategy;
         }
 
         public MethodInfo[] ListTestMethods(string[] testAssemblyPaths)
@@ -24,10 +26,7 @@ namespace AssociateTestsToTestCases.Access.File
             foreach (var testAssemblyPath in testAssemblyPaths)
             {
                 var testAssembly = _assemblyHelper.LoadFrom(testAssemblyPath);
-                testMethods.AddRange(testAssembly.GetTypes()
-                    .Where(type => type.GetCustomAttribute<TestClassAttribute>() != null)
-                    .SelectMany(type => type.GetMethods()
-                        .Where(method => method.GetCustomAttribute<TestMethodAttribute>() != null)));
+                testMethods.AddRange(_testFrameWorkStrategy.RetrieveTestMethods(testAssembly));
             }
 
             return testMethods.ToArray();

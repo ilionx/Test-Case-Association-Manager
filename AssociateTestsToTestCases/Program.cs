@@ -15,6 +15,7 @@ using AssociateTestsToTestCases.Manager.Output;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using TestMethod = AssociateTestsToTestCases.Manager.File.TestMethod;
+using AssociateTestsToTestCases.Access.File.Strategy;
 
 namespace AssociateTestsToTestCases
 {
@@ -42,6 +43,8 @@ namespace AssociateTestsToTestCases
         private static bool _isLocal;
         private static Counter.Counter _counter;
         private static AzureDevOpsColors _azureDevOpsColors;
+
+        private static ITestFrameworkStrategy _testFrameWorkStrategy;
 
         private static void Main(string[] args)
         {
@@ -82,9 +85,20 @@ namespace AssociateTestsToTestCases
             _azureDevOpsColors = new AzureDevOpsColors();
             _isLocal = Environment.GetEnvironmentVariable(SystemTeamProjectName) == null;
             _inputOptions = new CommandLineArgumentsParser(CreateCommandLineAccess(_isLocal, _messages, _azureDevOpsColors), _messages).Parse(args);
+            _testFrameWorkStrategy = RetrieveTestFrameworkStrategies().Single(x => x.TestFrameworkType == (TestFrameworkType)int.Parse(_inputOptions.TestFrameworkType));
 
             InitializeAccesses();
             InitializeManagers();
+        }
+
+        private static ITestFrameworkStrategy[] RetrieveTestFrameworkStrategies()
+        {
+            // todo: use reflection to retrieve these strategies.
+            return new ITestFrameworkStrategy[]
+            {
+                new MsTestStrategy(),
+                new XunitStrategy()
+            };
         }
 
         private static void InitializeTestAssemblyPaths()
@@ -95,7 +109,7 @@ namespace AssociateTestsToTestCases
         private static void InitializeAccesses()
         {
             _commandLineAccess = CreateCommandLineAccess(_isLocal, _messages, _azureDevOpsColors);
-            _fileAccess = CreateFileAccess();
+            _fileAccess = CreateFileAccess(_testFrameWorkStrategy);
 
             var httpClients = RetrieveHttpClients(CreateVssConnection());
             ValidateDevOpsCredentials(httpClients.TestManagementHttpClient);
@@ -209,9 +223,9 @@ namespace AssociateTestsToTestCases
             return new CommandLineAccess(isLocal, messages, azureDevOpsColors);
         }
 
-        private static FileAccess CreateFileAccess()
+        private static FileAccess CreateFileAccess(ITestFrameworkStrategy testFrameWorkStrategy)
         {
-            return new FileAccess(new AssemblyHelper());
+            return new FileAccess(new AssemblyHelper(), testFrameWorkStrategy);
         }
 
         private static VssConnection CreateVssConnection()

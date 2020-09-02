@@ -25,6 +25,9 @@ namespace AssociateTestsToTestCases
         [Option('s', "testsuiteid", Required = true, HelpText = "The suite within the test plan containing the test cases.")]
         public string TestSuiteId { get; set; }
 
+        [Option('f', "testframeworktype", Required = true, HelpText = "The type of Unit Test Framework.")]
+        public string TestFrameworkType { get; set; }
+
         [Option('t', "testtype", Required = false, Default = "", HelpText = "The automation test type.")]
         public string TestType { get; set; }
 
