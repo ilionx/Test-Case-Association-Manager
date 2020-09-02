@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace AssociateTestsToTestCases.Access.File.Strategy
@@ -10,8 +10,10 @@ namespace AssociateTestsToTestCases.Access.File.Strategy
 
         public IEnumerable<MethodInfo> RetrieveTestMethods(Assembly testAssembly)
         {
-            // todo: retrieve collection, then retrieve facts & theories.
-            throw new NotImplementedException();
+            return testAssembly.GetTypes()
+                    .Where(type => type.GetCustomAttribute<Xunit.TestCollectionOrdererAttribute>() != null)
+                    .SelectMany(type => type.GetMethods()
+                        .Where(method => method.GetCustomAttribute<Xunit.FactAttribute>() != null || method.GetCustomAttribute<Xunit.TheoryAttribute>() != null));
         }
     }
 }
