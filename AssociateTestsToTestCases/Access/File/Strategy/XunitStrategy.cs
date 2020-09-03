@@ -11,7 +11,7 @@ namespace AssociateTestsToTestCases.Access.File.Strategy
         public IEnumerable<MethodInfo> RetrieveTestMethods(Assembly testAssembly)
         {
             return testAssembly.GetTypes()
-                    .Where(type => type.GetCustomAttribute<Xunit.TestCollectionOrdererAttribute>() != null)
+                    .Where(type => type.GetCustomAttribute<Xunit.CollectionAttribute>() != null)
                     .SelectMany(type => type.GetMethods()
                         .Where(method => method.GetCustomAttribute<Xunit.FactAttribute>() != null || method.GetCustomAttribute<Xunit.TheoryAttribute>() != null));
         }

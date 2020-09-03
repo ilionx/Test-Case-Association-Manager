@@ -85,7 +85,7 @@ namespace AssociateTestsToTestCases
             _azureDevOpsColors = new AzureDevOpsColors();
             _isLocal = Environment.GetEnvironmentVariable(SystemTeamProjectName) == null;
             _inputOptions = new CommandLineArgumentsParser(CreateCommandLineAccess(_isLocal, _messages, _azureDevOpsColors), _messages).Parse(args);
-            _testFrameWorkStrategy = RetrieveTestFrameworkStrategies().Single(x => x.TestFrameworkType == (TestFrameworkType)int.Parse(_inputOptions.TestFrameworkType));
+            _testFrameWorkStrategy = RetrieveTestFrameworkStrategies().Single(x => x.TestFrameworkType == Enum.Parse<TestFrameworkType>(_inputOptions.TestFrameworkType, true));
 
             InitializeAccesses();
             InitializeManagers();
