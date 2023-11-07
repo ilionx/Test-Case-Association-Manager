@@ -2,10 +2,12 @@
 Azure DevOps extension for managing the associations between Test Methods (code) and Test Cases (Azure DevOps). It uses the [Azure DevOps Services REST API] to achieve this. The Test Method loading happens through its assemblies. These assemblies will be detected by using minimatch patterns which are provided by the user.
 
 # 0. Changelog
+* **Version 4.0**
+  - .NET 6 support
 * **Version 3.0**
   - Xunit support
 * **Version 2.0**
-  - **.NET Core support**
+  - **.NET Core 3.1 support**
   - Better task input options
   - Better and more output messages
 * **Version 1.0**
