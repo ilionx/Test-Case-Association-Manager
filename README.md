@@ -1,6 +1,6 @@
 # Test Case Association Manager
 ##### Azure DevOps extension for managing the associations between Test Methods (code) and Test Cases (Azure DevOps).
-The extension has been written in **.NET Core.** and therefore can be run locally through the command line. It supports **.NET and .NET Core applications**. For the production version please click on the following [link].
+The extension has been written in **.NET 6** and therefore can be run locally through the command line. It supports **.NET Framework and .NET 6 applications**. For the production version please click on the following [link].
 
 # 1. Features
 * **Association**: associates Test Methods (code) with Test Cases (Azure DevOps) by ***matching names***.
@@ -20,13 +20,13 @@ The extension has been written in **.NET Core.** and therefore can be run locall
 * **Association overview**: outputs an overview of the association process at the end.
 
 # 2. Setup
-The extension has been written in **.NET Core.** and therefore can be run locally through the command line. The setup is very straightforward, just clone the repository, and then open the solution file (**.sln**).
+The extension has been written in **.NET 6** and therefore can be run locally through the command line. The setup is very straightforward, just clone the repository, and then open the solution file (**.sln**).
 
 # 3. Build & Publish Extension
 1. Install the [tfx-cli] if you haven't yet.
 2. Copy the **Marketplace Extension** folder to any directory outside of the repository. (Desktop will do).
 3. Next, create the **tool** folder inside the **associatetooltask** folder. This specific folder can be found inside the **Marketplace Extension** folder.
-4. Now build .NET Core project in **Release Mode**.
+4. Now build .NET 6 project in **Release Mode**.
 5. Copy **everything** from within directory **/bin/Release/netcoreappX.Y/** to the **tool** folder.
 6. Change the **icon, overview.md, vss-extension.json, and task.json** files to your liking. These files can be found inside the **Marketplace Extension** folder.
 7. Now open **CMD** and navigate to the root of the **Marketplace Extension** folder.
