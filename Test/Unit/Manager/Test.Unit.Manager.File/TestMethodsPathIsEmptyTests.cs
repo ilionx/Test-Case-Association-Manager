@@ -27,11 +27,10 @@ namespace Test.Unit.Manager.File
             var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object).Create();
 
             // Act
-            Action actual = () => target.TestMethodAssembliesContainNoTestMethods(testAssemblyPaths);
+            var actual = target.TestMethodAssembliesContainNoTestMethods(testAssemblyPaths);
 
             // Assert
-            actual.Should().NotThrow<InvalidOperationException>();
-            actual.Should().Equals(false);
+            actual.Should().Be(false);
         }
 
         [TestMethod]
@@ -49,11 +48,10 @@ namespace Test.Unit.Manager.File
             var target = new FileManagerFactory(fileAccessMock.Object, outputAccess.Object).Create();
 
             // Act
-            Action actual = () => target.TestMethodAssembliesContainNoTestMethods(testAssemblyPaths);
+            var actual = target.TestMethodAssembliesContainNoTestMethods(testAssemblyPaths);
 
             // Assert
-            actual.Should().NotThrow<InvalidOperationException>();
-            actual.Should().Equals(true);
+            actual.Should().Be(true);
         }
     }
 }

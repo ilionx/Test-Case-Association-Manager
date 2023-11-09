@@ -26,11 +26,10 @@ namespace Test.Unit.Manager.DevOps
             var target = new DevOpsManagerFactory(devOpsAccessMock.Object, outputManagerMock.Object).Create();
 
             // Act
-            Action actual = () => target.TestPlanIsEmpty();
+            var actual = target.TestPlanIsEmpty();
 
             // Assert
-            actual.Should().NotThrow();
-            actual.Should().Equals(false);
+            actual.Should().Be(false);
         }
 
         [TestMethod]
@@ -45,11 +44,10 @@ namespace Test.Unit.Manager.DevOps
             var target = new DevOpsManagerFactory(devOpsAccessMock.Object, outputManagerMock.Object).Create();
 
             // Act
-            Action actual = () => target.TestPlanIsEmpty();
+            var actual = target.TestPlanIsEmpty();
 
             // Assert
-            actual.Should().NotThrow();
-            actual.Should().Equals(true);
+            actual.Should().Be(true);
         }
     }
 }
